@@ -51,3 +51,42 @@ Both MAJOR tests fail on the R1 candidate model (two leaf certificates in one CH
 **Regressions registry:** all 8 findings were added to `qa/regressions.json`.
 
 **Gate decision: NOT PASSED** (2 MAJOR, 3 MISLEADING beats). Proceed to R2 with fixes.
+
+### stage0-R2
+
+- **Candidate:** `8b38d1c` (full hash in `qa/rounds/stage0-R2/manifest.json`)
+- **Spec SHA-256 (candidate):** `6e9e1c368bc3a20a910dccb66b52e99aeac8465e33a53ec9e8e6ca367d430f7e`
+- **Packet:** `qa/rounds/stage0-R2/`. The report `pki-discriminator.json` was saved as delivered in the hand-back.
+- **Discriminator:** fresh `pki-discriminator` (opus). It read only packet files.
+- **Beat verdicts:** 33 ACCURATE, 0 MISLEADING, 0 WRONG.
+- **Findings:** 0 BLOCKER, 0 MAJOR, 9 MINOR.
+- **Regressions:** all 8 R1 findings FIXED.
+- **Hard discriminators:** `pytest` 87 passed; `ruff check` clean; `mypy --strict` clean.
+
+**Triage (Chief of Staff).** All 9 MINORs are ACCEPTED.
+- 01 (intermediate copy), 02 (causal ordering) and 03 (proof verification) are real model gaps.
+- 04 is a request/certificate wording error that F-04 and L-08 forbid.
+- 05 (CA 2 certificate reveal), 06 (Kerberos scope honesty) and 07 (browser revocation caveat) are valid accuracy refinements.
+- 08 (OCSP host) and 09 (passive AIA kiosk) are valid.
+
+The browser claim in 07 was checked against known behaviour: Chromium does not check revocation online by default, the `RequireOnlineRevocationChecksForLocalAnchors` policy exists, and Firefox does not use CDP CRLs. For 06, these notes do not claim a named Windows setting for "policy requires a trusted certificate"; the charter's F-16 text is kept, and the notes clarify it.
+
+| Finding | Fix |
+|---|---|
+| PKI-S0R2-01 | `INTERMEDIATE_STORED` events `E-04.5c` and `E-08.2e`: each server receives its own copy of the issuing CA certificate with the enrollment response. Spec B-04.5/B-08.2, notes and storyboard updated. |
+| PKI-S0R2-02 | B-09.1 retimed: presentation starts after the pulse arrives (0.6 s), and the revocation tick starts at 3.9 s, after both fetches (ending 3.8 and 3.9 s). |
+| PKI-S0R2-03 | `HANDSHAKE_PROOF_VERIFIED` events `E-06.1f` and `E-09.1q`: the client matches the impression against the server card's public key, and the proof dissolves (end of life). |
+| PKI-S0R2-04 | Reworded in spec B-05.2, the glossary "Offline root ceremony", the notes and the model summary: "the root issues and signs Issuing CA 1's CA certificate". |
+| PKI-S0R2-05 | CERT-CA2 is present (dimmed) on Issuing CA 2's crown from B-07.3. B-08.3 is a reveal sweep. The root's module and press stay dark in B-08.3 and B-09.2 (spec constraint added). |
+| PKI-S0R2-06 | The notes for B-02.2 and the F-16 section state that this lab would usually use Kerberos; "Unverified" means not PKI-validated; no named policy is claimed. |
+| PKI-S0R2-07 | Browser revocation caveat added to the notes for B-09.1. |
+| PKI-S0R2-08 | `SVC-OCSP.host` set to none; `LBL-OCSP` attached to the client chain (the revocation slot). |
+| PKI-S0R2-09 | Storyboard B-06.3: the kiosk is only passively highlighted; nothing requests or answers. |
+
+**New hard tests:**
+- `test_PKI_S0R2_01_server_holds_the_intermediate_it_presents`
+- `test_PKI_S0R2_02_presentation_and_revocation_follow_causal_order`
+- `test_PKI_S0R2_03_handshake_proof_is_verified_with_the_certificate_key`
+- `test_PKI_S0R2_08_undeployed_responder_has_no_host_and_its_tag_is_on_the_client`
+
+**Gate decision.** R2 itself met the Stage 0 criteria (0 BLOCKER/MAJOR, every beat ACCURATE), but the MINOR fixes changed the spec text. The Chief of Staff requires a confirming round (R3) on the exact text to be frozen before recording the freeze hash.
