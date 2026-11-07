@@ -9,6 +9,10 @@
     ],
     "hard_checks_missed": [],
     "failing_checks": {
+      "build_provenance": [
+        "scene BEAUTY is a deliberately broken variant (private_key_leak)",
+        "scene CAPTIONS is a deliberately broken variant (private_key_leak)"
+      ],
       "key_containment": [
         "frame 731: KEY-RDP-PRIV leaves RDP_SERVER's bounds",
         "frame 732: KEY-RDP-PRIV leaves RDP_SERVER's bounds",
@@ -33,6 +37,10 @@
     ],
     "hard_checks_missed": [],
     "failing_checks": {
+      "build_provenance": [
+        "scene BEAUTY is a deliberately broken variant (root_issues_leaf)",
+        "scene CAPTIONS is a deliberately broken variant (root_issues_leaf)"
+      ],
       "root_isolation": [
         "frame 858: REQ-RDP (end-entity) reaches the Root CA complex",
         "frame 1025: CERT-RDP (end-entity) reaches the Root CA complex"
@@ -68,6 +76,10 @@
     ],
     "hard_checks_missed": [],
     "failing_checks": {
+      "build_provenance": [
+        "scene BEAUTY is a deliberately broken variant (caption_clip)",
+        "scene CAPTIONS is a deliberately broken variant (caption_clip)"
+      ],
       "captions": [
         "CAP-S4: frame 860: PLATE-CAP-S4 (30,952)-(260,989) leaves the title-safe area",
         "CAP-S4: cap height 14.0 px < 30.0 (measured from the glyphs)",
@@ -85,6 +97,10 @@
     "hard_checks_caught": [],
     "hard_checks_missed": [],
     "failing_checks": {
+      "build_provenance": [
+        "scene BEAUTY is a deliberately broken variant (flowchart)",
+        "scene CAPTIONS is a deliberately broken variant (flowchart)"
+      ],
       "one_camera": [
         "beauty camera is not perspective (C-09)"
       ],

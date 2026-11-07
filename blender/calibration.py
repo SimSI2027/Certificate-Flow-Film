@@ -44,8 +44,8 @@ FAULTS = ("private_key_leak", "root_issues_leaf", "flowchart", "caption_clip")
 
 # --- fault parameters (calibration only; never part of the film) -------------------------------------------
 LEAK_ENTER_S = 0.5  # the private key slides from its container into the capsule over this long
-LEAK_KEY_SCALE = 0.6  # the key shrinks a little so it fits inside the (enlarged) glass capsule
-LEAK_CAPSULE_SCALE = 2.0
+LEAK_KEY_SCALE = 1.0  # full size: the key is larger than the capsule, so it visibly rides in (and through) it
+LEAK_CAPSULE_SCALE = 1.0
 ROOT_ARC_POINT: lo.Vec3 = (2.0, 10.0, 5.0)  # the request's flight arcs over the AD node toward the root
 ROOT_PRESS_DIP_M = 0.35
 CLIP_CAP_PX = 14.0

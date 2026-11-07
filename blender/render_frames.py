@@ -35,19 +35,23 @@ def render_range(scene_name: str, first: int, last: int, out_dir: Path, tier_nam
 
 
 def render_list(scene_name: str, wanted: list[int], out_dir: Path, tier_name: str) -> dict[str, object]:
-    """Render scattered frames one still at a time (packet samples); frames already on disk are skipped."""
+    """Render scattered frames (packet samples) as one-frame animation renders; frames already on disk are skipped.
+
+    A still render of a scene that is not the context scene (CAPTIONS) is not animation-evaluated in background mode,
+    so every frame is rendered through the animation path, exactly like ``render_range``.
+    """
     scene = bpy.data.scenes[scene_name]
     apply_tier(scene, render.tier(tier_name), transparent=scene_name == "CAPTIONS")
     out_dir.mkdir(parents=True, exist_ok=True)
+    scene.render.filepath = str(out_dir / FRAME_PATTERN)
     started = time.perf_counter()
     done = 0
     for frame in wanted:
         target = out_dir / f"{FRAME_PATTERN}{frame:04d}.png"
         if target.exists() and target.stat().st_size > 0:
             continue
-        scene.frame_set(frame)
-        scene.render.filepath = str(target)
-        bpy.ops.render.render(write_still=True, scene=scene_name)
+        scene.frame_start = scene.frame_end = frame
+        bpy.ops.render.render(animation=True, scene=scene_name)
         done += 1
     return {"scene": scene_name, "frames": len(wanted), "rendered": done, "seconds": round(time.perf_counter() - started, 1), "dir": str(out_dir)}
 
