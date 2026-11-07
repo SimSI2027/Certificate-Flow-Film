@@ -74,3 +74,25 @@
 
   This record follows in one more commit, which is sync-checked at close-out.
 - **Decision: APPROVED** — 2026-11-06. This was not a first attempt: Stage 0 took 3 rounds.
+
+## Phase 4 build — Pipeline + animatic build (Session 3)
+- **Scope:** build part only (no GAN rounds): `tools` commands (env, verify, build, render, captions, packet, contact, palette, motion, sync-check), `blender\build_scene.py` with grey-box actors, world, lighting, camera rig and the separate caption scene, `blender\checks\scene_checks.py`, full 960x540 animatic render in resumable chunks, `packet stage1`, sample frame inspection.
+- **Acceptance criteria:** `python -m tools verify` fully green; the full animatic rendered; the packet builds; sample frames inspected.
+- **Review performed:**
+  - Pre-flight: Phase 3 APPROVED, spec hash `7cf45afa…6d23` matches, HEAD equalled origin/main, spec untouched.
+  - Every Blender API checked by running it on 5.2.3: slotted actions and channelbags, `compositing_node_group`, material nodes without `use_nodes`, enum detection of `BLENDER_EEVEE`, bundled fonts.
+  - Camera plan audited against C-02 (every frame, exactly 2 cuts) and C-03 (framing and focus per beat); the audit found real failures (411 frames over C-02 at first) that were fixed by smoothing and per-shot tuning, not by loosening thresholds.
+  - In-Blender checks found real defects, fixed in the model not the check: the flashback walkway ended inside the root plinth's bounds; the root key rose through the floor; event timings left 12 must-read labels on screen under 1.5 s; the revocation amber was 4.2 dE00 from pending under deuteranopia.
+  - Opened the contact sheet of all 33 beats, both sides of the S5 cut, the B-04.4 strip and the B-09.2 hero frame: not blank, flashback desaturated at the cut, captions and labels in place.
+- **Problems found and corrections:**
+  - C-03 is still below threshold on B-05.1 and B-09.2: kept as an advisory ratchet (`C03_OPEN_BEATS`; a test fails on regressions and on stale entries), handed to the Stage 1 rounds.
+  - Several measurements needed an interpretation (pops, jerk, "on screen"); recorded in PROJECT-STATE.
+  - First blank-frame check failed on a path escape and then flagged the intended black ending; both fixed.
+  - Process slips against the edit rules: a heredoc retime (reviewed), one heredoc removing a constant, and one no-op heredoc call; all source changes since used Edit/Write.
+  - Not yet implemented as hard checks (listed in PROJECT-STATE): C-04, C-07, C-10 material audit, C-11 IoU, sampled L-02 contrast, L-05 overlap, L-06 occlusion/CoC.
+- **Tests run (real results):**
+  - `python -m tools verify`: ruff all checks passed; mypy --strict no issues (50 files); pytest 139 passed; traceability current; palette 87 pairs 0 failing (worst 15.8 dE00 across 8 key roles; revocation vs pending at least 11.7); planned-film audits 0 hard findings, 3 advisory; in-Blender scene checks 11 of 11 passed (30,217 keys, 1,188 F-curves; cuts at frames 1246 and 1396; max camera step 0.0398 of focus distance, 1.35 deg, 0.33 mm; 46 must-read labels legible); rendered frames 3270 of 3270 present, 0 blank.
+  - Render: 3270 beauty frames and 1990 caption frames at 960x540; `packet stage1 --round 0` built `qa\rounds\stage1-R0` (103 frames, 33 strips, manifest with SHA-256 for 145 files, regressions.json, schema.json). R0 is a build check, not a GAN round.
+- **Ledger rounds:** none (the Stage 1 gate is Session 4).
+- **Commit / sync:** commits c040282, b5d507c, be0f4c1, 91ec326, bb483a2 plus the close-out commit; the sync result is in the Session 3 report.
+- **Decision: APPROVED** (Phase 4 build only; the Stage 1 gate is not approved and the clean-round counter is 0) — 2026-11-07. First attempt at this phase, accepted because every gate item is evidenced above.

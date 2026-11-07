@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "certificate-flow-film/discriminator-report",
+  "title": "Discriminator report (Charter 2.5)",
+  "description": "The only output a discriminator returns. Severities: BLOCKER = wrong PKI, any private-key or Root CA violation, blank/broken frame, unreadable required caption, DIAGRAM shot in Stage 4+. MAJOR = misleading PKI, weak film quality, readability problems, broken continuity. MINOR = polish. 'direction' says what would fix it, not how to code it.",
+  "type": "object",
+  "required": ["discriminator", "round", "spec_sha256", "verdicts", "findings", "scores", "regressions_checked", "files_read"],
+  "additionalProperties": false,
+  "properties": {
+    "discriminator": { "type": "string", "enum": ["pki-discriminator", "cinema-discriminator", "legibility-discriminator"] },
+    "round": { "type": "string", "pattern": "^stage[0-4]-R[0-9]+$" },
+    "spec_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "verdicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["beat", "frames", "verdict", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "beat": { "type": "string", "pattern": "^B-[0-9]{2}\\.[0-9]$" },
+          "frames": { "type": "array", "items": { "type": "string" } },
+          "verdict": { "type": "string", "enum": ["ACCURATE", "MISLEADING", "WRONG", "FILM", "DIAGRAM"] },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "criterion", "beat", "frames", "evidence", "why", "direction"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["BLOCKER", "MAJOR", "MINOR"] },
+          "criterion": { "type": "string", "pattern": "^(F-[0-9]{2}|AR-[0-9]{2}|C-[0-9]{2}|L-[0-9]{2})$" },
+          "beat": { "type": "string" },
+          "frames": { "type": "array", "items": { "type": "string" } },
+          "evidence": { "type": "string", "description": "what is visible (or, at Stage 0, what the document or model dump says)" },
+          "why": { "type": "string" },
+          "direction": { "type": "string" }
+        }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "propertyNames": { "pattern": "^(C|L)-[0-9]{2}$" },
+      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 10 }
+    },
+    "regressions_checked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["finding", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "finding": { "type": "string" },
+          "status": { "type": "string", "enum": ["FIXED", "REGRESSED"] }
+        }
+      }
+    },
+    "files_read": { "type": "array", "items": { "type": "string" } }
+  }
+}

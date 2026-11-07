@@ -38,12 +38,12 @@ Updated: 2026-11-07 (end of Session 3)
   - `stage\`: `layout.py`, `tracks.py`, `objects.py` (137-object catalogue, `BASE_ANCHORED`, `centre_offset`), `choreography.py` (every on-screen event -> keyframe tracks, 136 animated objects), `labels.py` (48 placements, sizing from the camera plan), `camera.py` (smoothed plan), `audit.py` (C-02/03/06/09 audits)
 - **`blender\`**: `build_scene.py`, `world.py`, `actors\*` (grey-box builder per `Kind`), `materials.py`, `signage.py`, `camera_rig.py`, `lighting.py`, `compositor.py`, `captions_scene.py`, `animation.py`, `render_settings.py`, `render_frames.py`, `run_checks.py`, `checks\scene_checks.py` (11 checks).
 - **`tools\`**: `env`, `verify`, `build`, `render`, `captions`, `packet stage0|stage1`, `contact`, `palette`, `motion`, `traceability`, `model-dump`, `spec-hash`, `sync-check` (`pipeline.py`, `frames.py`, `toolchain.py`, `verify.py`).
-- **`tests\`**: 140+ pytest tests (Stage 0 suite plus camera, choreography, labels, palette, tooling, Blender static scans).
+- **`tests\`**: 139 pytest tests (Stage 0 suite plus camera, choreography, labels, palette, tooling, Blender static scans).
 - **`qa\`**: `schema.json`, `regressions.json` (20 accepted findings), `rounds\stage0-R1..R3`, `rounds\stage1-R0` (verification packet, not a round).
 - **`docs\`**: REFERENCE-SPEC (frozen), GLOSSARY, PKI-TECHNICAL-NOTES, STORYBOARD, GAN-FRAMEWORK, GAN-LEDGER, TRACEABILITY (generated), PIPELINE (new).
 
 ## Render / verify
-- Animatic: 960x540, 30 FPS, 3270 frames (109 s), EEVEE (`BLENDER_EEVEE`), 32 samples, no motion blur or volumetrics. Beauty frames in `renders\animatic\beauty`, caption-layer frames in `renders\animatic\captions` (both gitignored). Full animatic render took about 12 minutes in 300-frame chunks.
+- Animatic: 960x540, 30 FPS, 3270 frames (109 s), EEVEE (`BLENDER_EEVEE`), 32 samples, no motion blur or volumetrics. Beauty frames in `renders\animatic\beauty`, caption-layer frames in `renders\animatic\captions` (both gitignored). Rendered: 3270 beauty frames and 1990 caption frames (the frames on which a caption has opacity); the beauty pass took about 9 minutes and the caption layer 3.3 minutes in 300-frame chunks. Sample inspection (contact sheet of all 33 beats, both sides of the S5 cut, B-04.4 strip, B-09.2 hero): not blank, flashback desaturated, captions and labels in place.
 - `python -m tools verify` is fully green at the Session 3 close (ruff, mypy --strict, pytest, traceability, palette, motion, 11 in-Blender checks, blank-frame check on all 3270 frames).
 
 ## Names in use
