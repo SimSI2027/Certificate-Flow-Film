@@ -34,6 +34,7 @@ from cff.theme import motion, render, shots
 VISIBLE_SCALE = 0.05
 CONTAINMENT_TOLERANCE_M = 0.08
 ROOT_CLEARANCE_M = 0.05
+ROOT_NEIGHBOURHOOD_M = 12.0  # objects farther than this from the sealed vault cannot touch it (cheap pre-filter)
 POP_MAX_M = 0.35
 FAST_POP_MAX_M = 3.6  # whitelisted travel along channels and routes: light-speed data (a 27 m route in 0.8 s peaks near 3.5 m/frame), never a teleport
 RISE_POP_MAX_M = 0.8  # the Root CA complex rises 7 m into place during B-05.1
@@ -212,6 +213,8 @@ def check_dynamic(scene: bpy.types.Scene) -> list[Result]:
         "REQ-WEB": {m.WEB_SERVER, m.ISSUING_CA2},
         "REQ-CA1": {m.ISSUING_CA1},
     }
+    sealed_centre = (sealed[0] + sealed[1]) / 2
+    touchers = [o for o in CATALOGUE if o.owner != m.ROOT_CA and o.kind is not Kind.TRUST_LINK]
     contain, isolate, routes, pops = Result("key_containment"), Result("root_isolation"), Result("route_integrity"), Result("no_pops")
     moving = [o for o in CATALOGUE if o.kind not in {Kind.CHANNEL, Kind.ROUTE}]
     last_pos: dict[str, Vector] = {}
@@ -244,6 +247,12 @@ def check_dynamic(scene: bpy.types.Scene) -> list[Result]:
         for ch in channels:
             if frame == scene.frame_start and overlaps(world_bounds(objs[ch.id]), sealed, ROOT_CLEARANCE_M):
                 isolate.failures.append(f"{ch.id}: network geometry touches the Root CA plinth or vault")
+        for o in touchers:  # only trust-link geometry (and the root's own parts) may touch the sealed vault or its plinth
+            ob = objs[o.id]
+            near = (ob.matrix_world.translation - sealed_centre).length < ROOT_NEIGHBOURHOOD_M
+            if is_visible(ob) and near and overlaps(world_bounds(ob), sealed, ROOT_CLEARANCE_M) and f"touch:{o.id}" not in reported:
+                reported.add(f"touch:{o.id}")
+                isolate.failures.append(f"frame {frame}: {o.id} touches the Root CA vault or plinth but is not a trust link")
         for o in moving:
             ob = objs[o.id]
             pos = ob.matrix_world.translation.copy()

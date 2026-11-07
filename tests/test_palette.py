@@ -32,6 +32,15 @@ def test_cvd_condition_set_is_normal_deuteranopia_protanopia() -> None:
     assert set(colour.CVD_CONDITIONS) == {"normal", "deuteranopia", "protanopia"}
 
 
+@pytest.mark.covers("L-02")
+def test_white_text_on_a_plate_keeps_4_5_to_1_even_over_a_white_background() -> None:
+    """Worst case for a translucent plate: the scene behind it is white (the 95th-percentile background, L-02)."""
+    text = colour.relative_luminance(colour.hex_to_rgb(palette.TEXT_HEX))
+    plate = colour.relative_luminance(colour.hex_to_rgb(palette.PLATE_HEX))
+    worst_background = palette.PLATE_OPACITY * plate + (1.0 - palette.PLATE_OPACITY) * 1.0
+    assert colour.contrast_ratio(text, worst_background) >= 4.5
+
+
 @pytest.mark.covers("C-08")
 def test_ambient_stays_far_below_the_key_light() -> None:
     assert palette.WORLD_STRENGTH <= palette.AMBIENT_TO_KEY_MAX * 0.2

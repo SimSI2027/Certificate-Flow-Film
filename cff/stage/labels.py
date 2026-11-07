@@ -31,7 +31,6 @@ CAP_ROOT_PLATE = 0.3
 CAP_FIELD = 0.05
 TEXT_TO_EM = 1.0 / 0.72  # Blender font size (em) per metre of cap height, for the bundled font
 PLATE_MARGIN_EM = 0.45  # plate padding around the text, in cap heights
-PLATE_OPACITY = 0.82
 APPEAR_LEAD_FRAMES = 3  # staggering between consecutive windowed labels
 
 

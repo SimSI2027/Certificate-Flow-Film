@@ -61,12 +61,12 @@ def label_material(kind: str) -> bpy.types.Material:
     if kind == "plate":
         mat.surface_render_method = "DITHERED"
         bsdf.inputs["Base Color"].default_value = linear4(palette.PLATE_HEX)
-        bsdf.inputs["Alpha"].default_value = 0.82
+        bsdf.inputs["Alpha"].default_value = palette.PLATE_OPACITY
         bsdf.inputs["Roughness"].default_value = 0.9
     else:
         bsdf.inputs["Base Color"].default_value = linear4(palette.TEXT_HEX)
         bsdf.inputs["Emission Color"].default_value = linear4(palette.TEXT_HEX)
-        bsdf.inputs["Emission Strength"].default_value = 2.2
+        bsdf.inputs["Emission Strength"].default_value = palette.LABEL_TEXT_EMISSION
         bsdf.inputs["Roughness"].default_value = 1.0
     return mat
 
@@ -90,7 +90,7 @@ def caption_material(kind: str) -> bpy.types.Material:
     if kind == "plate":
         scale = nt.nodes.new("ShaderNodeMath")
         scale.operation = "MULTIPLY"
-        scale.inputs[1].default_value = 0.82
+        scale.inputs[1].default_value = palette.PLATE_OPACITY
         nt.links.new(info.outputs["Alpha"], scale.inputs[0])
         nt.links.new(scale.outputs["Value"], mix.inputs["Fac"])
     else:

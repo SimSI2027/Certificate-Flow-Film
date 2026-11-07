@@ -48,6 +48,8 @@ TEXT_HEX = "#FFFFFF"  # caption and label text
 PLATE_HEX = "#0B1220"  # label plate and caption backing
 SKIN_HEX = "#8A93A6"  # stylized figure (no realistic human)
 SCREEN_HEX = "#7FB4E8"  # laptop session window
+PLATE_OPACITY = 0.92  # label and caption plates: even over a white background, white text keeps >= 4.5:1 (L-02)
+LABEL_TEXT_EMISSION = 2.2  # emission strength of in-world label text
 
 # --- glow and light levels ---------------------------------------------------------------
 GLOW_OFF = 0.0
