@@ -1,0 +1,4002 @@
+{
+  "film": {
+    "fps": 30,
+    "frame_start": 1,
+    "frame_end": 3270,
+    "duration_s": 109.0,
+    "declared_cut_beats": [
+      "B-05.2",
+      "B-05.3"
+    ]
+  },
+  "names": {
+    "AD_DOMAIN_FQDN": {
+      "value": "1SN0S.LAB",
+      "is_fallback": false
+    },
+    "AD_NETBIOS": {
+      "value": "1SN0S",
+      "is_fallback": false
+    },
+    "DNS_SUFFIX": {
+      "value": "1sn0s.lab",
+      "is_fallback": false
+    },
+    "DC_HOSTNAME": {
+      "value": "DC01",
+      "is_fallback": true
+    },
+    "CLIENT_HOSTNAME": {
+      "value": "CLIENT01",
+      "is_fallback": true
+    },
+    "RDP_SERVER_HOSTNAME": {
+      "value": "RDP01",
+      "is_fallback": true
+    },
+    "WEB_SERVER_HOSTNAME": {
+      "value": "WEB01",
+      "is_fallback": true
+    },
+    "WEB_SITE_DNS_NAME": {
+      "value": "portal.1sn0s.lab",
+      "is_fallback": true
+    },
+    "ROOT_CA_NAME": {
+      "value": "1SN0S Root CA",
+      "is_fallback": true
+    },
+    "ISSUING_CA1_NAME": {
+      "value": "1SN0S Issuing CA 1",
+      "is_fallback": true
+    },
+    "ISSUING_CA2_NAME": {
+      "value": "1SN0S Issuing CA 2",
+      "is_fallback": true
+    },
+    "PKI_HTTP_HOST": {
+      "value": "pki.1sn0s.lab",
+      "is_fallback": true
+    },
+    "RDP_TEMPLATE": {
+      "value": "RDPAuth",
+      "is_fallback": false
+    },
+    "WEB_TEMPLATE": {
+      "value": "WebServer-TLS",
+      "is_fallback": false
+    },
+    "GITHUB_OWNER": {
+      "value": "SimSI2027",
+      "is_fallback": false
+    },
+    "REPO_NAME": {
+      "value": "Certificate-Flow-Film",
+      "is_fallback": false
+    }
+  },
+  "derived_names": {
+    "DC_FQDN": "dc01.1sn0s.lab",
+    "CLIENT_FQDN": "client01.1sn0s.lab",
+    "RDP_SERVER_FQDN": "rdp01.1sn0s.lab",
+    "WEB_SERVER_FQDN": "web01.1sn0s.lab"
+  },
+  "spec_ids": {
+    "architecture": {
+      "AR-01": "Root CA is offline, standalone, non-domain-joined, self-signed: the trust anchor",
+      "AR-02": "Root CA signs only issuing CA certificates (offline ceremony) and its own CRL",
+      "AR-03": "Issuing CAs are enterprise subordinate CAs, signed by the root, CA=true, not trust anchors",
+      "AR-04": "RDPAuth is published only on Issuing CA 1; WebServer-TLS only on Issuing CA 2",
+      "AR-05": "AD authenticates requesters, stores templates/permissions/Enrollment Services, distributes the root",
+      "AR-06": "AIA and CDP are HTTP locations on the PKI HTTP host, embedded in issued certificates",
+      "AR-07": "OCSP appears only as 'if an Online Responder is deployed'"
+    },
+    "facts": {
+      "F-01": "The user initiates RDP; the RDP server owns and presents the RDP certificate",
+      "F-02": "Out of the box RDP uses a self-signed certificate the client cannot verify",
+      "F-03": "Key pairs are generated locally; private keys (including CA keys) never leave their owner",
+      "F-04": "The request contains the public key, is signed with the private key, never contains it",
+      "F-05": "RDP enrollment is policy-triggered; eligible CAs are discovered from AD before sending",
+      "F-06": "The CA authenticates, checks publication, Enroll permission and template policy before signing",
+      "F-07": "RDPAuth builds subject/SAN from AD; WebServer-TLS takes the subject from the request",
+      "F-08": "RDPAuth uses Remote Desktop Authentication EKU; WebServer-TLS uses Server Authentication",
+      "F-09": "The issued certificate goes to LocalMachine\\My beside the existing private key",
+      "F-10": "In TLS the server sends its chain and proves possession of the private key by signing",
+      "F-11": "The client builds the chain to a root already trusted; AIA may fetch, never creates trust",
+      "F-12": "Validation is a set of distinct checks; the name match is a separate identity check",
+      "F-13": "Revocation is checked for each non-root link via CDP/CRL; the root is not checked",
+      "F-14": "Different templates can be issued by different eligible issuing CAs",
+      "F-15": "Both issuing paths terminate at the same Root CA",
+      "F-16": "Kerberos server authentication is out of scope on screen; the film shows certificate-based auth",
+      "F-17": "Terminology: end-entity certificate, subordinate/intermediate issuing CA, trust anchor = root"
+    },
+    "cinematic": {
+      "C-01": "No arrows or connector-diagram grammar",
+      "C-02": "One continuous camera; no hard cuts except the S5 flashback",
+      "C-03": "One clear focal subject per shot",
+      "C-04": "Foreground, midground and background layers with parallax",
+      "C-05": "Motivated key/rim lighting",
+      "C-06": "Eased motion; no pops or jitter; exits slightly faster than entrances",
+      "C-07": "Object continuity across scenes",
+      "C-08": "Restraint in glow, haze and particles",
+      "C-09": "Never template-like or slide-like",
+      "C-10": "Consistent colour language",
+      "C-11": "Shape vocabulary distinct in greyscale"
+    },
+    "legibility": {
+      "L-01": "Caption cap height >= 30 px; must-read in-world labels >= 18 px at 1080p",
+      "L-02": "Contrast >= 4.5:1 against the sampled local background",
+      "L-03": "All text inside the 90% title-safe area",
+      "L-04": "Each caption on screen >= max(2.5 s, 0.35 s per word)",
+      "L-05": "One caption at a time, never covering the focal action",
+      "L-06": "In-world names readable at the moment they matter",
+      "L-07": "Role colours distinguishable (CIEDE2000 >= 15), including under CVD simulation",
+      "L-08": "Terminology matches the glossary"
+    }
+  },
+  "scenes": [
+    {
+      "id": "S1",
+      "title": "The connection begins",
+      "start_s": 0.0,
+      "end_s": 7.0,
+      "frame_start": 1,
+      "frame_end": 210
+    },
+    {
+      "id": "S2",
+      "title": "An identity the client can't verify",
+      "start_s": 7.0,
+      "end_s": 14.0,
+      "frame_start": 211,
+      "frame_end": 420
+    },
+    {
+      "id": "S3",
+      "title": "Keys born locally, request sealed",
+      "start_s": 14.0,
+      "end_s": 24.0,
+      "frame_start": 421,
+      "frame_end": 720
+    },
+    {
+      "id": "S4",
+      "title": "Finding the right CA, then evaluation",
+      "start_s": 24.0,
+      "end_s": 38.0,
+      "frame_start": 721,
+      "frame_end": 1140
+    },
+    {
+      "id": "S5",
+      "title": "The hierarchy and the trust anchor",
+      "start_s": 38.0,
+      "end_s": 50.0,
+      "frame_start": 1141,
+      "frame_end": 1500
+    },
+    {
+      "id": "S6",
+      "title": "Presentation and validation",
+      "start_s": 50.0,
+      "end_s": 70.0,
+      "frame_start": 1501,
+      "frame_end": 2100
+    },
+    {
+      "id": "S7",
+      "title": "A second workload",
+      "start_s": 70.0,
+      "end_s": 82.0,
+      "frame_start": 2101,
+      "frame_end": 2460
+    },
+    {
+      "id": "S8",
+      "title": "Issuing CA 2 signs",
+      "start_s": 82.0,
+      "end_s": 93.0,
+      "frame_start": 2461,
+      "frame_end": 2790
+    },
+    {
+      "id": "S9",
+      "title": "Full picture and close",
+      "start_s": 93.0,
+      "end_s": 109.0,
+      "frame_start": 2791,
+      "frame_end": 3270
+    }
+  ],
+  "beats": [
+    {
+      "id": "B-01.1",
+      "title": "User opens RDP",
+      "summary": "At CLIENT01 the user opens an RDP connection to rdp01.1sn0s.lab.",
+      "facts": [
+        "F-01"
+      ],
+      "focal": "USER",
+      "flashback": false,
+      "scene": "S1",
+      "start_s": 0.0,
+      "end_s": 3.0,
+      "frame_start": 1,
+      "frame_end": 90,
+      "events": [
+        "E-01.1a"
+      ]
+    },
+    {
+      "id": "B-01.2",
+      "title": "Connection pulse",
+      "summary": "An amber connection pulse travels the floor light-channel to the RDP server.",
+      "facts": [
+        "F-01"
+      ],
+      "focal": "CH-RDP",
+      "flashback": false,
+      "scene": "S1",
+      "start_s": 3.0,
+      "end_s": 7.0,
+      "frame_start": 91,
+      "frame_end": 210,
+      "events": [
+        "E-01.2a"
+      ]
+    },
+    {
+      "id": "B-02.1",
+      "title": "Listener lights",
+      "summary": "Arrival at rdp01.1sn0s.lab; the RDP listener lights up.",
+      "facts": [
+        "F-01"
+      ],
+      "focal": "RDP_SERVER",
+      "flashback": false,
+      "scene": "S2",
+      "start_s": 7.0,
+      "end_s": 9.0,
+      "frame_start": 211,
+      "frame_end": 270,
+      "events": [
+        "E-02.1a"
+      ]
+    },
+    {
+      "id": "B-02.2",
+      "title": "Self-signed, unverified",
+      "summary": "The server's out-of-the-box self-signed certificate reaches the client, which cannot verify it; nothing is accepted and the attempt closes.",
+      "facts": [
+        "F-01",
+        "F-02"
+      ],
+      "focal": "CERT-RDP-SELF",
+      "flashback": false,
+      "scene": "S2",
+      "start_s": 9.0,
+      "end_s": 12.0,
+      "frame_start": 271,
+      "frame_end": 360,
+      "events": [
+        "E-02.2a",
+        "E-02.2b",
+        "E-02.2c"
+      ]
+    },
+    {
+      "id": "B-02.3",
+      "title": "Template from policy",
+      "summary": "Group Policy names the RDPAuth template for the RDP server.",
+      "facts": [
+        "F-05",
+        "F-07"
+      ],
+      "focal": "TPL-RDPAUTH",
+      "flashback": false,
+      "scene": "S2",
+      "start_s": 12.0,
+      "end_s": 14.0,
+      "frame_start": 361,
+      "frame_end": 420,
+      "events": [
+        "E-02.3a"
+      ]
+    },
+    {
+      "id": "B-03.1",
+      "title": "Key pair forms",
+      "summary": "A new key pair is generated inside the RDP server chassis.",
+      "facts": [
+        "F-03"
+      ],
+      "focal": "KP-RDP",
+      "flashback": false,
+      "scene": "S3",
+      "start_s": 14.0,
+      "end_s": 16.0,
+      "frame_start": 421,
+      "frame_end": 480,
+      "events": [
+        "E-03.1a"
+      ]
+    },
+    {
+      "id": "B-03.2",
+      "title": "Private key anchored",
+      "summary": "The private key settles into the server's locked key container and stays there.",
+      "facts": [
+        "F-03"
+      ],
+      "focal": "KEY-RDP-PRIV",
+      "flashback": false,
+      "scene": "S3",
+      "start_s": 16.0,
+      "end_s": 18.5,
+      "frame_start": 481,
+      "frame_end": 555,
+      "events": [
+        "E-03.2a"
+      ]
+    },
+    {
+      "id": "B-03.3",
+      "title": "Request assembled",
+      "summary": "The public key and request information enter the request capsule.",
+      "facts": [
+        "F-04"
+      ],
+      "focal": "REQ-RDP",
+      "flashback": false,
+      "scene": "S3",
+      "start_s": 18.5,
+      "end_s": 21.0,
+      "frame_start": 556,
+      "frame_end": 630,
+      "events": [
+        "E-03.3a"
+      ]
+    },
+    {
+      "id": "B-03.4",
+      "title": "Proof of possession",
+      "summary": "The private key signs the request in place; the key does not move.",
+      "facts": [
+        "F-03",
+        "F-04"
+      ],
+      "focal": "REQ-RDP",
+      "flashback": false,
+      "scene": "S3",
+      "start_s": 21.0,
+      "end_s": 24.0,
+      "frame_start": 631,
+      "frame_end": 720,
+      "events": [
+        "E-03.4a"
+      ]
+    },
+    {
+      "id": "B-04.1",
+      "title": "Who publishes the template?",
+      "summary": "The enrollment client asks AD (1SN0S.LAB) which CA publishes RDPAuth; only Issuing CA 1 is eligible.",
+      "facts": [
+        "F-05",
+        "F-14",
+        "AR-04",
+        "AR-05"
+      ],
+      "focal": "AD",
+      "flashback": false,
+      "scene": "S4",
+      "start_s": 24.0,
+      "end_s": 27.0,
+      "frame_start": 721,
+      "frame_end": 810,
+      "events": [
+        "E-04.1a",
+        "E-04.1b"
+      ]
+    },
+    {
+      "id": "B-04.2",
+      "title": "Into Issuing CA 1",
+      "summary": "The request travels to Issuing CA 1 only.",
+      "facts": [
+        "F-05",
+        "F-04"
+      ],
+      "focal": "REQ-RDP",
+      "flashback": false,
+      "scene": "S4",
+      "start_s": 27.0,
+      "end_s": 29.0,
+      "frame_start": 811,
+      "frame_end": 870,
+      "events": [
+        "E-04.2a"
+      ]
+    },
+    {
+      "id": "B-04.3",
+      "title": "Four checks",
+      "summary": "Issuing CA 1 authenticates the requester and checks publication, Enroll permission and template policy.",
+      "facts": [
+        "F-06",
+        "F-07",
+        "AR-05"
+      ],
+      "focal": "ISSUING_CA1",
+      "flashback": false,
+      "scene": "S4",
+      "start_s": 29.0,
+      "end_s": 33.0,
+      "frame_start": 871,
+      "frame_end": 990,
+      "events": [
+        "E-04.3a",
+        "E-04.3b",
+        "E-04.3c",
+        "E-04.3d"
+      ]
+    },
+    {
+      "id": "B-04.4",
+      "title": "CA signs",
+      "summary": "The request is consumed; Issuing CA 1's key, sealed in its module, drives the press that signs the end-entity certificate.",
+      "facts": [
+        "F-03",
+        "F-07",
+        "F-08",
+        "AR-06"
+      ],
+      "focal": "CERT-RDP",
+      "flashback": false,
+      "scene": "S4",
+      "start_s": 33.0,
+      "end_s": 36.0,
+      "frame_start": 991,
+      "frame_end": 1080,
+      "events": [
+        "E-04.4a",
+        "E-04.4b"
+      ]
+    },
+    {
+      "id": "B-04.5",
+      "title": "Certificate installed",
+      "summary": "The certificate returns and locks in beside the existing private key.",
+      "facts": [
+        "F-09",
+        "F-03"
+      ],
+      "focal": "CERT-RDP",
+      "flashback": false,
+      "scene": "S4",
+      "start_s": 36.0,
+      "end_s": 38.0,
+      "frame_start": 1081,
+      "frame_end": 1140,
+      "events": [
+        "E-04.5a",
+        "E-04.5b",
+        "E-04.5c"
+      ]
+    },
+    {
+      "id": "B-05.1",
+      "title": "The trust anchor",
+      "summary": "A sealed, cable-free gold vault: 1SN0S Root CA, self-signed, offline.",
+      "facts": [
+        "AR-01",
+        "F-17",
+        "F-11"
+      ],
+      "focal": "ROOT_CA",
+      "flashback": false,
+      "scene": "S5",
+      "start_s": 38.0,
+      "end_s": 41.5,
+      "frame_start": 1141,
+      "frame_end": 1245,
+      "events": [
+        "E-05.1a"
+      ]
+    },
+    {
+      "id": "B-05.2",
+      "title": "Offline ceremony (flashback)",
+      "summary": "Earlier, at setup: Issuing CA 1's own CA request is carried to the root on removable media; the root issues and signs Issuing CA 1's CA certificate offline, and the certificate is carried back.",
+      "facts": [
+        "AR-02",
+        "F-03",
+        "F-04"
+      ],
+      "focal": "REQ-CA1",
+      "flashback": true,
+      "scene": "S5",
+      "start_s": 41.5,
+      "end_s": 46.5,
+      "frame_start": 1246,
+      "frame_end": 1395,
+      "events": [
+        "E-05.2a",
+        "E-05.2b",
+        "E-05.2c",
+        "E-05.2d",
+        "E-05.2e",
+        "E-05.2f"
+      ]
+    },
+    {
+      "id": "B-05.3",
+      "title": "Issuer link",
+      "summary": "Present: a gold-to-cyan link joins Issuing CA 1's certificate to the root. No end-entity request reaches the root.",
+      "facts": [
+        "AR-03",
+        "F-15",
+        "F-17"
+      ],
+      "focal": "CERT-CA1",
+      "flashback": false,
+      "scene": "S5",
+      "start_s": 46.5,
+      "end_s": 50.0,
+      "frame_start": 1396,
+      "frame_end": 1500,
+      "events": [
+        "E-05.3a"
+      ]
+    },
+    {
+      "id": "B-06.1",
+      "title": "Presentation",
+      "summary": "A new connection attempt: the server presents its certificate with Issuing CA 1's certificate and proves possession of its private key.",
+      "facts": [
+        "F-10",
+        "F-03",
+        "F-01"
+      ],
+      "focal": "CERT-RDP",
+      "flashback": false,
+      "scene": "S6",
+      "start_s": 50.0,
+      "end_s": 53.0,
+      "frame_start": 1501,
+      "frame_end": 1590,
+      "events": [
+        "E-06.1a",
+        "E-06.1b",
+        "E-06.1c",
+        "E-06.1d",
+        "E-06.1e",
+        "E-06.1f"
+      ]
+    },
+    {
+      "id": "B-06.2",
+      "title": "Chain builds",
+      "summary": "On the client the cards dock upward to a root already in the Trusted Root store, installed earlier by policy.",
+      "facts": [
+        "F-11",
+        "AR-05"
+      ],
+      "focal": "CHAIN-RDP",
+      "flashback": false,
+      "scene": "S6",
+      "start_s": 53.0,
+      "end_s": 57.0,
+      "frame_start": 1591,
+      "frame_end": 1710,
+      "events": [
+        "E-06.2a",
+        "E-06.2b",
+        "E-06.2c"
+      ]
+    },
+    {
+      "id": "B-06.3",
+      "title": "AIA is not trust",
+      "summary": "A small AIA indicator: a missing intermediate could be fetched; fetching never creates trust.",
+      "facts": [
+        "F-11",
+        "AR-06"
+      ],
+      "focal": "SVC-AIA",
+      "flashback": false,
+      "scene": "S6",
+      "start_s": 57.0,
+      "end_s": 59.0,
+      "frame_start": 1711,
+      "frame_end": 1770,
+      "events": [
+        "E-06.3a"
+      ]
+    },
+    {
+      "id": "B-06.4",
+      "title": "Validation checks",
+      "summary": "Chain, signatures, validity, name, EKU resolve; revocation is pending.",
+      "facts": [
+        "F-12",
+        "F-08"
+      ],
+      "focal": "CHAIN-RDP",
+      "flashback": false,
+      "scene": "S6",
+      "start_s": 59.0,
+      "end_s": 64.0,
+      "frame_start": 1771,
+      "frame_end": 1920,
+      "events": [
+        "E-06.4a",
+        "E-06.4b",
+        "E-06.4c",
+        "E-06.4d",
+        "E-06.4e",
+        "E-06.4f"
+      ]
+    },
+    {
+      "id": "B-06.5",
+      "title": "Revocation per link",
+      "summary": "Two CRL fetches from the CDP, one per non-root link; OCSP only if deployed.",
+      "facts": [
+        "F-13",
+        "AR-06",
+        "AR-07"
+      ],
+      "focal": "SVC-CDP",
+      "flashback": false,
+      "scene": "S6",
+      "start_s": 64.0,
+      "end_s": 67.0,
+      "frame_start": 1921,
+      "frame_end": 2010,
+      "events": [
+        "E-06.5a",
+        "E-06.5b",
+        "E-06.5c",
+        "E-06.5d"
+      ]
+    },
+    {
+      "id": "B-06.6",
+      "title": "Trusted session",
+      "summary": "The channel turns green and the RDP session opens.",
+      "facts": [
+        "F-12",
+        "F-01"
+      ],
+      "focal": "CH-RDP",
+      "flashback": false,
+      "scene": "S6",
+      "start_s": 67.0,
+      "end_s": 70.0,
+      "frame_start": 2011,
+      "frame_end": 2100,
+      "events": [
+        "E-06.6a"
+      ]
+    },
+    {
+      "id": "B-07.1",
+      "title": "Web server",
+      "summary": "WEB01 serves portal.1sn0s.lab and needs a WebServer-TLS certificate.",
+      "facts": [
+        "F-07",
+        "F-14"
+      ],
+      "focal": "WEB_SERVER",
+      "flashback": false,
+      "scene": "S7",
+      "start_s": 70.0,
+      "end_s": 73.0,
+      "frame_start": 2101,
+      "frame_end": 2190,
+      "events": [
+        "E-07.1a"
+      ]
+    },
+    {
+      "id": "B-07.2",
+      "title": "Local key, sealed request",
+      "summary": "A local key pair; the private key is anchored; the request is sealed by proof of possession.",
+      "facts": [
+        "F-03",
+        "F-04"
+      ],
+      "focal": "REQ-WEB",
+      "flashback": false,
+      "scene": "S7",
+      "start_s": 73.0,
+      "end_s": 76.0,
+      "frame_start": 2191,
+      "frame_end": 2280,
+      "events": [
+        "E-07.2a",
+        "E-07.2b",
+        "E-07.2c",
+        "E-07.2d"
+      ]
+    },
+    {
+      "id": "B-07.3",
+      "title": "Eligibility",
+      "summary": "AD shows both CAs: Issuing CA 1 does not publish WebServer-TLS; Issuing CA 2 is eligible.",
+      "facts": [
+        "F-05",
+        "F-14",
+        "AR-04",
+        "AR-05"
+      ],
+      "focal": "AD",
+      "flashback": false,
+      "scene": "S7",
+      "start_s": 76.0,
+      "end_s": 79.5,
+      "frame_start": 2281,
+      "frame_end": 2385,
+      "events": [
+        "E-07.3a",
+        "E-07.3b"
+      ]
+    },
+    {
+      "id": "B-07.4",
+      "title": "Only to Issuing CA 2",
+      "summary": "The request travels only to Issuing CA 2.",
+      "facts": [
+        "F-05",
+        "F-14"
+      ],
+      "focal": "REQ-WEB",
+      "flashback": false,
+      "scene": "S7",
+      "start_s": 79.5,
+      "end_s": 82.0,
+      "frame_start": 2386,
+      "frame_end": 2460,
+      "events": [
+        "E-07.4a"
+      ]
+    },
+    {
+      "id": "B-08.1",
+      "title": "Compressed checks",
+      "summary": "Issuing CA 2 runs the four checks; the subject is supplied in the request, so enrollment is restricted.",
+      "facts": [
+        "F-06",
+        "F-07"
+      ],
+      "focal": "ISSUING_CA2",
+      "flashback": false,
+      "scene": "S8",
+      "start_s": 82.0,
+      "end_s": 85.5,
+      "frame_start": 2461,
+      "frame_end": 2565,
+      "events": [
+        "E-08.1a",
+        "E-08.1b",
+        "E-08.1c",
+        "E-08.1d"
+      ]
+    },
+    {
+      "id": "B-08.2",
+      "title": "TLS certificate",
+      "summary": "Issuing CA 2's key-driven press signs the TLS certificate; it locks in beside the web server's private key.",
+      "facts": [
+        "F-03",
+        "F-08",
+        "F-09"
+      ],
+      "focal": "CERT-WEB",
+      "flashback": false,
+      "scene": "S8",
+      "start_s": 85.5,
+      "end_s": 90.0,
+      "frame_start": 2566,
+      "frame_end": 2700,
+      "events": [
+        "E-08.2a",
+        "E-08.2b",
+        "E-08.2c",
+        "E-08.2d",
+        "E-08.2e"
+      ]
+    },
+    {
+      "id": "B-08.3",
+      "title": "Same root",
+      "summary": "Issuing CA 2's own certificate is linked in gold to the same root.",
+      "facts": [
+        "F-15",
+        "AR-03"
+      ],
+      "focal": "CERT-CA2",
+      "flashback": false,
+      "scene": "S8",
+      "start_s": 90.0,
+      "end_s": 93.0,
+      "frame_start": 2701,
+      "frame_end": 2790,
+      "events": [
+        "E-08.3a"
+      ]
+    },
+    {
+      "id": "B-09.1",
+      "title": "Browser validation",
+      "summary": "A browser validates portal.1sn0s.lab up to the root; the channel turns green.",
+      "facts": [
+        "F-10",
+        "F-11",
+        "F-12",
+        "F-13"
+      ],
+      "focal": "CHAIN-WEB",
+      "flashback": false,
+      "scene": "S9",
+      "start_s": 93.0,
+      "end_s": 98.0,
+      "frame_start": 2791,
+      "frame_end": 2940,
+      "events": [
+        "E-09.1a",
+        "E-09.1b",
+        "E-09.1c",
+        "E-09.1d",
+        "E-09.1e",
+        "E-09.1q",
+        "E-09.1f",
+        "E-09.1g",
+        "E-09.1h",
+        "E-09.1i",
+        "E-09.1j",
+        "E-09.1k",
+        "E-09.1l",
+        "E-09.1m",
+        "E-09.1n",
+        "E-09.1o",
+        "E-09.1p"
+      ]
+    },
+    {
+      "id": "B-09.2",
+      "title": "Hero topology",
+      "summary": "Root on top, both issuing CAs, both servers and the user; cyan and violet paths converge in gold at one root.",
+      "facts": [
+        "F-14",
+        "F-15",
+        "F-17"
+      ],
+      "focal": "ROOT_CA",
+      "flashback": false,
+      "scene": "S9",
+      "start_s": 98.0,
+      "end_s": 104.0,
+      "frame_start": 2941,
+      "frame_end": 3120,
+      "events": [
+        "E-09.2a",
+        "E-09.2b"
+      ]
+    },
+    {
+      "id": "B-09.3",
+      "title": "Close",
+      "summary": "Closing captions and title card; gentle settle and fade.",
+      "facts": [
+        "F-15"
+      ],
+      "focal": "ROOT_CA",
+      "flashback": false,
+      "scene": "S9",
+      "start_s": 104.0,
+      "end_s": 109.0,
+      "frame_start": 3121,
+      "frame_end": 3270,
+      "events": [
+        "E-09.3a"
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "id": "USER",
+      "kind": "user",
+      "label": "User",
+      "bounds_role": "figure",
+      "colour_role": "neutral",
+      "fqdn": null,
+      "domain_joined": false,
+      "network_connected": false,
+      "online": true
+    },
+    {
+      "id": "CLIENT",
+      "kind": "client",
+      "label": "CLIENT01",
+      "bounds_role": "device",
+      "colour_role": "neutral",
+      "fqdn": "client01.1sn0s.lab",
+      "domain_joined": true,
+      "network_connected": true,
+      "online": true
+    },
+    {
+      "id": "RDP_SERVER",
+      "kind": "server",
+      "label": "rdp01.1sn0s.lab",
+      "bounds_role": "chassis",
+      "colour_role": "neutral",
+      "fqdn": "rdp01.1sn0s.lab",
+      "domain_joined": true,
+      "network_connected": true,
+      "online": true
+    },
+    {
+      "id": "WEB_SERVER",
+      "kind": "server",
+      "label": "WEB01",
+      "bounds_role": "chassis",
+      "colour_role": "neutral",
+      "fqdn": "web01.1sn0s.lab",
+      "domain_joined": true,
+      "network_connected": true,
+      "online": true
+    },
+    {
+      "id": "AD",
+      "kind": "directory",
+      "label": "1SN0S.LAB",
+      "bounds_role": "directory_node",
+      "colour_role": "ad_steel_blue",
+      "fqdn": "dc01.1sn0s.lab",
+      "domain_joined": true,
+      "network_connected": true,
+      "online": true
+    },
+    {
+      "id": "ROOT_CA",
+      "kind": "root_ca",
+      "label": "1SN0S Root CA",
+      "bounds_role": "root_vault",
+      "colour_role": "root_gold",
+      "fqdn": null,
+      "domain_joined": false,
+      "network_connected": false,
+      "online": false
+    },
+    {
+      "id": "ISSUING_CA1",
+      "kind": "issuing_ca",
+      "label": "1SN0S Issuing CA 1",
+      "bounds_role": "ca_vault",
+      "colour_role": "ca1_cyan",
+      "fqdn": null,
+      "domain_joined": true,
+      "network_connected": true,
+      "online": true
+    },
+    {
+      "id": "ISSUING_CA2",
+      "kind": "issuing_ca",
+      "label": "1SN0S Issuing CA 2",
+      "bounds_role": "ca_vault",
+      "colour_role": "ca2_violet",
+      "fqdn": null,
+      "domain_joined": true,
+      "network_connected": true,
+      "online": true
+    },
+    {
+      "id": "PKI_HTTP",
+      "kind": "publication_host",
+      "label": "pki.1sn0s.lab",
+      "bounds_role": "publication_point",
+      "colour_role": "neutral",
+      "fqdn": "pki.1sn0s.lab",
+      "domain_joined": true,
+      "network_connected": true,
+      "online": true
+    }
+  ],
+  "key_pairs": [
+    {
+      "id": "KP-RDP-SELF",
+      "owner": "RDP_SERVER",
+      "private_key": "KEY-RDP-SELF-PRIV",
+      "public_key": "KEY-RDP-SELF-PUB",
+      "storage": "machine_key_container",
+      "generated_in_beat": null
+    },
+    {
+      "id": "KP-RDP",
+      "owner": "RDP_SERVER",
+      "private_key": "KEY-RDP-PRIV",
+      "public_key": "KEY-RDP-PUB",
+      "storage": "machine_key_container",
+      "generated_in_beat": "B-03.1"
+    },
+    {
+      "id": "KP-WEB",
+      "owner": "WEB_SERVER",
+      "private_key": "KEY-WEB-PRIV",
+      "public_key": "KEY-WEB-PUB",
+      "storage": "machine_key_container",
+      "generated_in_beat": "B-07.2"
+    },
+    {
+      "id": "KP-ROOT",
+      "owner": "ROOT_CA",
+      "private_key": "KEY-ROOT-PRIV",
+      "public_key": "KEY-ROOT-PUB",
+      "storage": "ca_protected_module",
+      "generated_in_beat": null
+    },
+    {
+      "id": "KP-CA1",
+      "owner": "ISSUING_CA1",
+      "private_key": "KEY-CA1-PRIV",
+      "public_key": "KEY-CA1-PUB",
+      "storage": "ca_protected_module",
+      "generated_in_beat": null
+    },
+    {
+      "id": "KP-CA2",
+      "owner": "ISSUING_CA2",
+      "private_key": "KEY-CA2-PRIV",
+      "public_key": "KEY-CA2-PUB",
+      "storage": "ca_protected_module",
+      "generated_in_beat": null
+    }
+  ],
+  "keys": [
+    {
+      "id": "KEY-RDP-SELF-PRIV",
+      "kind": "private",
+      "owner": "RDP_SERVER",
+      "pair": "KP-RDP-SELF"
+    },
+    {
+      "id": "KEY-RDP-SELF-PUB",
+      "kind": "public",
+      "owner": "RDP_SERVER",
+      "pair": "KP-RDP-SELF"
+    },
+    {
+      "id": "KEY-RDP-PRIV",
+      "kind": "private",
+      "owner": "RDP_SERVER",
+      "pair": "KP-RDP"
+    },
+    {
+      "id": "KEY-RDP-PUB",
+      "kind": "public",
+      "owner": "RDP_SERVER",
+      "pair": "KP-RDP"
+    },
+    {
+      "id": "KEY-WEB-PRIV",
+      "kind": "private",
+      "owner": "WEB_SERVER",
+      "pair": "KP-WEB"
+    },
+    {
+      "id": "KEY-WEB-PUB",
+      "kind": "public",
+      "owner": "WEB_SERVER",
+      "pair": "KP-WEB"
+    },
+    {
+      "id": "KEY-ROOT-PRIV",
+      "kind": "private",
+      "owner": "ROOT_CA",
+      "pair": "KP-ROOT"
+    },
+    {
+      "id": "KEY-ROOT-PUB",
+      "kind": "public",
+      "owner": "ROOT_CA",
+      "pair": "KP-ROOT"
+    },
+    {
+      "id": "KEY-CA1-PRIV",
+      "kind": "private",
+      "owner": "ISSUING_CA1",
+      "pair": "KP-CA1"
+    },
+    {
+      "id": "KEY-CA1-PUB",
+      "kind": "public",
+      "owner": "ISSUING_CA1",
+      "pair": "KP-CA1"
+    },
+    {
+      "id": "KEY-CA2-PRIV",
+      "kind": "private",
+      "owner": "ISSUING_CA2",
+      "pair": "KP-CA2"
+    },
+    {
+      "id": "KEY-CA2-PUB",
+      "kind": "public",
+      "owner": "ISSUING_CA2",
+      "pair": "KP-CA2"
+    }
+  ],
+  "templates": [
+    {
+      "id": "TPL-RDPAUTH",
+      "name": "RDPAuth",
+      "based_on": null,
+      "eku": [
+        "1.3.6.1.4.1.311.54.1.2"
+      ],
+      "subject_source": "build_from_ad",
+      "enroll_principals": [
+        "RDP server computer accounts"
+      ],
+      "trigger": "group_policy_rdp_setting",
+      "published_on": [
+        "ISSUING_CA1"
+      ]
+    },
+    {
+      "id": "TPL-WEBTLS",
+      "name": "WebServer-TLS",
+      "based_on": "Web Server",
+      "eku": [
+        "1.3.6.1.5.5.7.3.1"
+      ],
+      "subject_source": "supply_in_request",
+      "enroll_principals": [
+        "Authorized web-server accounts"
+      ],
+      "trigger": "authorized_request",
+      "published_on": [
+        "ISSUING_CA2"
+      ]
+    }
+  ],
+  "cas": [
+    {
+      "actor": "ROOT_CA",
+      "ca_type": "standalone_root",
+      "key_pair": "KP-ROOT",
+      "certificate": "CERT-ROOT",
+      "crl": "CRL-ROOT",
+      "published_templates": [],
+      "online": false
+    },
+    {
+      "actor": "ISSUING_CA1",
+      "ca_type": "enterprise_subordinate",
+      "key_pair": "KP-CA1",
+      "certificate": "CERT-CA1",
+      "crl": "CRL-CA1",
+      "published_templates": [
+        "TPL-RDPAUTH"
+      ],
+      "online": true
+    },
+    {
+      "actor": "ISSUING_CA2",
+      "ca_type": "enterprise_subordinate",
+      "key_pair": "KP-CA2",
+      "certificate": "CERT-CA2",
+      "crl": "CRL-CA2",
+      "published_templates": [
+        "TPL-WEBTLS"
+      ],
+      "online": true
+    }
+  ],
+  "certificates": [
+    {
+      "id": "CERT-ROOT",
+      "kind": "root_self_signed",
+      "subject_cn": "1SN0S Root CA",
+      "subject_actor": "ROOT_CA",
+      "san_dns": [],
+      "issuer_cert": "CERT-ROOT",
+      "signed_with": "KEY-ROOT-PRIV",
+      "public_key": "KEY-ROOT-PUB",
+      "eku": [],
+      "basic_constraints_ca": true,
+      "template": null,
+      "aia_issuer_cert": null,
+      "cdp_crl": null,
+      "store": "Trusted Root Certification Authorities",
+      "issued_in_beat": null,
+      "issuer_actor": "ROOT_CA",
+      "aia_url": null,
+      "cdp_url": null
+    },
+    {
+      "id": "CERT-CA1",
+      "kind": "issuing_ca",
+      "subject_cn": "1SN0S Issuing CA 1",
+      "subject_actor": "ISSUING_CA1",
+      "san_dns": [],
+      "issuer_cert": "CERT-ROOT",
+      "signed_with": "KEY-ROOT-PRIV",
+      "public_key": "KEY-CA1-PUB",
+      "eku": [],
+      "basic_constraints_ca": true,
+      "template": null,
+      "aia_issuer_cert": "CERT-ROOT",
+      "cdp_crl": "CRL-ROOT",
+      "store": "CA database and CA certificate store",
+      "issued_in_beat": "B-05.2",
+      "issuer_actor": "ROOT_CA",
+      "aia_url": "http://pki.1sn0s.lab/pki/1SN0S-Root-CA.crt",
+      "cdp_url": "http://pki.1sn0s.lab/pki/1SN0S-Root-CA.crl"
+    },
+    {
+      "id": "CERT-CA2",
+      "kind": "issuing_ca",
+      "subject_cn": "1SN0S Issuing CA 2",
+      "subject_actor": "ISSUING_CA2",
+      "san_dns": [],
+      "issuer_cert": "CERT-ROOT",
+      "signed_with": "KEY-ROOT-PRIV",
+      "public_key": "KEY-CA2-PUB",
+      "eku": [],
+      "basic_constraints_ca": true,
+      "template": null,
+      "aia_issuer_cert": "CERT-ROOT",
+      "cdp_crl": "CRL-ROOT",
+      "store": "CA database and CA certificate store",
+      "issued_in_beat": null,
+      "issuer_actor": "ROOT_CA",
+      "aia_url": "http://pki.1sn0s.lab/pki/1SN0S-Root-CA.crt",
+      "cdp_url": "http://pki.1sn0s.lab/pki/1SN0S-Root-CA.crl"
+    },
+    {
+      "id": "CERT-RDP-SELF",
+      "kind": "self_signed_end_entity",
+      "subject_cn": "rdp01.1sn0s.lab",
+      "subject_actor": "RDP_SERVER",
+      "san_dns": [],
+      "issuer_cert": "CERT-RDP-SELF",
+      "signed_with": "KEY-RDP-SELF-PRIV",
+      "public_key": "KEY-RDP-SELF-PUB",
+      "eku": [
+        "1.3.6.1.5.5.7.3.1"
+      ],
+      "basic_constraints_ca": false,
+      "template": null,
+      "aia_issuer_cert": null,
+      "cdp_crl": null,
+      "store": "Remote Desktop",
+      "issued_in_beat": null,
+      "issuer_actor": "RDP_SERVER",
+      "aia_url": null,
+      "cdp_url": null
+    },
+    {
+      "id": "CERT-RDP",
+      "kind": "end_entity",
+      "subject_cn": "rdp01.1sn0s.lab",
+      "subject_actor": "RDP_SERVER",
+      "san_dns": [
+        "rdp01.1sn0s.lab"
+      ],
+      "issuer_cert": "CERT-CA1",
+      "signed_with": "KEY-CA1-PRIV",
+      "public_key": "KEY-RDP-PUB",
+      "eku": [
+        "1.3.6.1.4.1.311.54.1.2"
+      ],
+      "basic_constraints_ca": false,
+      "template": "TPL-RDPAUTH",
+      "aia_issuer_cert": "CERT-CA1",
+      "cdp_crl": "CRL-CA1",
+      "store": "LocalMachine\\My",
+      "issued_in_beat": "B-04.4",
+      "issuer_actor": "ISSUING_CA1",
+      "aia_url": "http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-1.crt",
+      "cdp_url": "http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-1.crl"
+    },
+    {
+      "id": "CERT-WEB",
+      "kind": "end_entity",
+      "subject_cn": "portal.1sn0s.lab",
+      "subject_actor": "WEB_SERVER",
+      "san_dns": [
+        "portal.1sn0s.lab"
+      ],
+      "issuer_cert": "CERT-CA2",
+      "signed_with": "KEY-CA2-PRIV",
+      "public_key": "KEY-WEB-PUB",
+      "eku": [
+        "1.3.6.1.5.5.7.3.1"
+      ],
+      "basic_constraints_ca": false,
+      "template": "TPL-WEBTLS",
+      "aia_issuer_cert": "CERT-CA2",
+      "cdp_crl": "CRL-CA2",
+      "store": "LocalMachine\\My",
+      "issued_in_beat": "B-08.2",
+      "issuer_actor": "ISSUING_CA2",
+      "aia_url": "http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-2.crt",
+      "cdp_url": "http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-2.crl"
+    }
+  ],
+  "crls": [
+    {
+      "id": "CRL-ROOT",
+      "issuer_actor": "ROOT_CA",
+      "signed_with": "KEY-ROOT-PRIV",
+      "covers": [
+        "CERT-CA1",
+        "CERT-CA2"
+      ],
+      "published_on": "PKI_HTTP",
+      "publication_transport": "offline_media"
+    },
+    {
+      "id": "CRL-CA1",
+      "issuer_actor": "ISSUING_CA1",
+      "signed_with": "KEY-CA1-PRIV",
+      "covers": [
+        "CERT-RDP"
+      ],
+      "published_on": "PKI_HTTP",
+      "publication_transport": "network"
+    },
+    {
+      "id": "CRL-CA2",
+      "issuer_actor": "ISSUING_CA2",
+      "signed_with": "KEY-CA2-PRIV",
+      "covers": [
+        "CERT-WEB"
+      ],
+      "published_on": "PKI_HTTP",
+      "publication_transport": "network"
+    }
+  ],
+  "requests": [
+    {
+      "id": "REQ-RDP",
+      "kind": "end_entity",
+      "requester": "RDP_SERVER",
+      "template": "TPL-RDPAUTH",
+      "public_key": "KEY-RDP-PUB",
+      "signed_with": "KEY-RDP-PRIV",
+      "format": "PKCS #10 inside CMC",
+      "subject_in_request": null,
+      "destination": "ISSUING_CA1",
+      "transport": "network",
+      "result_cert": "CERT-RDP",
+      "contains_private_key": false
+    },
+    {
+      "id": "REQ-WEB",
+      "kind": "end_entity",
+      "requester": "WEB_SERVER",
+      "template": "TPL-WEBTLS",
+      "public_key": "KEY-WEB-PUB",
+      "signed_with": "KEY-WEB-PRIV",
+      "format": "PKCS #10 inside CMC",
+      "subject_in_request": "CN=portal.1sn0s.lab; SAN dNSName=portal.1sn0s.lab",
+      "destination": "ISSUING_CA2",
+      "transport": "network",
+      "result_cert": "CERT-WEB",
+      "contains_private_key": false
+    },
+    {
+      "id": "REQ-CA1",
+      "kind": "subordinate_ca",
+      "requester": "ISSUING_CA1",
+      "template": null,
+      "public_key": "KEY-CA1-PUB",
+      "signed_with": "KEY-CA1-PRIV",
+      "format": "PKCS #10 (request file)",
+      "subject_in_request": "CN=1SN0S Issuing CA 1",
+      "destination": "ROOT_CA",
+      "transport": "offline_media",
+      "result_cert": "CERT-CA1",
+      "contains_private_key": false
+    }
+  ],
+  "discoveries": [
+    {
+      "id": "DISC-RDP",
+      "requester": "RDP_SERVER",
+      "template": "TPL-RDPAUTH",
+      "directory": "AD",
+      "considered": [
+        "ISSUING_CA1",
+        "ISSUING_CA2"
+      ],
+      "eligible": [
+        "ISSUING_CA1"
+      ],
+      "criteria": [
+        "template_published",
+        "enrollment_policy",
+        "permissions",
+        "ca_available"
+      ]
+    },
+    {
+      "id": "DISC-WEB",
+      "requester": "WEB_SERVER",
+      "template": "TPL-WEBTLS",
+      "directory": "AD",
+      "considered": [
+        "ISSUING_CA1",
+        "ISSUING_CA2"
+      ],
+      "eligible": [
+        "ISSUING_CA2"
+      ],
+      "criteria": [
+        "template_published",
+        "enrollment_policy",
+        "permissions",
+        "ca_available"
+      ]
+    }
+  ],
+  "chains": [
+    {
+      "id": "CHAIN-RDP",
+      "relying_party": "CLIENT",
+      "server": "RDP_SERVER",
+      "certs": [
+        "CERT-RDP",
+        "CERT-CA1",
+        "CERT-ROOT"
+      ],
+      "expected_name": "rdp01.1sn0s.lab",
+      "accepted_ekus": [
+        "1.3.6.1.4.1.311.54.1.2",
+        "1.3.6.1.5.5.7.3.1"
+      ],
+      "purpose_label": "RDP"
+    },
+    {
+      "id": "CHAIN-WEB",
+      "relying_party": "CLIENT",
+      "server": "WEB_SERVER",
+      "certs": [
+        "CERT-WEB",
+        "CERT-CA2",
+        "CERT-ROOT"
+      ],
+      "expected_name": "portal.1sn0s.lab",
+      "accepted_ekus": [
+        "1.3.6.1.5.5.7.3.1"
+      ],
+      "purpose_label": "TLS server auth"
+    }
+  ],
+  "channels": [
+    {
+      "id": "CH-RDP",
+      "client": "CLIENT",
+      "server": "RDP_SERVER",
+      "protocol": "RDP over TLS"
+    },
+    {
+      "id": "CH-WEB",
+      "client": "CLIENT",
+      "server": "WEB_SERVER",
+      "protocol": "HTTPS (TLS)"
+    }
+  ],
+  "handshake_proofs": [
+    {
+      "id": "HS-RDP",
+      "server": "RDP_SERVER",
+      "signed_with": "KEY-RDP-PRIV",
+      "verified_with": "KEY-RDP-PUB"
+    },
+    {
+      "id": "HS-WEB",
+      "server": "WEB_SERVER",
+      "signed_with": "KEY-WEB-PRIV",
+      "verified_with": "KEY-WEB-PUB"
+    }
+  ],
+  "services": [
+    {
+      "id": "SVC-AIA",
+      "kind": "aia",
+      "host": "PKI_HTTP",
+      "deployed": true,
+      "trust_source": false
+    },
+    {
+      "id": "SVC-CDP",
+      "kind": "cdp",
+      "host": "PKI_HTTP",
+      "deployed": true,
+      "trust_source": false
+    },
+    {
+      "id": "SVC-OCSP",
+      "kind": "ocsp",
+      "host": null,
+      "deployed": false,
+      "trust_source": false
+    }
+  ],
+  "trust_store": [
+    {
+      "id": "TS-CLIENT-ROOT",
+      "holder": "CLIENT",
+      "cert": "CERT-ROOT",
+      "store": "Trusted Root Certification Authorities",
+      "source": "AD",
+      "installed_before_film": true
+    }
+  ],
+  "labels": [
+    {
+      "id": "LBL-HOST-CLIENT",
+      "kind": "host_plate",
+      "text": "CLIENT01",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-01.1"
+      ]
+    },
+    {
+      "id": "LBL-HOST-RDP",
+      "kind": "host_plate",
+      "text": "rdp01.1sn0s.lab",
+      "attached_to": "RDP_SERVER",
+      "must_read_beats": [
+        "B-02.1"
+      ]
+    },
+    {
+      "id": "LBL-HOST-WEB",
+      "kind": "host_plate",
+      "text": "WEB01",
+      "attached_to": "WEB_SERVER",
+      "must_read_beats": [
+        "B-07.1"
+      ]
+    },
+    {
+      "id": "LBL-SITE-WEB",
+      "kind": "host_plate",
+      "text": "portal.1sn0s.lab",
+      "attached_to": "WEB_SERVER",
+      "must_read_beats": [
+        "B-07.1"
+      ]
+    },
+    {
+      "id": "LBL-AD",
+      "kind": "host_plate",
+      "text": "1SN0S.LAB",
+      "attached_to": "AD",
+      "must_read_beats": [
+        "B-04.1",
+        "B-07.3"
+      ]
+    },
+    {
+      "id": "LBL-DC",
+      "kind": "host_plate",
+      "text": "DC01",
+      "attached_to": "AD",
+      "must_read_beats": []
+    },
+    {
+      "id": "LBL-PKI",
+      "kind": "host_plate",
+      "text": "pki.1sn0s.lab",
+      "attached_to": "PKI_HTTP",
+      "must_read_beats": []
+    },
+    {
+      "id": "LBL-ROOT",
+      "kind": "ca_nameplate",
+      "text": "1SN0S Root CA",
+      "attached_to": "ROOT_CA",
+      "must_read_beats": [
+        "B-05.1"
+      ]
+    },
+    {
+      "id": "LBL-CA1",
+      "kind": "ca_nameplate",
+      "text": "1SN0S Issuing CA 1",
+      "attached_to": "ISSUING_CA1",
+      "must_read_beats": [
+        "B-04.2",
+        "B-04.3"
+      ]
+    },
+    {
+      "id": "LBL-CA2",
+      "kind": "ca_nameplate",
+      "text": "1SN0S Issuing CA 2",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-07.3",
+        "B-08.1"
+      ]
+    },
+    {
+      "id": "LBL-TPL-RDP",
+      "kind": "template_badge",
+      "text": "RDPAuth",
+      "attached_to": "TPL-RDPAUTH",
+      "must_read_beats": [
+        "B-02.3",
+        "B-04.1"
+      ]
+    },
+    {
+      "id": "LBL-TPL-WEB",
+      "kind": "template_badge",
+      "text": "WebServer-TLS",
+      "attached_to": "TPL-WEBTLS",
+      "must_read_beats": [
+        "B-07.1",
+        "B-07.3"
+      ]
+    },
+    {
+      "id": "LBL-SELF",
+      "kind": "card_field",
+      "text": "Self-signed",
+      "attached_to": "CERT-RDP-SELF",
+      "must_read_beats": [
+        "B-02.2"
+      ]
+    },
+    {
+      "id": "LBL-UNVERIFIED",
+      "kind": "tag",
+      "text": "Unverified",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-02.2"
+      ]
+    },
+    {
+      "id": "LBL-CERT-RDP-SAN",
+      "kind": "card_field",
+      "text": "rdp01.1sn0s.lab",
+      "attached_to": "CERT-RDP",
+      "must_read_beats": [
+        "B-04.4"
+      ]
+    },
+    {
+      "id": "LBL-CERT-RDP-EKU",
+      "kind": "card_field",
+      "text": "Remote Desktop Authentication",
+      "attached_to": "CERT-RDP",
+      "must_read_beats": [
+        "B-04.4"
+      ]
+    },
+    {
+      "id": "LBL-CERT-WEB-SAN",
+      "kind": "card_field",
+      "text": "portal.1sn0s.lab",
+      "attached_to": "CERT-WEB",
+      "must_read_beats": [
+        "B-08.2"
+      ]
+    },
+    {
+      "id": "LBL-CERT-WEB-EKU",
+      "kind": "card_field",
+      "text": "Server Authentication",
+      "attached_to": "CERT-WEB",
+      "must_read_beats": [
+        "B-08.2"
+      ]
+    },
+    {
+      "id": "LBL-FLASHBACK",
+      "kind": "tag",
+      "text": "Earlier: offline signing ceremony",
+      "attached_to": "ROOT_CA",
+      "must_read_beats": [
+        "B-05.2"
+      ]
+    },
+    {
+      "id": "LBL-REQ-CA1",
+      "kind": "tag",
+      "text": "Issuing CA 1's own CA request",
+      "attached_to": "REQ-CA1",
+      "must_read_beats": [
+        "B-05.2"
+      ]
+    },
+    {
+      "id": "LBL-ROOT-STORE",
+      "kind": "tag",
+      "text": "Installed earlier by policy",
+      "attached_to": "TS-CLIENT-ROOT",
+      "must_read_beats": [
+        "B-06.2"
+      ]
+    },
+    {
+      "id": "LBL-AIA-1",
+      "kind": "tag",
+      "text": "Missing intermediate? AIA can fetch it",
+      "attached_to": "SVC-AIA",
+      "must_read_beats": [
+        "B-06.3"
+      ]
+    },
+    {
+      "id": "LBL-AIA-2",
+      "kind": "tag",
+      "text": "Fetching never creates trust",
+      "attached_to": "SVC-AIA",
+      "must_read_beats": [
+        "B-06.3"
+      ]
+    },
+    {
+      "id": "LBL-OCSP",
+      "kind": "tag",
+      "text": "OCSP if deployed",
+      "attached_to": "CHAIN-RDP",
+      "must_read_beats": [
+        "B-06.5"
+      ]
+    },
+    {
+      "id": "LBL-CA1-INELIGIBLE",
+      "kind": "tag",
+      "text": "WebServer-TLS not published here",
+      "attached_to": "ISSUING_CA1",
+      "must_read_beats": [
+        "B-07.3"
+      ]
+    },
+    {
+      "id": "LBL-CA2-NOTE",
+      "kind": "tag",
+      "text": "Name supplied in request — enrollment restricted",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-08.1"
+      ]
+    },
+    {
+      "id": "LBL-ELIG-TEMPLATE_PUBLISHED",
+      "kind": "tag",
+      "text": "Template published",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-07.3"
+      ]
+    },
+    {
+      "id": "LBL-ELIG-ENROLLMENT_POLICY",
+      "kind": "tag",
+      "text": "Enrollment policy",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-07.3"
+      ]
+    },
+    {
+      "id": "LBL-ELIG-PERMISSIONS",
+      "kind": "tag",
+      "text": "Permissions",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-07.3"
+      ]
+    },
+    {
+      "id": "LBL-ELIG-CA_AVAILABLE",
+      "kind": "tag",
+      "text": "CA available",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-07.3"
+      ]
+    },
+    {
+      "id": "LBL-ISSUING_CA1-REQUESTER_AUTHENTICATED",
+      "kind": "check",
+      "text": "Requester authenticated",
+      "attached_to": "ISSUING_CA1",
+      "must_read_beats": [
+        "B-04.3"
+      ]
+    },
+    {
+      "id": "LBL-ISSUING_CA1-TEMPLATE_PUBLISHED_ON_CA",
+      "kind": "check",
+      "text": "Template published on this CA",
+      "attached_to": "ISSUING_CA1",
+      "must_read_beats": [
+        "B-04.3"
+      ]
+    },
+    {
+      "id": "LBL-ISSUING_CA1-ENROLL_PERMISSION",
+      "kind": "check",
+      "text": "Enroll permission granted",
+      "attached_to": "ISSUING_CA1",
+      "must_read_beats": [
+        "B-04.3"
+      ]
+    },
+    {
+      "id": "LBL-ISSUING_CA1-TEMPLATE_POLICY",
+      "kind": "check",
+      "text": "Request meets template policy",
+      "attached_to": "ISSUING_CA1",
+      "must_read_beats": [
+        "B-04.3"
+      ]
+    },
+    {
+      "id": "LBL-ISSUING_CA2-REQUESTER_AUTHENTICATED",
+      "kind": "check",
+      "text": "Requester authenticated",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-08.1"
+      ]
+    },
+    {
+      "id": "LBL-ISSUING_CA2-TEMPLATE_PUBLISHED_ON_CA",
+      "kind": "check",
+      "text": "Template published on this CA",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-08.1"
+      ]
+    },
+    {
+      "id": "LBL-ISSUING_CA2-ENROLL_PERMISSION",
+      "kind": "check",
+      "text": "Enroll permission granted",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-08.1"
+      ]
+    },
+    {
+      "id": "LBL-ISSUING_CA2-TEMPLATE_POLICY",
+      "kind": "check",
+      "text": "Request meets template policy",
+      "attached_to": "ISSUING_CA2",
+      "must_read_beats": [
+        "B-08.1"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-RDP-CHAIN_TO_TRUSTED_ROOT",
+      "kind": "check",
+      "text": "Chain ends at a trusted root",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-06.4"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-RDP-SIGNATURES",
+      "kind": "check",
+      "text": "Signatures verify",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-06.4"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-RDP-VALIDITY",
+      "kind": "check",
+      "text": "Currently valid",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-06.4"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-RDP-NAME_MATCH",
+      "kind": "check",
+      "text": "Name matches rdp01.1sn0s.lab",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-06.4"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-RDP-EKU",
+      "kind": "check",
+      "text": "EKU permits RDP",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-06.4"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-RDP-REVOCATION",
+      "kind": "check",
+      "text": "Revocation OK",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-06.4",
+        "B-06.5"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-WEB-VALIDITY",
+      "kind": "check",
+      "text": "Currently valid",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-09.1"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-WEB-NAME_MATCH",
+      "kind": "check",
+      "text": "Name matches portal.1sn0s.lab",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-09.1"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-WEB-EKU",
+      "kind": "check",
+      "text": "EKU permits TLS server auth",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-09.1"
+      ]
+    },
+    {
+      "id": "LBL-CHAIN-WEB-REVOCATION",
+      "kind": "check",
+      "text": "Revocation OK",
+      "attached_to": "CLIENT",
+      "must_read_beats": [
+        "B-09.1"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "E-01.1a",
+      "beat": "B-01.1",
+      "type": "user_initiates",
+      "object": "CH-RDP",
+      "from": "USER",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 0.6,
+      "end_s": 2.4,
+      "frame_start": 19,
+      "frame_end": 72
+    },
+    {
+      "id": "E-01.2a",
+      "beat": "B-01.2",
+      "type": "connection_pulse",
+      "object": "CH-RDP",
+      "from": "CLIENT",
+      "to": "RDP_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 3.0,
+      "end_s": 7.0,
+      "frame_start": 91,
+      "frame_end": 210
+    },
+    {
+      "id": "E-02.1a",
+      "beat": "B-02.1",
+      "type": "listener_activates",
+      "object": "CH-RDP",
+      "from": "RDP_SERVER",
+      "to": "RDP_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 7.2,
+      "end_s": 8.4,
+      "frame_start": 217,
+      "frame_end": 252
+    },
+    {
+      "id": "E-02.2a",
+      "beat": "B-02.2",
+      "type": "present_cert",
+      "object": "CERT-RDP-SELF",
+      "from": "RDP_SERVER",
+      "to": "CLIENT",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 9.0,
+      "end_s": 10.2,
+      "frame_start": 271,
+      "frame_end": 306
+    },
+    {
+      "id": "E-02.2b",
+      "beat": "B-02.2",
+      "type": "client_cannot_verify",
+      "object": "CERT-RDP-SELF",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 10.2,
+      "end_s": 11.2,
+      "frame_start": 307,
+      "frame_end": 336
+    },
+    {
+      "id": "E-02.2c",
+      "beat": "B-02.2",
+      "type": "connection_closed",
+      "object": "CH-RDP",
+      "from": "CLIENT",
+      "to": "RDP_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 11.3,
+      "end_s": 11.9,
+      "frame_start": 340,
+      "frame_end": 357
+    },
+    {
+      "id": "E-02.3a",
+      "beat": "B-02.3",
+      "type": "policy_assigns_template",
+      "object": "TPL-RDPAUTH",
+      "from": "AD",
+      "to": "RDP_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 12.0,
+      "end_s": 13.6,
+      "frame_start": 361,
+      "frame_end": 408
+    },
+    {
+      "id": "E-03.1a",
+      "beat": "B-03.1",
+      "type": "keypair_generated",
+      "object": "KP-RDP",
+      "from": "RDP_SERVER",
+      "to": "RDP_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 14.2,
+      "end_s": 15.8,
+      "frame_start": 427,
+      "frame_end": 474
+    },
+    {
+      "id": "E-03.2a",
+      "beat": "B-03.2",
+      "type": "private_key_stored",
+      "object": "KEY-RDP-PRIV",
+      "from": "RDP_SERVER",
+      "to": "RDP_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 16.0,
+      "end_s": 17.6,
+      "frame_start": 481,
+      "frame_end": 528
+    },
+    {
+      "id": "E-03.3a",
+      "beat": "B-03.3",
+      "type": "request_assembled",
+      "object": "REQ-RDP",
+      "from": "RDP_SERVER",
+      "to": "RDP_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 18.5,
+      "end_s": 20.5,
+      "frame_start": 556,
+      "frame_end": 615
+    },
+    {
+      "id": "E-03.4a",
+      "beat": "B-03.4",
+      "type": "proof_of_possession",
+      "object": "REQ-RDP",
+      "from": "RDP_SERVER",
+      "to": "RDP_SERVER",
+      "transport": "local",
+      "uses_key": "KEY-RDP-PRIV",
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 21.3,
+      "end_s": 23.1,
+      "frame_start": 640,
+      "frame_end": 693
+    },
+    {
+      "id": "E-04.1a",
+      "beat": "B-04.1",
+      "type": "ca_discovery_query",
+      "object": "DISC-RDP",
+      "from": "RDP_SERVER",
+      "to": "AD",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 24.0,
+      "end_s": 25.0,
+      "frame_start": 721,
+      "frame_end": 750
+    },
+    {
+      "id": "E-04.1b",
+      "beat": "B-04.1",
+      "type": "ca_discovery_result",
+      "object": "DISC-RDP",
+      "from": "AD",
+      "to": "RDP_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 25.0,
+      "end_s": 26.6,
+      "frame_start": 751,
+      "frame_end": 798
+    },
+    {
+      "id": "E-04.2a",
+      "beat": "B-04.2",
+      "type": "request_submitted",
+      "object": "REQ-RDP",
+      "from": "RDP_SERVER",
+      "to": "ISSUING_CA1",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 27.0,
+      "end_s": 29.0,
+      "frame_start": 811,
+      "frame_end": 870
+    },
+    {
+      "id": "E-04.3a",
+      "beat": "B-04.3",
+      "type": "ca_check",
+      "object": "REQ-RDP",
+      "from": "ISSUING_CA1",
+      "to": "ISSUING_CA1",
+      "transport": "local",
+      "uses_key": null,
+      "check": "requester_authenticated",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 29.2,
+      "end_s": 29.9,
+      "frame_start": 877,
+      "frame_end": 897
+    },
+    {
+      "id": "E-04.3b",
+      "beat": "B-04.3",
+      "type": "ca_check",
+      "object": "REQ-RDP",
+      "from": "ISSUING_CA1",
+      "to": "ISSUING_CA1",
+      "transport": "local",
+      "uses_key": null,
+      "check": "template_published_on_ca",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 30.1,
+      "end_s": 30.8,
+      "frame_start": 904,
+      "frame_end": 924
+    },
+    {
+      "id": "E-04.3c",
+      "beat": "B-04.3",
+      "type": "ca_check",
+      "object": "REQ-RDP",
+      "from": "ISSUING_CA1",
+      "to": "ISSUING_CA1",
+      "transport": "local",
+      "uses_key": null,
+      "check": "enroll_permission",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 31.0,
+      "end_s": 31.7,
+      "frame_start": 931,
+      "frame_end": 951
+    },
+    {
+      "id": "E-04.3d",
+      "beat": "B-04.3",
+      "type": "ca_check",
+      "object": "REQ-RDP",
+      "from": "ISSUING_CA1",
+      "to": "ISSUING_CA1",
+      "transport": "local",
+      "uses_key": null,
+      "check": "template_policy",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 31.9,
+      "end_s": 32.6,
+      "frame_start": 958,
+      "frame_end": 978
+    },
+    {
+      "id": "E-04.4a",
+      "beat": "B-04.4",
+      "type": "request_consumed",
+      "object": "REQ-RDP",
+      "from": "ISSUING_CA1",
+      "to": "ISSUING_CA1",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 33.0,
+      "end_s": 33.4,
+      "frame_start": 991,
+      "frame_end": 1002
+    },
+    {
+      "id": "E-04.4b",
+      "beat": "B-04.4",
+      "type": "ca_signs",
+      "object": "CERT-RDP",
+      "from": "ISSUING_CA1",
+      "to": "ISSUING_CA1",
+      "transport": "local",
+      "uses_key": "KEY-CA1-PRIV",
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 33.4,
+      "end_s": 35.4,
+      "frame_start": 1003,
+      "frame_end": 1062
+    },
+    {
+      "id": "E-04.5a",
+      "beat": "B-04.5",
+      "type": "cert_returned",
+      "object": "CERT-RDP",
+      "from": "ISSUING_CA1",
+      "to": "RDP_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 36.0,
+      "end_s": 37.2,
+      "frame_start": 1081,
+      "frame_end": 1116
+    },
+    {
+      "id": "E-04.5b",
+      "beat": "B-04.5",
+      "type": "cert_installed",
+      "object": "CERT-RDP",
+      "from": "RDP_SERVER",
+      "to": "RDP_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 37.2,
+      "end_s": 37.9,
+      "frame_start": 1117,
+      "frame_end": 1137
+    },
+    {
+      "id": "E-04.5c",
+      "beat": "B-04.5",
+      "type": "intermediate_stored",
+      "object": "CERT-CA1",
+      "from": "ISSUING_CA1",
+      "to": "RDP_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": "Copy returned with the enrollment response chain",
+      "start_s": 37.2,
+      "end_s": 37.9,
+      "frame_start": 1117,
+      "frame_end": 1137
+    },
+    {
+      "id": "E-05.1a",
+      "beat": "B-05.1",
+      "type": "self_signature_shown",
+      "object": "CERT-ROOT",
+      "from": "ROOT_CA",
+      "to": "ROOT_CA",
+      "transport": "none",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 39.2,
+      "end_s": 41.0,
+      "frame_start": 1177,
+      "frame_end": 1230
+    },
+    {
+      "id": "E-05.2a",
+      "beat": "B-05.2",
+      "type": "proof_of_possession",
+      "object": "REQ-CA1",
+      "from": "ISSUING_CA1",
+      "to": "ISSUING_CA1",
+      "transport": "local",
+      "uses_key": "KEY-CA1-PRIV",
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "flashback",
+      "on_screen": true,
+      "note": null,
+      "start_s": 41.7,
+      "end_s": 42.5,
+      "frame_start": 1252,
+      "frame_end": 1275
+    },
+    {
+      "id": "E-05.2b",
+      "beat": "B-05.2",
+      "type": "offline_carry",
+      "object": "REQ-CA1",
+      "from": "ISSUING_CA1",
+      "to": "ROOT_CA",
+      "transport": "offline_media",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "flashback",
+      "on_screen": true,
+      "note": null,
+      "start_s": 42.5,
+      "end_s": 43.7,
+      "frame_start": 1276,
+      "frame_end": 1311
+    },
+    {
+      "id": "E-05.2c",
+      "beat": "B-05.2",
+      "type": "request_consumed",
+      "object": "REQ-CA1",
+      "from": "ROOT_CA",
+      "to": "ROOT_CA",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "flashback",
+      "on_screen": true,
+      "note": null,
+      "start_s": 43.7,
+      "end_s": 44.0,
+      "frame_start": 1312,
+      "frame_end": 1320
+    },
+    {
+      "id": "E-05.2d",
+      "beat": "B-05.2",
+      "type": "ca_signs",
+      "object": "CERT-CA1",
+      "from": "ROOT_CA",
+      "to": "ROOT_CA",
+      "transport": "local",
+      "uses_key": "KEY-ROOT-PRIV",
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "flashback",
+      "on_screen": true,
+      "note": null,
+      "start_s": 44.0,
+      "end_s": 44.7,
+      "frame_start": 1321,
+      "frame_end": 1341
+    },
+    {
+      "id": "E-05.2e",
+      "beat": "B-05.2",
+      "type": "offline_carry",
+      "object": "CERT-CA1",
+      "from": "ROOT_CA",
+      "to": "ISSUING_CA1",
+      "transport": "offline_media",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "flashback",
+      "on_screen": true,
+      "note": null,
+      "start_s": 44.7,
+      "end_s": 45.9,
+      "frame_start": 1342,
+      "frame_end": 1377
+    },
+    {
+      "id": "E-05.2f",
+      "beat": "B-05.2",
+      "type": "cert_installed",
+      "object": "CERT-CA1",
+      "from": "ISSUING_CA1",
+      "to": "ISSUING_CA1",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "flashback",
+      "on_screen": true,
+      "note": null,
+      "start_s": 45.9,
+      "end_s": 46.4,
+      "frame_start": 1378,
+      "frame_end": 1392
+    },
+    {
+      "id": "E-05.3a",
+      "beat": "B-05.3",
+      "type": "issuer_link",
+      "object": "CERT-CA1",
+      "from": "ROOT_CA",
+      "to": "ISSUING_CA1",
+      "transport": "logical",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 46.8,
+      "end_s": 48.8,
+      "frame_start": 1405,
+      "frame_end": 1464
+    },
+    {
+      "id": "E-06.1a",
+      "beat": "B-06.1",
+      "type": "connection_pulse",
+      "object": "CH-RDP",
+      "from": "CLIENT",
+      "to": "RDP_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 50.0,
+      "end_s": 50.6,
+      "frame_start": 1501,
+      "frame_end": 1518
+    },
+    {
+      "id": "E-06.1b",
+      "beat": "B-06.1",
+      "type": "present_cert",
+      "object": "CERT-RDP",
+      "from": "RDP_SERVER",
+      "to": "CLIENT",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 50.6,
+      "end_s": 51.5,
+      "frame_start": 1519,
+      "frame_end": 1545
+    },
+    {
+      "id": "E-06.1c",
+      "beat": "B-06.1",
+      "type": "present_cert",
+      "object": "CERT-CA1",
+      "from": "RDP_SERVER",
+      "to": "CLIENT",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 50.7,
+      "end_s": 51.6,
+      "frame_start": 1522,
+      "frame_end": 1548
+    },
+    {
+      "id": "E-06.1d",
+      "beat": "B-06.1",
+      "type": "handshake_signature",
+      "object": "HS-RDP",
+      "from": "RDP_SERVER",
+      "to": "RDP_SERVER",
+      "transport": "local",
+      "uses_key": "KEY-RDP-PRIV",
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 51.6,
+      "end_s": 52.0,
+      "frame_start": 1549,
+      "frame_end": 1560
+    },
+    {
+      "id": "E-06.1e",
+      "beat": "B-06.1",
+      "type": "handshake_proof_sent",
+      "object": "HS-RDP",
+      "from": "RDP_SERVER",
+      "to": "CLIENT",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 52.0,
+      "end_s": 52.4,
+      "frame_start": 1561,
+      "frame_end": 1572
+    },
+    {
+      "id": "E-06.1f",
+      "beat": "B-06.1",
+      "type": "handshake_proof_verified",
+      "object": "HS-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-RDP",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 52.4,
+      "end_s": 52.9,
+      "frame_start": 1573,
+      "frame_end": 1587
+    },
+    {
+      "id": "E-06.2a",
+      "beat": "B-06.2",
+      "type": "chain_link",
+      "object": "CERT-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-CA1",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 53.0,
+      "end_s": 54.2,
+      "frame_start": 1591,
+      "frame_end": 1626
+    },
+    {
+      "id": "E-06.2b",
+      "beat": "B-06.2",
+      "type": "chain_link",
+      "object": "CERT-CA1",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-ROOT",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 54.2,
+      "end_s": 55.4,
+      "frame_start": 1627,
+      "frame_end": 1662
+    },
+    {
+      "id": "E-06.2c",
+      "beat": "B-06.2",
+      "type": "trust_store_recall",
+      "object": "TS-CLIENT-ROOT",
+      "from": "AD",
+      "to": "CLIENT",
+      "transport": "none",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "recall",
+      "on_screen": true,
+      "note": null,
+      "start_s": 55.2,
+      "end_s": 56.6,
+      "frame_start": 1657,
+      "frame_end": 1698
+    },
+    {
+      "id": "E-06.3a",
+      "beat": "B-06.3",
+      "type": "aia_indicator",
+      "object": "SVC-AIA",
+      "from": "CLIENT",
+      "to": "PKI_HTTP",
+      "transport": "none",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-CA1",
+      "conditional": true,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 57.2,
+      "end_s": 58.6,
+      "frame_start": 1717,
+      "frame_end": 1758
+    },
+    {
+      "id": "E-06.4a",
+      "beat": "B-06.4",
+      "type": "validation_check",
+      "object": "CHAIN-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "chain_to_trusted_root",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 59.2,
+      "end_s": 59.8,
+      "frame_start": 1777,
+      "frame_end": 1794
+    },
+    {
+      "id": "E-06.4b",
+      "beat": "B-06.4",
+      "type": "validation_check",
+      "object": "CHAIN-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "signatures",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 60.0,
+      "end_s": 60.6,
+      "frame_start": 1801,
+      "frame_end": 1818
+    },
+    {
+      "id": "E-06.4c",
+      "beat": "B-06.4",
+      "type": "validation_check",
+      "object": "CHAIN-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "validity",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 60.8,
+      "end_s": 61.4,
+      "frame_start": 1825,
+      "frame_end": 1842
+    },
+    {
+      "id": "E-06.4d",
+      "beat": "B-06.4",
+      "type": "validation_check",
+      "object": "CHAIN-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "name_match",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 61.6,
+      "end_s": 62.2,
+      "frame_start": 1849,
+      "frame_end": 1866
+    },
+    {
+      "id": "E-06.4e",
+      "beat": "B-06.4",
+      "type": "validation_check",
+      "object": "CHAIN-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "eku",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 62.4,
+      "end_s": 63.0,
+      "frame_start": 1873,
+      "frame_end": 1890
+    },
+    {
+      "id": "E-06.4f",
+      "beat": "B-06.4",
+      "type": "validation_pending",
+      "object": "CHAIN-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "revocation",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 63.2,
+      "end_s": 64.0,
+      "frame_start": 1897,
+      "frame_end": 1920
+    },
+    {
+      "id": "E-06.5a",
+      "beat": "B-06.5",
+      "type": "crl_fetch",
+      "object": "CRL-CA1",
+      "from": "CLIENT",
+      "to": "PKI_HTTP",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-RDP",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 64.1,
+      "end_s": 65.1,
+      "frame_start": 1924,
+      "frame_end": 1953
+    },
+    {
+      "id": "E-06.5b",
+      "beat": "B-06.5",
+      "type": "crl_fetch",
+      "object": "CRL-ROOT",
+      "from": "CLIENT",
+      "to": "PKI_HTTP",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-CA1",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 64.6,
+      "end_s": 65.6,
+      "frame_start": 1939,
+      "frame_end": 1968
+    },
+    {
+      "id": "E-06.5c",
+      "beat": "B-06.5",
+      "type": "ocsp_note",
+      "object": "SVC-OCSP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "none",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": true,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 64.4,
+      "end_s": 66.0,
+      "frame_start": 1933,
+      "frame_end": 1980
+    },
+    {
+      "id": "E-06.5d",
+      "beat": "B-06.5",
+      "type": "validation_check",
+      "object": "CHAIN-RDP",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "revocation",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 65.8,
+      "end_s": 66.6,
+      "frame_start": 1975,
+      "frame_end": 1998
+    },
+    {
+      "id": "E-06.6a",
+      "beat": "B-06.6",
+      "type": "session_established",
+      "object": "CH-RDP",
+      "from": "CLIENT",
+      "to": "RDP_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 67.2,
+      "end_s": 68.8,
+      "frame_start": 2017,
+      "frame_end": 2064
+    },
+    {
+      "id": "E-07.1a",
+      "beat": "B-07.1",
+      "type": "template_selected",
+      "object": "TPL-WEBTLS",
+      "from": "WEB_SERVER",
+      "to": "WEB_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 71.0,
+      "end_s": 72.4,
+      "frame_start": 2131,
+      "frame_end": 2172
+    },
+    {
+      "id": "E-07.2a",
+      "beat": "B-07.2",
+      "type": "keypair_generated",
+      "object": "KP-WEB",
+      "from": "WEB_SERVER",
+      "to": "WEB_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 73.0,
+      "end_s": 73.8,
+      "frame_start": 2191,
+      "frame_end": 2214
+    },
+    {
+      "id": "E-07.2b",
+      "beat": "B-07.2",
+      "type": "private_key_stored",
+      "object": "KEY-WEB-PRIV",
+      "from": "WEB_SERVER",
+      "to": "WEB_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 73.8,
+      "end_s": 74.5,
+      "frame_start": 2215,
+      "frame_end": 2235
+    },
+    {
+      "id": "E-07.2c",
+      "beat": "B-07.2",
+      "type": "request_assembled",
+      "object": "REQ-WEB",
+      "from": "WEB_SERVER",
+      "to": "WEB_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 74.5,
+      "end_s": 75.1,
+      "frame_start": 2236,
+      "frame_end": 2253
+    },
+    {
+      "id": "E-07.2d",
+      "beat": "B-07.2",
+      "type": "proof_of_possession",
+      "object": "REQ-WEB",
+      "from": "WEB_SERVER",
+      "to": "WEB_SERVER",
+      "transport": "local",
+      "uses_key": "KEY-WEB-PRIV",
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 75.1,
+      "end_s": 75.9,
+      "frame_start": 2254,
+      "frame_end": 2277
+    },
+    {
+      "id": "E-07.3a",
+      "beat": "B-07.3",
+      "type": "ca_discovery_query",
+      "object": "DISC-WEB",
+      "from": "WEB_SERVER",
+      "to": "AD",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 76.0,
+      "end_s": 77.0,
+      "frame_start": 2281,
+      "frame_end": 2310
+    },
+    {
+      "id": "E-07.3b",
+      "beat": "B-07.3",
+      "type": "ca_discovery_result",
+      "object": "DISC-WEB",
+      "from": "AD",
+      "to": "WEB_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 77.0,
+      "end_s": 79.2,
+      "frame_start": 2311,
+      "frame_end": 2376
+    },
+    {
+      "id": "E-07.4a",
+      "beat": "B-07.4",
+      "type": "request_submitted",
+      "object": "REQ-WEB",
+      "from": "WEB_SERVER",
+      "to": "ISSUING_CA2",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 79.5,
+      "end_s": 81.9,
+      "frame_start": 2386,
+      "frame_end": 2457
+    },
+    {
+      "id": "E-08.1a",
+      "beat": "B-08.1",
+      "type": "ca_check",
+      "object": "REQ-WEB",
+      "from": "ISSUING_CA2",
+      "to": "ISSUING_CA2",
+      "transport": "local",
+      "uses_key": null,
+      "check": "requester_authenticated",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 82.2,
+      "end_s": 82.8,
+      "frame_start": 2467,
+      "frame_end": 2484
+    },
+    {
+      "id": "E-08.1b",
+      "beat": "B-08.1",
+      "type": "ca_check",
+      "object": "REQ-WEB",
+      "from": "ISSUING_CA2",
+      "to": "ISSUING_CA2",
+      "transport": "local",
+      "uses_key": null,
+      "check": "template_published_on_ca",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 82.9,
+      "end_s": 83.5,
+      "frame_start": 2488,
+      "frame_end": 2505
+    },
+    {
+      "id": "E-08.1c",
+      "beat": "B-08.1",
+      "type": "ca_check",
+      "object": "REQ-WEB",
+      "from": "ISSUING_CA2",
+      "to": "ISSUING_CA2",
+      "transport": "local",
+      "uses_key": null,
+      "check": "enroll_permission",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": "Name supplied in request — enrollment restricted",
+      "start_s": 83.6,
+      "end_s": 84.2,
+      "frame_start": 2509,
+      "frame_end": 2526
+    },
+    {
+      "id": "E-08.1d",
+      "beat": "B-08.1",
+      "type": "ca_check",
+      "object": "REQ-WEB",
+      "from": "ISSUING_CA2",
+      "to": "ISSUING_CA2",
+      "transport": "local",
+      "uses_key": null,
+      "check": "template_policy",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 84.3,
+      "end_s": 85.2,
+      "frame_start": 2530,
+      "frame_end": 2556
+    },
+    {
+      "id": "E-08.2a",
+      "beat": "B-08.2",
+      "type": "request_consumed",
+      "object": "REQ-WEB",
+      "from": "ISSUING_CA2",
+      "to": "ISSUING_CA2",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 85.5,
+      "end_s": 85.8,
+      "frame_start": 2566,
+      "frame_end": 2574
+    },
+    {
+      "id": "E-08.2b",
+      "beat": "B-08.2",
+      "type": "ca_signs",
+      "object": "CERT-WEB",
+      "from": "ISSUING_CA2",
+      "to": "ISSUING_CA2",
+      "transport": "local",
+      "uses_key": "KEY-CA2-PRIV",
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 85.8,
+      "end_s": 87.3,
+      "frame_start": 2575,
+      "frame_end": 2619
+    },
+    {
+      "id": "E-08.2c",
+      "beat": "B-08.2",
+      "type": "cert_returned",
+      "object": "CERT-WEB",
+      "from": "ISSUING_CA2",
+      "to": "WEB_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 87.3,
+      "end_s": 88.7,
+      "frame_start": 2620,
+      "frame_end": 2661
+    },
+    {
+      "id": "E-08.2d",
+      "beat": "B-08.2",
+      "type": "cert_installed",
+      "object": "CERT-WEB",
+      "from": "WEB_SERVER",
+      "to": "WEB_SERVER",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 88.7,
+      "end_s": 89.5,
+      "frame_start": 2662,
+      "frame_end": 2685
+    },
+    {
+      "id": "E-08.2e",
+      "beat": "B-08.2",
+      "type": "intermediate_stored",
+      "object": "CERT-CA2",
+      "from": "ISSUING_CA2",
+      "to": "WEB_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": "Copy returned with the enrollment response chain",
+      "start_s": 88.7,
+      "end_s": 89.5,
+      "frame_start": 2662,
+      "frame_end": 2685
+    },
+    {
+      "id": "E-08.3a",
+      "beat": "B-08.3",
+      "type": "issuer_link",
+      "object": "CERT-CA2",
+      "from": "ROOT_CA",
+      "to": "ISSUING_CA2",
+      "transport": "logical",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 90.3,
+      "end_s": 92.3,
+      "frame_start": 2710,
+      "frame_end": 2769
+    },
+    {
+      "id": "E-09.1a",
+      "beat": "B-09.1",
+      "type": "connection_pulse",
+      "object": "CH-WEB",
+      "from": "CLIENT",
+      "to": "WEB_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 93.0,
+      "end_s": 93.6,
+      "frame_start": 2791,
+      "frame_end": 2808
+    },
+    {
+      "id": "E-09.1b",
+      "beat": "B-09.1",
+      "type": "present_cert",
+      "object": "CERT-WEB",
+      "from": "WEB_SERVER",
+      "to": "CLIENT",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 93.6,
+      "end_s": 94.0,
+      "frame_start": 2809,
+      "frame_end": 2820
+    },
+    {
+      "id": "E-09.1c",
+      "beat": "B-09.1",
+      "type": "present_cert",
+      "object": "CERT-CA2",
+      "from": "WEB_SERVER",
+      "to": "CLIENT",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 93.7,
+      "end_s": 94.1,
+      "frame_start": 2812,
+      "frame_end": 2823
+    },
+    {
+      "id": "E-09.1d",
+      "beat": "B-09.1",
+      "type": "handshake_signature",
+      "object": "HS-WEB",
+      "from": "WEB_SERVER",
+      "to": "WEB_SERVER",
+      "transport": "local",
+      "uses_key": "KEY-WEB-PRIV",
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 94.1,
+      "end_s": 94.4,
+      "frame_start": 2824,
+      "frame_end": 2832
+    },
+    {
+      "id": "E-09.1e",
+      "beat": "B-09.1",
+      "type": "handshake_proof_sent",
+      "object": "HS-WEB",
+      "from": "WEB_SERVER",
+      "to": "CLIENT",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 94.4,
+      "end_s": 94.7,
+      "frame_start": 2833,
+      "frame_end": 2841
+    },
+    {
+      "id": "E-09.1q",
+      "beat": "B-09.1",
+      "type": "handshake_proof_verified",
+      "object": "HS-WEB",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-WEB",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 94.7,
+      "end_s": 95.0,
+      "frame_start": 2842,
+      "frame_end": 2850
+    },
+    {
+      "id": "E-09.1f",
+      "beat": "B-09.1",
+      "type": "chain_link",
+      "object": "CERT-WEB",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-CA2",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 95.0,
+      "end_s": 95.3,
+      "frame_start": 2851,
+      "frame_end": 2859
+    },
+    {
+      "id": "E-09.1g",
+      "beat": "B-09.1",
+      "type": "chain_link",
+      "object": "CERT-CA2",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-ROOT",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 95.3,
+      "end_s": 95.6,
+      "frame_start": 2860,
+      "frame_end": 2868
+    },
+    {
+      "id": "E-09.1h",
+      "beat": "B-09.1",
+      "type": "validation_check",
+      "object": "CHAIN-WEB",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "chain_to_trusted_root",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": false,
+      "note": null,
+      "start_s": 95.6,
+      "end_s": 95.8,
+      "frame_start": 2869,
+      "frame_end": 2874
+    },
+    {
+      "id": "E-09.1i",
+      "beat": "B-09.1",
+      "type": "validation_check",
+      "object": "CHAIN-WEB",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "signatures",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": false,
+      "note": null,
+      "start_s": 95.6,
+      "end_s": 95.8,
+      "frame_start": 2869,
+      "frame_end": 2874
+    },
+    {
+      "id": "E-09.1j",
+      "beat": "B-09.1",
+      "type": "validation_check",
+      "object": "CHAIN-WEB",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "name_match",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 95.6,
+      "end_s": 96.0,
+      "frame_start": 2869,
+      "frame_end": 2880
+    },
+    {
+      "id": "E-09.1k",
+      "beat": "B-09.1",
+      "type": "validation_check",
+      "object": "CHAIN-WEB",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "eku",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 96.0,
+      "end_s": 96.3,
+      "frame_start": 2881,
+      "frame_end": 2889
+    },
+    {
+      "id": "E-09.1l",
+      "beat": "B-09.1",
+      "type": "validation_check",
+      "object": "CHAIN-WEB",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "validity",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 96.3,
+      "end_s": 96.6,
+      "frame_start": 2890,
+      "frame_end": 2898
+    },
+    {
+      "id": "E-09.1m",
+      "beat": "B-09.1",
+      "type": "crl_fetch",
+      "object": "CRL-CA2",
+      "from": "CLIENT",
+      "to": "PKI_HTTP",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-WEB",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 96.4,
+      "end_s": 96.8,
+      "frame_start": 2893,
+      "frame_end": 2904
+    },
+    {
+      "id": "E-09.1n",
+      "beat": "B-09.1",
+      "type": "crl_fetch",
+      "object": "CRL-ROOT",
+      "from": "CLIENT",
+      "to": "PKI_HTTP",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": "CERT-CA2",
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 96.5,
+      "end_s": 96.9,
+      "frame_start": 2896,
+      "frame_end": 2907
+    },
+    {
+      "id": "E-09.1o",
+      "beat": "B-09.1",
+      "type": "validation_check",
+      "object": "CHAIN-WEB",
+      "from": "CLIENT",
+      "to": "CLIENT",
+      "transport": "local",
+      "uses_key": null,
+      "check": "revocation",
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 96.9,
+      "end_s": 97.3,
+      "frame_start": 2908,
+      "frame_end": 2919
+    },
+    {
+      "id": "E-09.1p",
+      "beat": "B-09.1",
+      "type": "session_established",
+      "object": "CH-WEB",
+      "from": "CLIENT",
+      "to": "WEB_SERVER",
+      "transport": "network",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 97.3,
+      "end_s": 97.9,
+      "frame_start": 2920,
+      "frame_end": 2937
+    },
+    {
+      "id": "E-09.2a",
+      "beat": "B-09.2",
+      "type": "trust_path_reveal",
+      "object": "CHAIN-RDP",
+      "from": null,
+      "to": null,
+      "transport": "logical",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 98.5,
+      "end_s": 101.5,
+      "frame_start": 2956,
+      "frame_end": 3045
+    },
+    {
+      "id": "E-09.2b",
+      "beat": "B-09.2",
+      "type": "trust_path_reveal",
+      "object": "CHAIN-WEB",
+      "from": null,
+      "to": null,
+      "transport": "logical",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 98.8,
+      "end_s": 101.8,
+      "frame_start": 2965,
+      "frame_end": 3054
+    },
+    {
+      "id": "E-09.3a",
+      "beat": "B-09.3",
+      "type": "final_fade",
+      "object": "WORLD",
+      "from": null,
+      "to": null,
+      "transport": "none",
+      "uses_key": null,
+      "check": null,
+      "target": null,
+      "conditional": false,
+      "era": "present",
+      "on_screen": true,
+      "note": null,
+      "start_s": 105.5,
+      "end_s": 107.8,
+      "frame_start": 3166,
+      "frame_end": 3234
+    }
+  ],
+  "captions": [
+    {
+      "id": "CAP-S1",
+      "kind": "caption",
+      "text": "Secure RDP connection",
+      "scene": "S1",
+      "anchor_beat": "B-01.1",
+      "words": 3,
+      "required_hold_s": 2.5,
+      "appear_s": 0.6,
+      "hold": {
+        "start_s": 1.0,
+        "end_s": 5.0,
+        "frame_start": 31,
+        "frame_end": 150
+      },
+      "vanish_s": 5.3
+    },
+    {
+      "id": "CAP-S2",
+      "kind": "caption",
+      "text": "The RDP server needs a trusted identity",
+      "scene": "S2",
+      "anchor_beat": "B-02.1",
+      "words": 7,
+      "required_hold_s": 2.5,
+      "appear_s": 7.6,
+      "hold": {
+        "start_s": 8.0,
+        "end_s": 12.5,
+        "frame_start": 241,
+        "frame_end": 375
+      },
+      "vanish_s": 12.8
+    },
+    {
+      "id": "CAP-S3a",
+      "kind": "caption",
+      "text": "The private key stays on the server",
+      "scene": "S3",
+      "anchor_beat": "B-03.1",
+      "words": 7,
+      "required_hold_s": 2.5,
+      "appear_s": 14.6,
+      "hold": {
+        "start_s": 15.0,
+        "end_s": 19.5,
+        "frame_start": 451,
+        "frame_end": 585
+      },
+      "vanish_s": 19.8
+    },
+    {
+      "id": "CAP-S3b",
+      "kind": "caption",
+      "text": "The request is signed, not the key sent",
+      "scene": "S3",
+      "anchor_beat": "B-03.3",
+      "words": 8,
+      "required_hold_s": 2.8,
+      "appear_s": 20.3,
+      "hold": {
+        "start_s": 20.7,
+        "end_s": 23.7,
+        "frame_start": 622,
+        "frame_end": 711
+      },
+      "vanish_s": 24.0
+    },
+    {
+      "id": "CAP-S4",
+      "kind": "caption",
+      "text": "Issuing CA 1 verifies, then signs",
+      "scene": "S4",
+      "anchor_beat": "B-04.3",
+      "words": 6,
+      "required_hold_s": 2.5,
+      "appear_s": 28.6,
+      "hold": {
+        "start_s": 29.0,
+        "end_s": 35.0,
+        "frame_start": 871,
+        "frame_end": 1050
+      },
+      "vanish_s": 35.3
+    },
+    {
+      "id": "CAP-S5a",
+      "kind": "caption",
+      "text": "The Root CA signs the issuing CA certificate",
+      "scene": "S5",
+      "anchor_beat": "B-05.2",
+      "words": 8,
+      "required_hold_s": 2.8,
+      "appear_s": 41.5,
+      "hold": {
+        "start_s": 41.9,
+        "end_s": 45.9,
+        "frame_start": 1258,
+        "frame_end": 1377
+      },
+      "vanish_s": 46.2
+    },
+    {
+      "id": "CAP-S5b",
+      "kind": "caption",
+      "text": "The Root CA is the trust anchor",
+      "scene": "S5",
+      "anchor_beat": "B-05.3",
+      "words": 7,
+      "required_hold_s": 2.5,
+      "appear_s": 46.7,
+      "hold": {
+        "start_s": 47.1,
+        "end_s": 49.7,
+        "frame_start": 1414,
+        "frame_end": 1491
+      },
+      "vanish_s": 50.0
+    },
+    {
+      "id": "CAP-S6a",
+      "kind": "caption",
+      "text": "The client validates the whole chain",
+      "scene": "S6",
+      "anchor_beat": "B-06.2",
+      "words": 6,
+      "required_hold_s": 2.5,
+      "appear_s": 53.1,
+      "hold": {
+        "start_s": 53.5,
+        "end_s": 63.0,
+        "frame_start": 1606,
+        "frame_end": 1890
+      },
+      "vanish_s": 63.3
+    },
+    {
+      "id": "CAP-S6b",
+      "kind": "caption",
+      "text": "Trusted RDP connection established",
+      "scene": "S6",
+      "anchor_beat": "B-06.6",
+      "words": 4,
+      "required_hold_s": 2.5,
+      "appear_s": 66.8,
+      "hold": {
+        "start_s": 67.2,
+        "end_s": 69.7,
+        "frame_start": 2017,
+        "frame_end": 2091
+      },
+      "vanish_s": 70.0
+    },
+    {
+      "id": "CAP-S7",
+      "kind": "caption",
+      "text": "Different templates can use different issuing CAs",
+      "scene": "S7",
+      "anchor_beat": "B-07.3",
+      "words": 7,
+      "required_hold_s": 2.5,
+      "appear_s": 75.6,
+      "hold": {
+        "start_s": 76.0,
+        "end_s": 80.5,
+        "frame_start": 2281,
+        "frame_end": 2415
+      },
+      "vanish_s": 80.8
+    },
+    {
+      "id": "CAP-S8",
+      "kind": "caption",
+      "text": "Issuing CA 2 signs the TLS certificate",
+      "scene": "S8",
+      "anchor_beat": "B-08.2",
+      "words": 7,
+      "required_hold_s": 2.5,
+      "appear_s": 85.1,
+      "hold": {
+        "start_s": 85.5,
+        "end_s": 89.5,
+        "frame_start": 2566,
+        "frame_end": 2685
+      },
+      "vanish_s": 89.8
+    },
+    {
+      "id": "CAP-S9a",
+      "kind": "caption",
+      "text": "Different issuing paths. One trusted root.",
+      "scene": "S9",
+      "anchor_beat": "B-09.2",
+      "words": 6,
+      "required_hold_s": 2.5,
+      "appear_s": 98.6,
+      "hold": {
+        "start_s": 99.0,
+        "end_s": 103.0,
+        "frame_start": 2971,
+        "frame_end": 3090
+      },
+      "vanish_s": 103.3
+    },
+    {
+      "id": "TITLE-S9",
+      "kind": "title",
+      "text": "Certificate Flow — From request to trust",
+      "scene": "S9",
+      "anchor_beat": "B-09.3",
+      "words": 6,
+      "required_hold_s": 2.5,
+      "appear_s": 104.1,
+      "hold": {
+        "start_s": 104.5,
+        "end_s": 108.2,
+        "frame_start": 3136,
+        "frame_end": 3246
+      },
+      "vanish_s": 108.5
+    }
+  ]
+}

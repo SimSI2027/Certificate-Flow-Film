@@ -1,0 +1,82 @@
+{
+  "stage": "stage0",
+  "round": "stage0-R3",
+  "candidate": "96d6bdb397b517a6d9c7d183008b0b5a00f60132",
+  "spec_sha256": "7cf45afa01572b7e9d30a6fb376807fb10a4f6a693af41ffed1d96bce2686d23",
+  "frozen_files": [
+    "docs/REFERENCE-SPEC.md",
+    "docs/GLOSSARY.md",
+    "docs/PKI-TECHNICAL-NOTES.md"
+  ],
+  "beats": [
+    "B-01.1",
+    "B-01.2",
+    "B-02.1",
+    "B-02.2",
+    "B-02.3",
+    "B-03.1",
+    "B-03.2",
+    "B-03.3",
+    "B-03.4",
+    "B-04.1",
+    "B-04.2",
+    "B-04.3",
+    "B-04.4",
+    "B-04.5",
+    "B-05.1",
+    "B-05.2",
+    "B-05.3",
+    "B-06.1",
+    "B-06.2",
+    "B-06.3",
+    "B-06.4",
+    "B-06.5",
+    "B-06.6",
+    "B-07.1",
+    "B-07.2",
+    "B-07.3",
+    "B-07.4",
+    "B-08.1",
+    "B-08.2",
+    "B-08.3",
+    "B-09.1",
+    "B-09.2",
+    "B-09.3"
+  ],
+  "frames": [],
+  "motion_strips": [],
+  "files": [
+    {
+      "path": "docs/GLOSSARY.md",
+      "sha256": "dde695c8d203b58d404f7f62fc5c67eaee8d7af351ccacf8e462bfbe9ed22a11"
+    },
+    {
+      "path": "docs/PKI-TECHNICAL-NOTES.md",
+      "sha256": "9f323ab14af041ee70d6e22665f396e4545a51791b471a3b56907ee054eb895c"
+    },
+    {
+      "path": "docs/REFERENCE-SPEC.md",
+      "sha256": "7cf45afa01572b7e9d30a6fb376807fb10a4f6a693af41ffed1d96bce2686d23"
+    },
+    {
+      "path": "docs/STORYBOARD.md",
+      "sha256": "ba91d905a816c37d45ff4f8cbf900297a7e9b1c6178e15998357e6fa9236f571"
+    },
+    {
+      "path": "model-dump.json",
+      "sha256": "4b6bd5712370b1f66cea6da33b364fd5b16f1e3c02e055cd3b60da1f4ec31452"
+    },
+    {
+      "path": "README.md",
+      "sha256": "9a30343a1474d8b2d3e99dad554701b639c97e330899d17cd8579b19499408a2"
+    },
+    {
+      "path": "regressions.json",
+      "sha256": "643ea8c210bc5186fac995d0dbbc2d172d8ce8c7a57a6c98b6272ebcfb9f3bd9"
+    },
+    {
+      "path": "schema.json",
+      "sha256": "4aa42e64fcfcc7ef623d1eb88e86040f83a931a7301ac495bd455c5476ad1cbe"
+    }
+  ]
+}
