@@ -14,11 +14,11 @@ Conventions
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 
 from cff.stage import layout as lo
 from cff.stage.layout import Vec3
-from cff.stage.objects import BY_ID, CATALOGUE, StageObject
+from cff.stage.objects import BY_ID, CATALOGUE
 from cff.stage.tracks import GLOW, LOCATION, ROTATION, SCALE, Timeline, Value
 from cff.story import model as m
 from cff.story import timing
@@ -159,7 +159,7 @@ class Choreographer:
     def grow(self, obj_id: str, f0: int, f1: int, glow: Value) -> None:
         """A beam or trust link extends along its own axis while it lights up."""
         full = BY_ID[obj_id].full
-        thin = (motion.HIDDEN_SCALE if full[0] != 1.0 else 1.0, 1.0 if full[0] != 1.0 else 1.0, motion.HIDDEN_SCALE if full[2] != 1.0 else 1.0)
+        thin = (motion.HIDDEN_SCALE if full[0] != 1.0 else 1.0, 1.0, motion.HIDDEN_SCALE if full[2] != 1.0 else 1.0)
         self._hold(obj_id, SCALE, f0)
         self._set(obj_id, SCALE, f0, thin, "EASE_OUT")
         self._set(obj_id, SCALE, f1, full, HOLD_EASE)
@@ -196,7 +196,7 @@ class Choreographer:
         self.go(obj_id, f0, mid, lo.add(dest, (0.0, 0.0, SETTLE_BOUNCE)), "EASE_OUT")
         self.go(obj_id, mid, f1, dest, "SETTLE")
 
-    def travel(self, obj_id: str, f0: int, f1: int, points: tuple[Vec3, ...] | list[Vec3], ease: str = "EASE_IN_OUT") -> Callable[[float], int]:
+    def travel(self, obj_id: str, f0: int, f1: int, points: Sequence[lo.Seq3], ease: str = "EASE_IN_OUT") -> Callable[[float], int]:
         """Move along a polyline with eased progress, baked onto SMOOTH Bezier keys.
 
         Returns a function mapping an arc-length fraction to the frame the object reaches it.
@@ -204,7 +204,7 @@ class Choreographer:
         self._hold(obj_id, LOCATION, f0)
         easing = motion.preset(ease)
         step = motion.PATH_KEY_STEP_FRAMES
-        frames = list(range(f0, f1, step)) + [f1]
+        frames: list[int] = [*range(f0, f1, step), f1]
         progress: list[float] = []
         for frame in frames:
             t = (frame - f0) / (f1 - f0)
@@ -329,7 +329,7 @@ class Choreographer:
         ent, swing, slide = (9, 18, 18) if compress else (18, 24, 30)
         beam_d, ring_d, close_d = (6, 6, 9) if compress else (15, 12, 12)
         # keys form: the front panel swings open to a cutaway interior
-        f0, f1 = self.event(e_form)
+        f0, _f1 = self.event(e_form)
         self.turn(panel, f0, f0 + swing, (0.0, 0.0, -110.0))
         self.show(container, f0 + 6, ent, rise=(0.0, 0.0, -0.2), ease="OUT_BACK")
         self.show(lid, f0 + 6, ent, rise=(0.0, 0.0, -0.2))
@@ -338,7 +338,7 @@ class Choreographer:
         self.show(priv, k0, ent, rise=(0.0, 0.0, 0.2), glow=soft_white)
         self.show(pub, k0 + 6, ent, rise=(0.0, 0.0, 0.2), glow=soft_white)
         # the private key settles into its container; lid closes; lock turns; anchors engage
-        f0, f1 = self.event(e_store)
+        f0, _ = self.event(e_store)
         inside = lo.add(base, (lo.CONTAINER[0], lo.CONTAINER[1], lo.CONTAINER[2] + 0.02))
         self.travel(priv, f0, f0 + slide, (self.current(priv, LOCATION), lo.add(inside, (0.0, 0.0, 0.3)), inside))
         close = f0 + slide
@@ -350,7 +350,7 @@ class Choreographer:
             self.show(clamp, close + 12, 12, rise=(sign * 0.15, 0.0, 0.0))
             self.go(clamp, close + 24, close + 36, lo.add(self.current(clamp, LOCATION), (-sign * 0.1, 0.0, 0.0)), "EASE_IN_OUT")
         # the public key and the request information enter the glass capsule; the private key stays put
-        f0, f1 = self.event(e_request)
+        f0, _ = self.event(e_request)
         capsule_at = lo.add(base, lo.CAPSULE_SPOT)
         self.show(req, f0, ent, rise=(0.0, 0.0, -0.2), glow=glow_value(R.REQUEST, 0.35), at=capsule_at)
         enter0 = f0 + 6
@@ -361,7 +361,7 @@ class Choreographer:
         self.travel(tile, enter0 + 9, enter0 + 21, (tile_at, lo.add(capsule_at, (0.0, 0.1, 0.1)), capsule_at))
         self.hide(tile, enter0 + 21, 9, sink=(0.0, 0.0, 0.0))
         # proof of possession: a beam rises from the container; the seal ring closes round the capsule
-        f0, f1 = self.event(e_proof)
+        f0, _ = self.event(e_proof)
         self.glow_pulse(container, f0, f0 + beam_d + ring_d + close_d, white)
         self.grow(f"BEAM-{tag}", f0, f0 + beam_d, white)
         ring = f"SEAL-{tag}"
@@ -415,16 +415,16 @@ class Choreographer:
         self.travel("REQ-RDP", f0, f1, (self.current("REQ-RDP", LOCATION), lo.add(press, (-0.3, -0.5, 0.9)), lo.add(press, (0.0, 0.0, 0.7))))
         self.hide("REQ-RDP", f1, 9, sink=(0.0, 0.0, -0.1))
         f0, f1 = self.event("E-04.4b")
-        self.glow_to("MODULE-CA1", f0, f0 + 9, cyan, "EASE_OUT")
-        self.glow_to("KEY-CA1-PRIV", f0, f0 + 9, cyan, "EASE_OUT")
-        self.glow_to("LINK-CA1", f0 + 6, f0 + 18, cyan, "EASE_OUT")
+        self.glow_to("MODULE-CA1", f0, f0 + 6, cyan, "EASE_OUT")
+        self.glow_to("KEY-CA1-PRIV", f0, f0 + 6, cyan, "EASE_OUT")
+        self.glow_to("LINK-CA1", f0 + 3, f0 + 12, cyan, "EASE_OUT")
         head = lo.add(press, (0.0, 0.0, 0.85))
-        self.go("PRESSHEAD-CA1", f0 + 18, f0 + 30, lo.add(head, (0.0, 0.0, -0.35)), "EASE_IN")
+        self.go("PRESSHEAD-CA1", f0 + 9, f0 + 18, lo.add(head, (0.0, 0.0, -0.35)), "EASE_IN")
         out = lo.add(lo.CA1, lo.CA_PRESS_OUT)
-        self.show("CERT-RDP", f0 + 30, 15, rise=(0.0, 0.0, -0.2), glow=glow_value(R.ISSUING_CA1, 0.9), at=out)
-        self.go("PRESSHEAD-CA1", f0 + 30, f0 + 42, head, "EASE_OUT")
-        self.glow_to("LINK-CA1", f0 + 36, f1, OFF_GLOW, "EASE_IN")
-        self.glow_to("MODULE-CA1", f0 + 36, f1, glow_value(R.ISSUING_CA1, 0.3), "EASE_IN")  # the sealed module stays shut
+        self.show("CERT-RDP", f0 + 18, 15, rise=(0.0, 0.0, -0.2), glow=glow_value(R.ISSUING_CA1, 0.9), at=out)
+        self.go("PRESSHEAD-CA1", f0 + 18, f0 + 30, head, "EASE_OUT")
+        self.glow_to("LINK-CA1", f0 + 24, f1, OFF_GLOW, "EASE_IN")
+        self.glow_to("MODULE-CA1", f0 + 24, f1, glow_value(R.ISSUING_CA1, 0.3), "EASE_IN")  # the sealed module stays shut
         # B-04.5: the card returns along the cyan route and locks beside the private key; the CA's certificate copy follows.
         f0, f1 = self.event("E-04.5a")
         f0b, f1b = self.event("E-04.5b")
@@ -462,8 +462,10 @@ class Choreographer:
         # B-05.1: the root complex rises on its own plinth; the sweep reveals the existing self-signed seal.
         b0 = self.beat("B-05.1")
         rise = (0.0, 0.0, -7.0)
-        for n, oid in enumerate(("ROOT-DAIS", "ROOT-PLINTH", m.ROOT_CA, "READER-ROOT", "PRESS-ROOT", "PRESSHEAD-ROOT", "MODULE-ROOT", "KEY-ROOT-PRIV")):
+        for n, oid in enumerate(("ROOT-DAIS", "ROOT-PLINTH", m.ROOT_CA, "READER-ROOT", "PRESS-ROOT", "PRESSHEAD-ROOT")):
             self.show(oid, b0 + n * 3, 36, rise=rise, ease="EASE_OUT", glow=glow_value(R.ROOT, 0.12) if oid in {m.ROOT_CA, "ROOT-DAIS", "ROOT-PLINTH"} else None)
+        for oid in ("MODULE-ROOT", "KEY-ROOT-PRIV"):  # the dark key module and its key appear on the dais bay once the complex has landed
+            self.show(oid, b0 + 60, 18, rise=(0.0, 0.0, -0.25), ease="EASE_OUT")
         f0, f1 = self.event("E-05.1a")
         self.show("SEAL-ROOT", f0 - 12, 12, rise=(0.0, 0.0, 0.0), glow=glow_value(R.ROOT, 0.1))
         self.glow_to("SEAL-ROOT", f0, f1, gold, "EASE_IN_OUT")
@@ -482,7 +484,7 @@ class Choreographer:
         self.glow_to("REQ-CA1", f0 + 12, f1, glow_value(R.REQUEST, palette.GLOW_ACTIVE))
         f0, f1 = self.event("E-05.2b")
         cart0 = lo.add(lo.WALKWAY[0], (0.0, 0.0, 0.85))
-        self.show("CARTRIDGE", f0 - 12, 12, rise=(0.0, 0.0, 0.0), glow=hex_glow(palette.TEXT_HEX, 0.5), at=cart0)
+        self.show("CARTRIDGE", self.beat("B-05.2", 0.1), 12, rise=(0.0, 0.0, 0.0), glow=hex_glow(palette.TEXT_HEX, 0.5), at=cart0)
         walk = tuple(lo.add(p, (0.0, 0.0, 0.85)) for p in lo.WALKWAY)
         reader = lo.add(lo.ROOT_READER, (0.0, 0.0, 0.62))
         out_path = (*walk, reader)
@@ -737,7 +739,7 @@ class Choreographer:
         for scroll, ev_id, dock in (("CRL-CA2", "E-09.1m", lo.STACK_CERT), ("CRL-ROOT-2", "E-09.1n", lo.STACK_INTERMEDIATE)):
             f0, f1 = self.event(ev_id)
             self.show(scroll, f0, 6, rise=(0.0, 0.0, 0.0), glow=rev, at=lo.add(dock, (0.62, 0.0, 0.0)))
-            self.hide(scroll, f1 - 6, 6, sink=(0.0, 0.0, 0.0))
+            self.hide(scroll, max(f0 + 6, f1 - 6), 6, sink=(0.0, 0.0, 0.0))
         self.glow_pulse(m.PKI_HTTP, self.beat("B-09.1", 3.2), self.beat("B-09.1", 3.8), hex_glow(palette.TEXT_HEX, 0.5), rest=hex_glow(palette.TEXT_HEX, 0.1))
         f0, f1 = self.event("E-09.1p")
         self.recolour_path("CH-WEB", len(lo.CHANNEL_WEB) - 1, f0, f1, green, reverse=False)

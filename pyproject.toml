@@ -6,7 +6,7 @@ requires-python = ">=3.12"
 license = "GPL-3.0-or-later"
 
 [tool.ruff]
-line-length = 120
+line-length = 160  # raised from 120 in Session 3: stage tables, Blender builders and CLI plumbing read better unwrapped
 target-version = "py312"
 src = ["."]
 extend-exclude = ["qa", "renders", "output", "site"]
@@ -23,6 +23,13 @@ ignore = [
 # Data tables: one record per line reads better than wrapped records.
 "cff/story/model.py" = ["E501", "N806", "PLR0915"]
 "tests/*" = ["PLR0912", "PLR0915"]
+# Stage data and choreography: coordinate tables, long event scripts and the colour-role alias `R`.
+"cff/stage/*" = ["E501", "N806", "PLR0915", "PLR0917", "RUF007", "PLR0912"]
+"cff/theme/*" = ["E501"]
+"tools/*" = ["E501"]
+"cff/theme/colour.py" = ["PLR0917"]
+"blender/*" = ["E501", "N806", "PLR0915", "PLR0917", "PLR0912", "PLR0911"]
+"blender/**/*.py" = ["E501", "N806", "PLR0915", "PLR0917", "PLR0912", "PLR0911"]
 
 [tool.mypy]
 python_version = "3.12"

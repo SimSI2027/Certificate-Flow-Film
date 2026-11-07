@@ -19,7 +19,7 @@ ROLE_HEX: dict[ColourRole, str] = {
     ColourRole.REQUEST: "#F7FAFF",  # bright neutral white
     ColourRole.VALIDATED: "#26B985",  # green
     ColourRole.PENDING: "#D95C00",  # amber
-    ColourRole.REVOCATION: "#B8742E",  # restrained amber (a darker, calmer variant of pending)
+    ColourRole.REVOCATION: "#D9A24F",  # restrained amber: a calmer, lighter variant of pending (dE00 >= 11.7 from it, incl. CVD)
     ColourRole.INELIGIBLE: "#8E939C",  # muted grey
     ColourRole.DIRECTORY: "#215C86",  # steel blue
     ColourRole.NEUTRAL: "#4A5568",  # chassis and furniture grey-blue

@@ -210,8 +210,8 @@ def build_catalogue() -> tuple[StageObject, ...]:
     # --- CA vaults ------------------------------------------------------------------------------
     objs += _ca_vault(m.ISSUING_CA1, "CA1", lo.CA1, R.ISSUING_CA1, "CERT-CA1", "KEY-CA1-PRIV")
     objs += _ca_vault(m.ISSUING_CA2, "CA2", lo.CA2, R.ISSUING_CA2, "CERT-CA2", "KEY-CA2-PRIV")
-    objs += _check_slots("CA1", 4, lo.add(lo.CA1, (-1.4, 1.2, 1.15)), 0.34, R.ISSUING_CA1)
-    objs += _check_slots("CA2", 4, lo.add(lo.CA2, (-1.4, 1.2, 1.15)), 0.34, R.ISSUING_CA2)
+    objs += _check_slots("CA1", 4, lo.add(lo.CA1, (-0.9, 0.5, 0.75)), 0.34, R.ISSUING_CA1)
+    objs += _check_slots("CA2", 4, lo.add(lo.CA2, (-0.9, 0.5, 0.75)), 0.34, R.ISSUING_CA2)
 
     # --- directory, publication point -----------------------------------------------------------
     objs += [
@@ -278,3 +278,17 @@ if len(BY_ID) != len(CATALOGUE):
 
 def obj(object_id: str) -> StageObject:
     return BY_ID[object_id]
+
+
+# Kinds whose origin is the bottom centre of the shape (they stand on something); every other kind is centred.
+BASE_ANCHORED: frozenset[Kind] = frozenset({
+    Kind.DESK, Kind.LAPTOP, Kind.FIGURE, Kind.CHASSIS, Kind.AD_COLUMN, Kind.KIOSK, Kind.CA_VAULT, Kind.PLINTH, Kind.DAIS,
+})
+
+
+def centre_offset(object_id: str) -> Vec3:
+    """Offset from an object's origin to the middle of its visible bulk (the camera and audits aim here)."""
+    o = BY_ID[object_id]
+    if o.kind in BASE_ANCHORED:
+        return (0.0, 0.0, o.size[2] / 2)
+    return (0.0, 0.0, 0.0)

@@ -37,6 +37,8 @@ SMOOTH = "SMOOTH"  # auto-clamped Bezier handles on analytically eased, densely 
 # --- durations (seconds, all on frame boundaries) ------------------------------------------
 ENTRANCE_S = 0.6
 EXIT_S = 0.4  # 0.67 x the entrance (C-06: exits are 0.6-0.9 x)
+LABEL_ENTRANCE_S = 0.4  # in-world tags: quicker than a stage object, so short beats still hold them for 1.5 s
+LABEL_EXIT_S = 0.27  # 0.67 x the entrance (C-06)
 STAGGER_S = 0.1
 IDLE_PERIOD_S = 2.0
 IDLE_AMPLITUDE_FRACTION = 0.015  # <= 2% of object size (C-06)
@@ -49,6 +51,8 @@ FULL_SCALE = 1.0
 # --- key sampling ---------------------------------------------------------------------------
 PATH_KEY_STEP_FRAMES = 3  # keys on analytically eased paths
 CAMERA_KEY_STEP_FRAMES = 6  # keys on camera, target and focus tracks
+CAMERA_SMOOTH_SIGMA_FRAMES = 16.0  # Gaussian lag on camera position and look-at: the subject leads, the camera follows
+CAMERA_SMOOTH_REACH_SIGMAS = 3.0  # kernel half-width in sigmas
 
 # LINEAR is allowed only on these channel names (constant-speed effects). None are used in the animatic.
 LINEAR_WHITELIST: frozenset[str] = frozenset()
@@ -75,6 +79,14 @@ def entrance_frames() -> int:
 
 def exit_frames() -> int:
     return round(EXIT_S * timing.FPS)
+
+
+def label_entrance_frames() -> int:
+    return round(LABEL_ENTRANCE_S * timing.FPS)
+
+
+def label_exit_frames() -> int:
+    return round(LABEL_EXIT_S * timing.FPS)
 
 
 BISECTION_STEPS = 40

@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 from cff.stage import layout as lo
 from cff.stage.layout import Vec3
-from cff.stage.objects import BY_ID
+from cff.stage.objects import BY_ID, centre_offset
 from cff.stage.tracks import LOCATION, Timeline
 from cff.story import model as m
 from cff.story import timing
@@ -69,6 +69,7 @@ class CameraPlan:
         self.states: dict[int, CamState] = {}
         self.cut_frames: list[int] = []
         self.beat_first: dict[str, int] = {}
+        self.beat_focal: dict[str, str] = subject_ids()
         self._build()
 
     # --- target evaluation -------------------------------------------------------------
@@ -76,9 +77,8 @@ class CameraPlan:
         if not isinstance(target, str):
             return target
         value = self.timeline.value_at(target, LOCATION, frame)
-        if value is not None:
-            return (value[0], value[1], value[2])
-        return BY_ID[target].home
+        base = (value[0], value[1], value[2]) if value is not None else BY_ID[target].home
+        return lo.add(base, centre_offset(target))
 
     def centre(self, targets: tuple[Target, ...], frame: int) -> Vec3:
         pts = [self.point(t, frame) for t in targets]
@@ -115,6 +115,37 @@ class CameraPlan:
                     prev = state
             if index == len(beats) - 1 and prev is not None:
                 self.states[last + 1] = prev
+        self._smooth()
+
+    def _smooth(self) -> None:
+        """Gaussian-filter camera position, look-at and lens inside each cut-free segment (no motion across a cut)."""
+        sigma = motion.CAMERA_SMOOTH_SIGMA_FRAMES
+        reach = round(sigma * motion.CAMERA_SMOOTH_REACH_SIGMAS)
+        weights = {k: math.exp(-0.5 * (k / sigma) ** 2) for k in range(-reach, reach + 1)}
+        frames = sorted(self.states)
+        bounds = [frames[0], *self.cut_frames, frames[-1] + 1]
+        raw = dict(self.states)
+        packed = {f: (*s.position, *s.look, s.lens, s.fstop) for f, s in raw.items()}
+        width = 8
+        for lo_f, hi_f in zip(bounds, bounds[1:], strict=False):
+            last_f = hi_f - 1
+            for frame in range(lo_f, hi_f):
+                total = 0.0
+                acc = [0.0] * width
+                for k, w in weights.items():
+                    other = frame + k
+                    sample = list(packed[min(max(other, lo_f), last_f)])  # at the ends of a segment (film ends, cuts) hold the end pose
+                    total += w
+                    for axis in range(width):
+                        acc[axis] += w * sample[axis]
+                position = (acc[0] / total, acc[1] / total, acc[2] / total)
+                look_pt = (acc[3] / total, acc[4] / total, acc[5] / total)
+                lens, fstop = acc[6] / total, acc[7] / total
+                rel = lo.sub(position, look_pt)
+                d = max(lo.length(rel), 1e-6)
+                self.states[frame] = CamState(
+                    frame, look_pt, math.degrees(math.atan2(rel[1], rel[0])), math.degrees(math.asin(rel[2] / d)), d,
+                    lens, fstop, raw[frame].focus)
 
     def _state(self, shot: Shot, start: CamState, first: int, frame: int, t: float, lens_t: float) -> CamState:
         w = ease(t / shot.follow) if shot.follow > 0 else 1.0
@@ -124,12 +155,12 @@ class CameraPlan:
         bump = math.sin(math.pi * min(1.0, t))
         dist = _lerp(start.dist, shot.dist, e) + shot.bulge * bump
         lens = _lerp(start.lens, shot.lens, ease(t / lens_t) if lens_t > 0 else 1.0)
-        focus_targets = shot.focus or shot.look
+        focus_targets = shot.focus or shots.focal_objects(shot.beat, self.beat_focal[shot.beat])
         focus_now = self.centre(focus_targets, frame)
         if shot.rack_to:
             r = max(0.0, min(1.0, (t - shots.RACK_FROM) / (shots.RACK_TO - shots.RACK_FROM)))
             focus_now = lo.lerp(focus_now, self.centre(shot.rack_to, frame), ease(r))
-        focus = lo.lerp(start.focus, focus_now, w)
+        focus = lo.lerp(start.focus, focus_now, ease(t / shots.FOCUS_PULL_FRACTION))
         return CamState(frame, look, _lerp_angle(start.az, shot.az, e), _lerp(start.el, shot.el, e), dist, lens,
                         _lerp(start.fstop, shot.fstop, e), focus)
 

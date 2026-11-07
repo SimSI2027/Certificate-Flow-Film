@@ -8,31 +8,33 @@ the issuing CAs are further north; the root is on its own dais at the far end.
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 
 Vec3 = tuple[float, float, float]
+Seq3 = Sequence[float]  # any 3-sequence; keyframe values arrive as variable-length tuples
 
 
-def add(a: Vec3, b: Vec3) -> Vec3:
+def add(a: Seq3, b: Seq3) -> Vec3:
     return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
 
 
-def sub(a: Vec3, b: Vec3) -> Vec3:
+def sub(a: Seq3, b: Seq3) -> Vec3:
     return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
 
 
-def mul(a: Vec3, k: float) -> Vec3:
+def mul(a: Seq3, k: float) -> Vec3:
     return (a[0] * k, a[1] * k, a[2] * k)
 
 
-def lerp(a: Vec3, b: Vec3, t: float) -> Vec3:
+def lerp(a: Seq3, b: Seq3, t: float) -> Vec3:
     return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t)
 
 
-def dist(a: Vec3, b: Vec3) -> float:
+def dist(a: Seq3, b: Seq3) -> float:
     return math.dist(a, b)
 
 
-def length(a: Vec3) -> float:
+def length(a: Seq3) -> float:
     return math.hypot(a[0], a[1], a[2])
 
 
@@ -140,11 +142,11 @@ ROUTE_CA2: tuple[Vec3, ...] = (
 )
 
 
-def polyline_length(points: tuple[Vec3, ...] | list[Vec3]) -> float:
+def polyline_length(points: Sequence[Seq3]) -> float:
     return sum(dist(a, b) for a, b in zip(points, points[1:], strict=False))
 
 
-def point_along(points: tuple[Vec3, ...] | list[Vec3], fraction: float) -> Vec3:
+def point_along(points: Sequence[Seq3], fraction: float) -> Vec3:
     """Point at a fraction (0..1) of the arc length of a polyline."""
     total = polyline_length(points)
     target = max(0.0, min(1.0, fraction)) * total
@@ -154,7 +156,8 @@ def point_along(points: tuple[Vec3, ...] | list[Vec3], fraction: float) -> Vec3:
         if walked + seg >= target and seg > 0:
             return lerp(a, b, (target - walked) / seg)
         walked += seg
-    return points[-1]
+    last = points[-1]
+    return (last[0], last[1], last[2])
 
 
 def reverse(points: tuple[Vec3, ...]) -> tuple[Vec3, ...]:
@@ -176,12 +179,12 @@ ROOT_READER: Vec3 = (ROOT[0] - 1.9, ROOT[1] - 2.6, ROOT_DAIS_Z + 0.55)
 ROOT_PRESS: Vec3 = (ROOT[0], ROOT[1] - 2.6, ROOT_DAIS_Z + 0.55)
 ROOT_MODULE: Vec3 = (ROOT[0] + 1.9, ROOT[1] - 2.6, ROOT_DAIS_Z + 0.45)
 FOOTPRINT_COUNT = 8
-WALKWAY: tuple[Vec3, ...] = (  # the footprint trail from Issuing CA 1's vault to the dais steps
+WALKWAY: tuple[Vec3, ...] = (  # the footprint trail from Issuing CA 1's vault, up the dais edge, to the reader bay
     (-1.4, 12.4, 0.0),
-    (-0.4, 15.0, 0.0),
-    (1.2, 17.2, 0.0),
-    (2.4, 19.2, 0.0),
-    (3.0, 21.0, 0.9),
+    (-0.4, 14.6, 0.0),
+    (0.6, 16.4, 0.0),
+    (1.3, 17.6, ROOT_DAIS_Z + 0.02),
+    (2.0, 18.6, ROOT_DAIS_Z + 0.02),
 )
 
 # --- client cluster ------------------------------------------------------------------------------
