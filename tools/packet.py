@@ -13,8 +13,11 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from cff.stage import camera, choreography, labels
+from cff.story import timing
 from cff.story.export import model_dump
 from cff.story.model import MODEL
+from tools import frames
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUNDS = ROOT / "qa" / "rounds"
@@ -64,6 +67,95 @@ def next_round(stage: str) -> int:
 
 def _write_json(path: Path, data: object) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+
+
+STAGE1_README = """# Stage 1 round packet: animatic (grey-box, 960x540)
+
+Judge the animatic as film, not as a diagram, against the frozen spec (REFERENCE-SPEC criteria C-01..C-11,
+L-01..L-08, facts F-01..F-17, architecture AR-01..AR-07).
+
+Contents:
+- `frames/`: composited animatic frames (3D beauty pass + caption layer). Three per beat (`B-xx.y_a/b/c`: just after
+  entry, middle, just before exit) and the frames on both sides of each cut (`T-cut-*`).
+- `strips/`: one motion strip per beat (6 frames from first to last, left to right, top to bottom).
+- `shots.json`: per beat, the model's focal subject and the camera lens, f-stop and focus distance at the middle frame.
+- `model-dump.json`: the story data (events, certificates, labels, captions with timings).
+- `docs/`: the frozen spec, glossary, PKI notes and the storyboard.
+- `schema.json`: the required report format. `regressions.json`: previously accepted findings to re-check.
+- `manifest.json`: every file with its SHA-256, the frame list and the spec hash.
+
+For each beat give a PKI verdict (ACCURATE, MISLEADING or WRONG) citing frame file names; report findings with
+severities as defined in `schema.json`. Grey-box geometry is expected at this stage: judge composition, motion,
+legibility, colour language and accuracy, not surface finish.
+"""
+
+
+def _frame_entry(path: Path, folder: Path, beat: str | None, frame: int | None) -> dict[str, object]:
+    return {"path": path.relative_to(folder).as_posix(), "beat": beat, "frame": frame, "sha256": sha256(path)}
+
+
+def build_stage1(round_number: int | None = None, tier: str = "animatic") -> Path:
+    """A Stage 1 packet: composited frames, motion strips, shots.json, manifest, regressions and schema. No source, no claims."""
+    missing = frames.missing_frames(tier)
+    if missing:
+        raise RuntimeError(f"{len(missing)} {tier} frames are not rendered yet (first missing: {missing[0]})")
+    number = next_round("stage1") if round_number is None else round_number
+    folder = ROUNDS / f"stage1-R{number}"
+    if folder.exists():
+        raise FileExistsError(f"{folder} already exists; packets are immutable")
+    candidate, dirty = _git_head()
+    if dirty:
+        raise RuntimeError("working tree is dirty: commit the candidate before building its packet")
+    (folder / "docs").mkdir(parents=True)
+    for rel in STAGE0_DOCS:
+        shutil.copyfile(ROOT / rel, folder / rel)
+    frame_entries: list[dict[str, object]] = []
+    for beat in MODEL.beats:
+        for letter, frame in zip("abc", frames.sample_frames(beat.id), strict=True):
+            out = frames.composite(tier, frame, folder / "frames" / f"{beat.id}_{letter}_f{frame:04d}.png")
+            frame_entries.append(_frame_entry(out, folder, beat.id, frame))
+    for cut_beat in timing.DECLARED_CUT_BEATS:
+        first = timing.seconds_to_frame(timing.beat_window(cut_beat)[0])
+        for frame in (first - 1, first):
+            out = frames.composite(tier, frame, folder / "frames" / f"T-cut-{cut_beat}_f{frame:04d}.png")
+            frame_entries.append(_frame_entry(out, folder, cut_beat, frame))
+    strip_entries: list[dict[str, object]] = []
+    for beat in MODEL.beats:
+        picks = frames.strip_frames(beat.id)
+        images = [frames.composite(tier, f, folder / "strips" / "tmp" / f"{beat.id}_{f:04d}.png") for f in picks]
+        strip = frames.tile(images, folder / "strips" / f"{beat.id}_strip.png", columns=3, width=frames.STRIP_TILE_WIDTH)
+        strip_entries.append({**_frame_entry(strip, folder, beat.id, None), "frames": picks})
+    shutil.rmtree(folder / "strips" / "tmp")
+    timeline = choreography.build_timeline()
+    labels.add_label_tracks(timeline)
+    plan = camera.CameraPlan(timeline)
+    shots_data = []
+    for beat in MODEL.beats:
+        mid = frames.sample_frames(beat.id)[1]
+        state = plan.state(mid)
+        shots_data.append({"beat": beat.id, "focal_subject": beat.focal, "frame": mid, "lens_mm": round(state.lens, 1), "f_stop": round(state.fstop, 2),
+                           "focus_distance_m": round(state.focus_distance, 2)})
+    _write_json(folder / "shots.json", shots_data)
+    _write_json(folder / "model-dump.json", model_dump())
+    shutil.copyfile(SCHEMA, folder / "schema.json")
+    regressions = json.loads(REGRESSIONS.read_text(encoding="utf-8")) if REGRESSIONS.exists() else []
+    _write_json(folder / "regressions.json", regressions)
+    (folder / "README.md").write_text(STAGE1_README, encoding="utf-8", newline="\n")
+    files = sorted(p for p in folder.rglob("*") if p.is_file())
+    manifest = {
+        "stage": "stage1",
+        "round": f"stage1-R{number}",
+        "tier": tier,
+        "candidate": candidate,
+        "spec_sha256": sha256(SPEC),
+        "frozen_files": list(FROZEN_FILES),
+        "beats": [b.id for b in MODEL.beats],
+        "frames": frame_entries,
+        "motion_strips": strip_entries,
+        "files": [{"path": p.relative_to(folder).as_posix(), "sha256": sha256(p)} for p in files],
+    }
+    _write_json(folder / "manifest.json", manifest)
+    return folder
 
 
 def build_stage0(round_number: int | None = None) -> Path:
