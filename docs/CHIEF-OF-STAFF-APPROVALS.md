@@ -19,3 +19,58 @@
 - **Ledger rounds:** n/a.
 - **Commit / sync:** bootstrap commit `a1cb1d176b148751e58dc56832dc3aef7238ca91`; local HEAD equals `git ls-remote origin refs/heads/main` at that commit. The final docs/state commit and its sync result are given in the Session 1 report and verified after push.
 - **Decision: APPROVED** — 2026-11-07T00:55Z.
+
+## Phase 3 — Stage 0 spec freeze (Session 2)
+- **Scope:** Charter 4 Phase 3 and the Session 2 prompt:
+  - the `.lab` IANA check and its docs note
+  - `docs\REFERENCE-SPEC.md` (AR-01..07, F-01..F-17, B-01.1..B-09.3, C-01..C-11 and L-01..L-08 with measurable thresholds)
+  - `GLOSSARY.md`, `PKI-TECHNICAL-NOTES.md`, `STORYBOARD.md` and `GAN-FRAMEWORK.md`
+  - pure-Python `cff\config\names.py` and `cff\story\{model,timing,captions,spec_ids,export}.py`
+  - the pytest suite; ruff and mypy clean
+  - the generated `TRACEABILITY.md` with its missing-ID test
+  - the stage0 packet, `pki-discriminator` rounds and the spec freeze
+- **Acceptance criteria:**
+  - 0 BLOCKER/MAJOR in the latest round, every beat ACCURATE, MINORs fixed
+  - hard tests green
+  - spec hash recorded in the ledger
+  - no `bpy` in `cff`
+  - no placeholder text in any output
+- **Review performed:**
+  - **`.lab` check, verified from primary sources:**
+    - the IANA TLD list (v2026110600) does not list LAB
+    - `root.zone` (SOA 2026110602) has no `lab.` delegation
+    - the IANA root-db page returns 404
+    - the ICANN `.internal` resolution 2024.07.29.06 was fetched and confirmed
+  - **Discriminator rounds:** three rounds of fresh `pki-discriminator` instances (opus), each pointed only at an immutable packet. Every finding was triaged against the spec, and nothing was rejected.
+  - **Verbatim saving:** the first R1 save paraphrased the agent's text. The Chief of Staff caught this and rewrote the file verbatim from the hand-back, because the background transcript file was empty.
+- **Problems found and corrections:**
+  - **R1:** 2 MAJOR and 6 MINOR.
+    - One TLS handshake was shown switching certificates. Fixed: the unverified S2 attempt now closes, and S6 starts a new attempt.
+    - The RDP request had no end of life, so the CA request was ambiguous. Fixed: requests are consumed at their destination, and the CA request carries a labelled CA=true band.
+  - **R2:** 9 MINOR: intermediate copies, causal ordering, proof verification, request/certificate wording, the CA 2 certificate reveal, Kerberos scope, browser revocation caveat, OCSP host, passive AIA.
+  - **R3:** 3 MINOR: distinct intermediate-copy objects and two wording fixes.
+  - **Own catches:**
+    - the web handshake proof was sent before its signature finished (caught by test)
+    - CRLF conversion would have broken the frozen hash; fixed with `.gitattributes` (LF)
+    - the C-02 camera threshold was set at 4% of focus distance per frame before the freeze, so camera follows between vaults are feasible
+    - the first attempt to write this record failed (non-unique edit anchor) and was re-applied in a follow-up commit
+  - **Charter deviation, recorded in the ledger:** B-05.1's seal is revealed statically rather than animated closing (PKI accuracy).
+- **Tests run (real results):**
+  - `pytest`: 93 passed
+  - `ruff check`: all checks passed
+  - `mypy --strict` (`cff`, `tools`, `tests`): no issues
+  - `python -m tools traceability --check`: current, every ID covered
+  - Mutation sanity: both R1 MAJOR tests fail on the R1 model, and `test_missing_coverage_is_detected` proves the traceability check catches missing IDs.
+  - `python -m tools spec-hash` = `7cf45afa…6d23`.
+- **Ledger rounds:**
+  - stage0-R1: 2 MAJOR, 6 MINOR; NOT PASSED
+  - stage0-R2: 0/0, 9 MINOR
+  - stage0-R3: 0/0, 3 MINOR, 33/33 ACCURATE; PASSED
+
+  **Frozen REFERENCE-SPEC SHA-256:** `7cf45afa01572b7e9d30a6fb376807fb10a4f6a693af41ffed1d96bce2686d23` (`docs\GAN-LEDGER.md`, "Stage 0 freeze").
+- **Commit / sync:**
+  - freeze commit `fc9edad75f6e3f339b55f1204657634b85de9caf`: pushed, `sync-check` SYNC OK
+  - state commit `559ecfdd97dfd6a4307ab4cd585cc83de5f955e2`: pushed, SYNC OK
+
+  This record follows in one more commit, which is sync-checked at close-out.
+- **Decision: APPROVED** — 2026-11-06. This was not a first attempt: Stage 0 took 3 rounds.
