@@ -206,6 +206,7 @@ EKU_NAMES: dict[str, str] = {
 STORE_PERSONAL = "LocalMachine\\My"
 STORE_TRUSTED_ROOT = "Trusted Root Certification Authorities"
 STORE_CA = "CA database and CA certificate store"
+STORE_INTERMEDIATE = "Intermediate Certification Authorities"
 REQUEST_FORMAT_EE = "PKCS #10 inside CMC"
 REQUEST_FORMAT_SUBCA = "PKCS #10 (request file)"
 AIA_CDP_SCHEME = "http"
@@ -290,6 +291,8 @@ class Certificate:
     cdp_crl: str | None  # CDP points to this CRL
     store: str
     issued_in_beat: str | None  # None: issued before the film's present or never shown
+    copy_of: str | None = None  # set on a holder's copy of another certificate (same certificate, own object)
+    holder: str | None = None  # actor holding this copy in its store (copies only)
 
 
 @dataclass(frozen=True)
@@ -513,6 +516,10 @@ class StoryModel:
     def cert(self, cert_id: str) -> Certificate:
         return next(c for c in self.certificates if c.id == cert_id)
 
+    def canonical(self, cert_id: str) -> str:
+        """The original certificate a copy stands for (itself when not a copy)."""
+        return self.cert(cert_id).copy_of or cert_id
+
     def crl(self, crl_id: str) -> Crl:
         return next(c for c in self.crls if c.id == crl_id)
 
@@ -731,7 +738,26 @@ def _templates() -> tuple[Template, ...]:
     )
 
 
+def _intermediate_copy(original: Certificate, copy_id: str, holder: str) -> Certificate:
+    """A server's own copy of an issuing CA certificate, received with the enrollment response chain."""
+    return Certificate(
+        copy_id, original.kind, original.subject_cn, original.subject_actor, original.san_dns, original.issuer_cert,
+        original.signed_with, original.public_key, original.eku, original.basic_constraints_ca, original.template,
+        original.aia_issuer_cert, original.cdp_crl, STORE_INTERMEDIATE, None, copy_of=original.id, holder=holder,
+    )
+
+
 def _certificates() -> tuple[Certificate, ...]:
+    originals = _original_certificates()
+    by_id = {c.id: c for c in originals}
+    return (
+        *originals,
+        _intermediate_copy(by_id["CERT-CA1"], "CERT-CA1-COPY-RDP", RDP_SERVER),
+        _intermediate_copy(by_id["CERT-CA2"], "CERT-CA2-COPY-WEB", WEB_SERVER),
+    )
+
+
+def _original_certificates() -> tuple[Certificate, ...]:
     return (
         Certificate("CERT-ROOT", CertKind.ROOT_SELF_SIGNED, n.ROOT_CA_NAME, ROOT_CA, (), "CERT-ROOT", "KEY-ROOT-PRIV", "KEY-ROOT-PUB", (), True, None, None, None, STORE_TRUSTED_ROOT, None),
         Certificate("CERT-CA1", CertKind.ISSUING_CA, n.ISSUING_CA1_NAME, ISSUING_CA1, (), "CERT-ROOT", "KEY-ROOT-PRIV", "KEY-CA1-PUB", (), True, None, "CERT-ROOT", "CRL-ROOT", STORE_CA, "B-05.2"),
@@ -776,8 +802,8 @@ def _discoveries() -> tuple[Discovery, ...]:
 
 def _chains() -> tuple[Chain, ...]:
     return (
-        Chain("CHAIN-RDP", CLIENT, RDP_SERVER, ("CERT-RDP", "CERT-CA1", "CERT-ROOT"), n.RDP_SERVER_FQDN, (OID_REMOTE_DESKTOP_AUTH, OID_SERVER_AUTH), "RDP"),
-        Chain("CHAIN-WEB", CLIENT, WEB_SERVER, ("CERT-WEB", "CERT-CA2", "CERT-ROOT"), n.WEB_SITE_DNS_NAME, (OID_SERVER_AUTH,), "TLS server auth"),
+        Chain("CHAIN-RDP", CLIENT, RDP_SERVER, ("CERT-RDP", "CERT-CA1-COPY-RDP", "CERT-ROOT"), n.RDP_SERVER_FQDN, (OID_REMOTE_DESKTOP_AUTH, OID_SERVER_AUTH), "RDP"),
+        Chain("CHAIN-WEB", CLIENT, WEB_SERVER, ("CERT-WEB", "CERT-CA2-COPY-WEB", "CERT-ROOT"), n.WEB_SITE_DNS_NAME, (OID_SERVER_AUTH,), "TLS server auth"),
     )
 
 
@@ -861,7 +887,7 @@ def _events() -> tuple[Event, ...]:
         Event("E-04.4b", "B-04.4", E.CA_SIGNS, "CERT-RDP", ISSUING_CA1, ISSUING_CA1, T.LOCAL, uses_key="KEY-CA1-PRIV"),
         Event("E-04.5a", "B-04.5", E.CERT_RETURNED, "CERT-RDP", ISSUING_CA1, RDP_SERVER, T.NETWORK),
         Event("E-04.5b", "B-04.5", E.CERT_INSTALLED, "CERT-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL),
-        Event("E-04.5c", "B-04.5", E.INTERMEDIATE_STORED, "CERT-CA1", ISSUING_CA1, RDP_SERVER, T.NETWORK, note="Copy returned with the enrollment response chain"),
+        Event("E-04.5c", "B-04.5", E.INTERMEDIATE_STORED, "CERT-CA1-COPY-RDP", ISSUING_CA1, RDP_SERVER, T.NETWORK, note="Copy returned with the enrollment response chain"),
         # S5
         Event("E-05.1a", "B-05.1", E.SELF_SIGNATURE_SHOWN, "CERT-ROOT", ROOT_CA, ROOT_CA, T.NONE),
         Event("E-05.2a", "B-05.2", E.PROOF_OF_POSSESSION, "REQ-CA1", ISSUING_CA1, ISSUING_CA1, T.LOCAL, uses_key="KEY-CA1-PRIV", era=F),
@@ -874,12 +900,12 @@ def _events() -> tuple[Event, ...]:
         # S6
         Event("E-06.1a", "B-06.1", E.CONNECTION_PULSE, "CH-RDP", CLIENT, RDP_SERVER, T.NETWORK),
         Event("E-06.1b", "B-06.1", E.PRESENT_CERT, "CERT-RDP", RDP_SERVER, CLIENT, T.NETWORK),
-        Event("E-06.1c", "B-06.1", E.PRESENT_CERT, "CERT-CA1", RDP_SERVER, CLIENT, T.NETWORK),
+        Event("E-06.1c", "B-06.1", E.PRESENT_CERT, "CERT-CA1-COPY-RDP", RDP_SERVER, CLIENT, T.NETWORK),
         Event("E-06.1d", "B-06.1", E.HANDSHAKE_SIGNATURE, "HS-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL, uses_key="KEY-RDP-PRIV"),
         Event("E-06.1e", "B-06.1", E.HANDSHAKE_PROOF_SENT, "HS-RDP", RDP_SERVER, CLIENT, T.NETWORK),
         Event("E-06.1f", "B-06.1", E.HANDSHAKE_PROOF_VERIFIED, "HS-RDP", CLIENT, CLIENT, T.LOCAL, target="CERT-RDP"),
-        Event("E-06.2a", "B-06.2", E.CHAIN_LINK, "CERT-RDP", CLIENT, CLIENT, T.LOCAL, target="CERT-CA1"),
-        Event("E-06.2b", "B-06.2", E.CHAIN_LINK, "CERT-CA1", CLIENT, CLIENT, T.LOCAL, target="CERT-ROOT"),
+        Event("E-06.2a", "B-06.2", E.CHAIN_LINK, "CERT-RDP", CLIENT, CLIENT, T.LOCAL, target="CERT-CA1-COPY-RDP"),
+        Event("E-06.2b", "B-06.2", E.CHAIN_LINK, "CERT-CA1-COPY-RDP", CLIENT, CLIENT, T.LOCAL, target="CERT-ROOT"),
         Event("E-06.2c", "B-06.2", E.TRUST_STORE_RECALL, "TS-CLIENT-ROOT", AD, CLIENT, T.NONE, era=Era.RECALL),
         Event("E-06.3a", "B-06.3", E.AIA_INDICATOR, "SVC-AIA", CLIENT, PKI_HTTP, T.NONE, target="CERT-CA1", conditional=True),
     ]
@@ -888,7 +914,7 @@ def _events() -> tuple[Event, ...]:
     ev += [
         Event("E-06.4f", "B-06.4", E.VALIDATION_PENDING, "CHAIN-RDP", CLIENT, CLIENT, T.LOCAL, check=ValidationCheck.REVOCATION),
         Event("E-06.5a", "B-06.5", E.CRL_FETCH, "CRL-CA1", CLIENT, PKI_HTTP, T.NETWORK, target="CERT-RDP"),
-        Event("E-06.5b", "B-06.5", E.CRL_FETCH, "CRL-ROOT", CLIENT, PKI_HTTP, T.NETWORK, target="CERT-CA1"),
+        Event("E-06.5b", "B-06.5", E.CRL_FETCH, "CRL-ROOT", CLIENT, PKI_HTTP, T.NETWORK, target="CERT-CA1-COPY-RDP"),
         Event("E-06.5c", "B-06.5", E.OCSP_NOTE, "SVC-OCSP", CLIENT, CLIENT, T.NONE, conditional=True),
         Event("E-06.5d", "B-06.5", E.VALIDATION_CHECK, "CHAIN-RDP", CLIENT, CLIENT, T.LOCAL, check=ValidationCheck.REVOCATION),
         Event("E-06.6a", "B-06.6", E.SESSION_ESTABLISHED, "CH-RDP", CLIENT, RDP_SERVER, T.NETWORK),
@@ -911,24 +937,24 @@ def _events() -> tuple[Event, ...]:
         Event("E-08.2b", "B-08.2", E.CA_SIGNS, "CERT-WEB", ISSUING_CA2, ISSUING_CA2, T.LOCAL, uses_key="KEY-CA2-PRIV"),
         Event("E-08.2c", "B-08.2", E.CERT_RETURNED, "CERT-WEB", ISSUING_CA2, WEB_SERVER, T.NETWORK),
         Event("E-08.2d", "B-08.2", E.CERT_INSTALLED, "CERT-WEB", WEB_SERVER, WEB_SERVER, T.LOCAL),
-        Event("E-08.2e", "B-08.2", E.INTERMEDIATE_STORED, "CERT-CA2", ISSUING_CA2, WEB_SERVER, T.NETWORK, note="Copy returned with the enrollment response chain"),
+        Event("E-08.2e", "B-08.2", E.INTERMEDIATE_STORED, "CERT-CA2-COPY-WEB", ISSUING_CA2, WEB_SERVER, T.NETWORK, note="Copy returned with the enrollment response chain"),
         Event("E-08.3a", "B-08.3", E.ISSUER_LINK, "CERT-CA2", ROOT_CA, ISSUING_CA2, T.LOGICAL),
         # S9
         Event("E-09.1a", "B-09.1", E.CONNECTION_PULSE, "CH-WEB", CLIENT, WEB_SERVER, T.NETWORK),
         Event("E-09.1b", "B-09.1", E.PRESENT_CERT, "CERT-WEB", WEB_SERVER, CLIENT, T.NETWORK),
-        Event("E-09.1c", "B-09.1", E.PRESENT_CERT, "CERT-CA2", WEB_SERVER, CLIENT, T.NETWORK),
+        Event("E-09.1c", "B-09.1", E.PRESENT_CERT, "CERT-CA2-COPY-WEB", WEB_SERVER, CLIENT, T.NETWORK),
         Event("E-09.1d", "B-09.1", E.HANDSHAKE_SIGNATURE, "HS-WEB", WEB_SERVER, WEB_SERVER, T.LOCAL, uses_key="KEY-WEB-PRIV"),
         Event("E-09.1e", "B-09.1", E.HANDSHAKE_PROOF_SENT, "HS-WEB", WEB_SERVER, CLIENT, T.NETWORK),
         Event("E-09.1q", "B-09.1", E.HANDSHAKE_PROOF_VERIFIED, "HS-WEB", CLIENT, CLIENT, T.LOCAL, target="CERT-WEB"),
-        Event("E-09.1f", "B-09.1", E.CHAIN_LINK, "CERT-WEB", CLIENT, CLIENT, T.LOCAL, target="CERT-CA2"),
-        Event("E-09.1g", "B-09.1", E.CHAIN_LINK, "CERT-CA2", CLIENT, CLIENT, T.LOCAL, target="CERT-ROOT"),
+        Event("E-09.1f", "B-09.1", E.CHAIN_LINK, "CERT-WEB", CLIENT, CLIENT, T.LOCAL, target="CERT-CA2-COPY-WEB"),
+        Event("E-09.1g", "B-09.1", E.CHAIN_LINK, "CERT-CA2-COPY-WEB", CLIENT, CLIENT, T.LOCAL, target="CERT-ROOT"),
         Event("E-09.1h", "B-09.1", E.VALIDATION_CHECK, "CHAIN-WEB", CLIENT, CLIENT, T.LOCAL, check=V.CHAIN_TO_TRUSTED_ROOT, on_screen=False),
         Event("E-09.1i", "B-09.1", E.VALIDATION_CHECK, "CHAIN-WEB", CLIENT, CLIENT, T.LOCAL, check=V.SIGNATURES, on_screen=False),
         Event("E-09.1j", "B-09.1", E.VALIDATION_CHECK, "CHAIN-WEB", CLIENT, CLIENT, T.LOCAL, check=V.NAME_MATCH),
         Event("E-09.1k", "B-09.1", E.VALIDATION_CHECK, "CHAIN-WEB", CLIENT, CLIENT, T.LOCAL, check=V.EKU),
         Event("E-09.1l", "B-09.1", E.VALIDATION_CHECK, "CHAIN-WEB", CLIENT, CLIENT, T.LOCAL, check=V.VALIDITY),
         Event("E-09.1m", "B-09.1", E.CRL_FETCH, "CRL-CA2", CLIENT, PKI_HTTP, T.NETWORK, target="CERT-WEB"),
-        Event("E-09.1n", "B-09.1", E.CRL_FETCH, "CRL-ROOT", CLIENT, PKI_HTTP, T.NETWORK, target="CERT-CA2"),
+        Event("E-09.1n", "B-09.1", E.CRL_FETCH, "CRL-ROOT", CLIENT, PKI_HTTP, T.NETWORK, target="CERT-CA2-COPY-WEB"),
         Event("E-09.1o", "B-09.1", E.VALIDATION_CHECK, "CHAIN-WEB", CLIENT, CLIENT, T.LOCAL, check=V.REVOCATION),
         Event("E-09.1p", "B-09.1", E.SESSION_ESTABLISHED, "CH-WEB", CLIENT, WEB_SERVER, T.NETWORK),
         Event("E-09.2a", "B-09.2", E.TRUST_PATH_REVEAL, "CHAIN-RDP", None, None, T.LOGICAL),

@@ -87,7 +87,7 @@ Kerberos server authentication is out of scope on screen (F-16; see "Kerberos sc
 
 **Meaning:** out of the box, the Remote Desktop service creates a self-signed certificate for the computer, with Server Authentication EKU (`CERT-RDP-SELF`, with its own key pair `KP-RDP-SELF`) (F-02).
 
-The certificate *is* signed, by its own private key. What it lacks is an issuer the client already trusts. It is not in the client's Trusted Root store, and no trusted CA vouches for it. So the certificate cannot be validated through the PKI; that is what the "Unverified" tag means. Where Kerberos server authentication is unavailable (see "Kerberos scope" below), the Remote Desktop client then warns ("The identity of the remote computer cannot be verified"), depending on its server-authentication setting. In this lab's exact configuration (a domain-joined client, a domain-joined server, an FQDN and NLA), Kerberos would usually authenticate the server, and no warning would appear. The film depicts the certificate-based case. The film shows nothing being accepted.
+The certificate *is* signed, by its own private key. What it lacks is an issuer the client already trusts. It is not in the client's Trusted Root store, and no CA that chains to a trusted root vouches for it. So the certificate cannot be validated through the PKI; that is what the "Unverified" tag means. Where Kerberos server authentication is unavailable (see "Kerberos scope" below), the Remote Desktop client then warns ("The identity of the remote computer cannot be verified"), depending on its server-authentication setting. In this lab's exact configuration (a domain-joined client, a domain-joined server, an FQDN and NLA), Kerberos would usually authenticate the server, and no warning would appear. The film depicts the certificate-based case. The film shows nothing being accepted.
 
 The root certificate (B-05.1) is also self-signed. The difference is not the signature but the fact that the root was deliberately installed as a trust anchor (B-06.2).
 
@@ -196,7 +196,7 @@ The certificate contains:
 
 **Meaning:** the CA returns the issued certificate in the enrollment response. The enrollment client installs it in `LocalMachine\My` and associates it with the private key generated in B-03.1, which never moved (F-09, F-03).
 
-The response also carries the issuing CA's certificate as part of its chain. The server stores this copy of `CERT-CA1` in its Intermediate Certification Authorities store (model `E-04.5c`). This copy is what the server presents in B-06.1. It is shown as a translucent card, distinct from the CA's own certificate on Issuing CA 1's crown. (On domain members, issuing CA certificates published in AD can also reach the Intermediate store.)
+The response also carries the issuing CA's certificate as part of its chain. The server stores this copy of `CERT-CA1` in its Intermediate Certification Authorities store (model `E-04.5c`; the copy is its own object, `CERT-CA1-COPY-RDP`, so the original on Issuing CA 1's crown never moves). This copy is what the server presents in B-06.1. It is shown as a translucent card, distinct from the CA's own certificate on Issuing CA 1's crown. (On domain members, issuing CA certificates published in AD can also reach the Intermediate store.)
 
 (Docs only, F-09: the Remote Desktop service needs read access to that private key in order to use the certificate. When the Group Policy template setting is used, the service uses the enrolled certificate for RDP's TLS.)
 
@@ -351,7 +351,7 @@ The note compresses F-07. This template takes the subject and SAN from the reque
 - not-a-CA Basic Constraints
 - AIA and CDP pointing to Issuing CA 2's certificate and CRL on `pki.1sn0s.lab`
 
-It is installed in `WEB01`'s `LocalMachine\My` with the existing private key (F-09), and bound to the site's HTTPS listener. As in B-04.5, the response chain gives `WEB01` its own copy of `CERT-CA2` for its Intermediate store (model `E-08.2e`). That copy is what it presents in B-09.1.
+It is installed in `WEB01`'s `LocalMachine\My` with the existing private key (F-09), and bound to the site's HTTPS listener. As in B-04.5, the response chain gives `WEB01` its own copy of `CERT-CA2` for its Intermediate store (model `E-08.2e`, object `CERT-CA2-COPY-WEB`). That copy is what it presents in B-09.1.
 
 ### B-08.3
 **On screen:** Issuing CA 2's own certificate is revealed, linked in gold to the same root.

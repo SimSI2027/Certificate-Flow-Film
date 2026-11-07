@@ -361,7 +361,7 @@ def test_out_of_the_box_certificate_is_self_signed_and_unverified() -> None:
 def test_chain_links_follow_issuers_up_to_a_preinstalled_root() -> None:
     for chain in M.chains:
         for child, parent in pairwise(chain.certs):
-            assert M.cert(child).issuer_cert == parent
+            assert M.canonical(M.cert(child).issuer_cert) == M.canonical(parent)
             links = [e for e in M.events_of(EventType.CHAIN_LINK) if e.object == child and e.target == parent]
             assert len(links) == 1 and links[0].from_ == links[0].to == chain.relying_party
         assert chain.certs[-1] in {t.cert for t in M.trust_store if t.holder == chain.relying_party}
@@ -429,7 +429,7 @@ def test_revocation_checked_for_each_non_root_link_and_never_for_the_root() -> N
             mine = [f for f in fetches if f.target == cert_id]
             assert len(mine) == 1, cert_id
             fetch = mine[0]
-            assert fetch.object == cert.cdp_crl and cert_id in M.crl(fetch.object).covers
+            assert fetch.object == cert.cdp_crl and M.canonical(cert_id) in M.crl(fetch.object).covers
             assert M.crl(fetch.object).issuer_actor == M.issuer_actor(cert_id)
             assert fetch.from_ == chain.relying_party and fetch.to == PKI_HTTP == M.crl(fetch.object).published_on
             assert cdp_url(M, cert) is not None

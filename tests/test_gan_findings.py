@@ -197,6 +197,22 @@ def test_PKI_S0R2_03_handshake_proof_is_verified_with_the_certificate_key() -> N
         assert v.end_s <= session.start_s + EPS
 
 
+@pytest.mark.covers("F-10", "C-07", "B-04.5", "B-05.3", "B-06.1", "B-08.2", "B-08.3", "B-09.1")
+def test_PKI_S0R3_01_servers_present_their_own_copy_and_crown_originals_never_move() -> None:  # noqa: N802
+    originals = {c.certificate for c in M.cas}
+    static_reveals = (EventType.ISSUER_LINK, EventType.SELF_SIGNATURE_SHOWN)
+    for e in M.events:
+        if e.object in originals and e.era == Era.PRESENT:
+            assert e.type in static_reveals, f"{e.id} moves or uses a CA's own certificate"
+    for chain in M.chains:
+        intermediate = M.cert(chain.certs[1])
+        assert intermediate.copy_of is not None and intermediate.copy_of in originals, chain.id
+        assert intermediate.holder == chain.server and intermediate.store == "Intermediate Certification Authorities"
+        original = M.cert(intermediate.copy_of)
+        assert (intermediate.public_key, intermediate.signed_with) == (original.public_key, original.signed_with)
+        assert all(e.object != intermediate.id or e.era == Era.PRESENT for e in M.events)
+
+
 @pytest.mark.covers("AR-07", "B-06.5")
 def test_PKI_S0R2_08_undeployed_responder_has_no_host_and_its_tag_is_on_the_client() -> None:  # noqa: N802
     for service in M.services:

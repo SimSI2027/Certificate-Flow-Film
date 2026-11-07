@@ -34,7 +34,7 @@ A certificate a relying party trusts directly, because it was deliberately place
 A CA whose own certificate is signed by another CA (here, by the root), with Basic Constraints CA=true. `1SN0S Issuing CA 1` and `1SN0S Issuing CA 2` are enterprise subordinate issuing CAs. They are not trust anchors. On screen: "Issuing CA 1", "Issuing CA 2".
 
 ### Standalone CA
-A CA that does not use AD or certificate templates. Requests are typically held pending until an administrator issues them. The offline root is a standalone CA.
+A CA that does not require AD and does not use certificate templates. Requests are typically held pending until an administrator issues them. The offline root here is a standalone CA and is not domain-joined.
 
 ### Enterprise CA
 A domain-joined CA that uses certificate templates and AD for authentication, permissions and publication. Both issuing CAs are enterprise CAs.

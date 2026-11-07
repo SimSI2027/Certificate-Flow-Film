@@ -151,5 +151,32 @@
     "beat": "B-06.3",
     "summary": "The pki.1sn0s.lab kiosk is only passively highlighted as where a fetch could go; nothing is requested or answers.",
     "hard_test": "tests/test_model_integrity.py::test_aia_is_never_a_trust_source"
+  },
+  {
+    "finding": "PKI-S0R3-01",
+    "round": "stage0-R3",
+    "severity": "MINOR",
+    "criterion": "F-10",
+    "beat": "B-04.5",
+    "summary": "Each server's intermediate is a distinct object (copy_of the CA's certificate, held in its Intermediate store); the CA's own crown certificate never moves.",
+    "hard_test": "tests/test_gan_findings.py::test_PKI_S0R3_01_servers_present_their_own_copy_and_crown_originals_never_move"
+  },
+  {
+    "finding": "PKI-S0R3-02",
+    "round": "stage0-R3",
+    "severity": "MINOR",
+    "criterion": "AR-01",
+    "beat": "B-05.1",
+    "summary": "Glossary: a standalone CA does not require AD and does not use templates.",
+    "hard_test": "none (wording)"
+  },
+  {
+    "finding": "PKI-S0R3-03",
+    "round": "stage0-R3",
+    "severity": "MINOR",
+    "criterion": "L-08",
+    "beat": "B-02.2",
+    "summary": "No generic 'trusted CA'; use 'a CA that chains to a trusted root'.",
+    "hard_test": "none (wording)"
   }
 ]
