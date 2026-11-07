@@ -1,0 +1,21 @@
+Certificate-Flow-Film — licence summary
+=======================================
+
+This repository is dual-licensed by content type. Full texts are in LICENSES/.
+
+1. SOURCE CODE — GPL-3.0-or-later (SPDX: GPL-3.0-or-later)
+   Everything that is code: cff/, blender/, tools/, tests/, scripts/, site/
+   scripts and build files. Blender-side scripts import `bpy`, which is
+   GPL-licensed, so the project code is GPL-3.0-or-later to avoid any
+   ambiguity. Full text: LICENSES/GPL-3.0-or-later.txt
+
+2. RENDERED FILM, IMAGES AND DOCUMENTATION — CC BY 4.0 (SPDX: CC-BY-4.0)
+   The rendered film (MP4), posters, frames, contact sheets, and the
+   written documentation in docs/ and README.md.
+   Full text: LICENSES/CC-BY-4.0.txt
+   Attribution: "Certificate-Flow-Film" by SimSI2027, CC BY 4.0.
+
+3. BUNDLED FONT — SIL Open Font License 1.1
+   assets/fonts/Inter-*.ttf (Inter, (c) 2016 The Inter Project Authors,
+   https://github.com/rsms/inter, release v4.1). Licence text:
+   assets/fonts/OFL.txt. The font keeps its own licence.

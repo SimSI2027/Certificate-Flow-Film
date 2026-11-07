@@ -1,0 +1,16 @@
+# Environment
+.venv/
+.env*
+config/toolchain.local.json
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Generated render artefacts
+renders/
+qa/rounds/**/frames/
+*.blend
+*.blend1
+output/*.mp4
