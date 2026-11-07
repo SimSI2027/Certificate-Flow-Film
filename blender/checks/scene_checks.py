@@ -34,6 +34,7 @@ from cff.theme import motion, render, shots
 VISIBLE_SCALE = 0.05
 CONTAINMENT_TOLERANCE_M = 0.08
 ROOT_CLEARANCE_M = 0.05
+SCREEN_MIN_DEPTH_M = 0.5  # screen displacement is reported only for points at least this far in front of the lens
 ROOT_NEIGHBOURHOOD_M = 12.0  # objects farther than this from the sealed vault cannot touch it (cheap pre-filter)
 POP_MAX_M = 0.35
 FAST_POP_MAX_M = 3.6  # whitelisted travel along channels and routes: light-speed data (a 27 m route in 0.8 s peaks near 3.5 m/frame), never a teleport
@@ -267,8 +268,8 @@ def check_dynamic(scene: bpy.types.Scene) -> list[Result]:
                 if camera is not None and step > 0.0:
                     a = world_to_camera_view(scene, camera, last_pos[o.id])
                     b = world_to_camera_view(scene, camera, pos)
-                    if a.z > 0 and b.z > 0:
-                        screen_max = max(screen_max, abs(b.x - a.x))
+                    if a.z > SCREEN_MIN_DEPTH_M and b.z > SCREEN_MIN_DEPTH_M and -0.5 <= a.x <= 1.5 and -0.5 <= b.x <= 1.5:
+                        screen_max = max(screen_max, abs(b.x - a.x))  # on or near the frame only: a point at the lens would blow up
             last_pos[o.id], last_visible[o.id] = pos, vis
     pops.metrics = {"max_screen_displacement_fraction_of_width": round(screen_max, 3)}
     contain.metrics = {"private_keys": len(keys)}

@@ -11,6 +11,8 @@ __pycache__/
 # Generated render artefacts
 renders/
 qa/rounds/**/frames/
+qa/rounds/**/strips/
+output/animatic/
 *.blend
 *.blend1
 output/*.mp4

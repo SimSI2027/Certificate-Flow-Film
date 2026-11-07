@@ -1,0 +1,53 @@
+WEBVTT
+
+CAP-S1
+00:00:01.000 --> 00:00:05.000
+Secure RDP connection
+
+CAP-S2
+00:00:08.000 --> 00:00:12.500
+The RDP server needs a trusted identity
+
+CAP-S3a
+00:00:15.000 --> 00:00:19.500
+The private key stays on the server
+
+CAP-S3b
+00:00:20.700 --> 00:00:23.700
+The request is signed, not the key sent
+
+CAP-S4
+00:00:29.000 --> 00:00:35.000
+Issuing CA 1 verifies, then signs
+
+CAP-S5a
+00:00:41.900 --> 00:00:45.900
+The Root CA signs the issuing CA certificate
+
+CAP-S5b
+00:00:47.100 --> 00:00:49.700
+The Root CA is the trust anchor
+
+CAP-S6a
+00:00:53.500 --> 00:01:03.000
+The client validates the whole chain
+
+CAP-S6b
+00:01:07.200 --> 00:01:09.700
+Trusted RDP connection established
+
+CAP-S7
+00:01:16.000 --> 00:01:20.500
+Different templates can use different issuing CAs
+
+CAP-S8
+00:01:25.500 --> 00:01:29.500
+Issuing CA 2 signs the TLS certificate
+
+CAP-S9a
+00:01:39.000 --> 00:01:43.000
+Different issuing paths. One trusted root.
+
+TITLE-S9
+00:01:44.500 --> 00:01:48.200
+Certificate Flow — From request to trust

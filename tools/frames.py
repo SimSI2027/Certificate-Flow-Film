@@ -94,7 +94,7 @@ def frame_stats(tier: str, first: int, last: int) -> list[FrameStats]:
     source = tier_dir(tier) / "beauty" / "f_%04d.png"
     log = tier_dir(tier) / "stats.txt"
     result = toolchain.run_ffmpeg(["-start_number", str(first), "-framerate", str(timing.FPS), "-i", str(source), "-frames:v", str(last - first + 1),
-                                   "-vf", f"signalstats,metadata=print:file={log.as_posix()}", "-f", "null", "-"])
+                                   "-vf", f"signalstats,metadata=print:file={log.relative_to(ROOT).as_posix()}", "-f", "null", "-"])
     if result.returncode != 0:
         raise RuntimeError(f"signalstats failed: {result.stderr}")
     text = log.read_text(encoding="utf-8")
@@ -107,10 +107,10 @@ def frame_stats(tier: str, first: int, last: int) -> list[FrameStats]:
 
 
 def blank_frames(tier: str, first: int, last: int) -> list[int]:
-    """Frames that are blank, ignoring the deliberate black ending (the world fade, event E-09.3a, ends in black)."""
+    """Frames that are blank before the deliberate fade to black (world fade, event E-09.3a); the fade itself ends in black."""
     fade = next(e for e in model.MODEL.events if e.id == "E-09.3a")
-    fade_end = timing.seconds_to_frame(fade.end_s)
-    return [s.frame for s in frame_stats(tier, first, last) if s.blank and s.frame < fade_end]
+    fade_start = timing.seconds_to_frame(fade.start_s)
+    return [s.frame for s in frame_stats(tier, first, last) if s.blank and s.frame < fade_start]
 
 
 # --- compositing, strips, contact sheets -------------------------------------------------------------
