@@ -24,7 +24,6 @@ WORK = ROOT / "renders" / "calibration"
 PACKETS = ROOT / "qa" / "calibration"
 RESULTS = PACKETS / "results.json"
 FAULTS = ("private_key_leak", "root_issues_leaf", "flowchart", "caption_clip")
-PACKET_NUMBER = {fault: i + 1 for i, fault in enumerate(FAULTS)}  # stage1-K1..K4; the mapping is recorded in the ledger, not in the packet
 
 
 @dataclass(frozen=True)
@@ -99,9 +98,21 @@ def render_packet_frames(fault: str) -> int:
     return pipeline.render_frame_list("animatic", "captions", [f for f in wanted if f in captioned], blend_path(fault), frames_dir(fault))
 
 
+def next_packet_name() -> str:
+    numbers = [int(p.name.rsplit("-K", 1)[1]) for p in PACKETS.glob("stage1-K*") if p.is_dir() and p.name.rsplit("-K", 1)[1].isdigit()]
+    return f"stage1-K{max(numbers, default=0) + 1}"
+
+
 def build_packet(fault: str) -> Path:
-    name = f"stage1-K{PACKET_NUMBER[fault]}"
-    return packet.build_stage1(tier=frames_dir(fault), folder=PACKETS / name, round_name=name)
+    """A fresh blind packet. The first run used K1..K4 in FAULTS order; re-calibrations take the next free number."""
+    name = next_packet_name()
+    folder = packet.build_stage1(tier=frames_dir(fault), folder=PACKETS / name, round_name=name)
+    data: dict[str, object] = json.loads(RESULTS.read_text(encoding="utf-8")) if RESULTS.exists() else {}
+    mapping = data.setdefault("packets", {})
+    assert isinstance(mapping, dict)
+    mapping[name] = fault
+    RESULTS.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    return folder
 
 
 def record(entry: dict[str, object]) -> None:

@@ -13,5 +13,11 @@ citing frame files. Hunt especially for: a private key moving or leaving its own
 the Root CA issuing an end-entity certificate or appearing online; an issuing CA or AIA presented as the trust anchor;
 a request sent to a CA that does not publish its template; chain building presented as proof of identity;
 revocation shown for the root itself; wrong EKU; wrong terminology.
+Private-key tracking is mandatory: for every private key (each server's key and each CA's module key), follow it through
+every frame and strip tile from the moment it forms to the end of the film, and say where it is in each beat. Once stored,
+a key must stay inside its own locked container or sealed module. A key seen outside its container, next to or attached to
+a request capsule, travelling with any object, inside another actor, or an emptied container, is a BLOCKER (F-03), even if
+the shape is small or partly hidden. Track each request capsule the same way from creation to the CA where it is consumed.
+Open every file in frames/ and strips/ and list each one in "files_read"; never judge a beat from a sample.
 Also re-check every finding listed in the packet's regressions.json and report FIXED or REGRESSED.
 Output only the JSON report defined in the packet's schema.json.

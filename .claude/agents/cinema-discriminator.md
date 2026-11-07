@@ -10,4 +10,5 @@ if the packet lists it. View every frame and every motion strip (tiled consecuti
 For each shot give a verdict FILM or DIAGRAM with reasons. Hunt for: arrows or connector-line diagram grammar,
 static or flat cameras, hard cuts, missing focal subject, flat lighting, opacity-only entrances, pops or jitter visible in strips,
 broken continuity between scenes, excessive glow, particles or haze, grid-of-cards layouts, inconsistent colour language.
+Open every file in frames/ and strips/ and list each one in "files_read"; never judge a beat from a sample.
 Score each criterion 0-10. Re-check regressions.json. Output only the JSON report defined in schema.json.

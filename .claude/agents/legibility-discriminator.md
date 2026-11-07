@@ -10,4 +10,5 @@ Use the packet's manifest.json (caption text, on-screen start/end times, measure
 palette check results) together with the frames. Hunt for: text too small, low contrast, text outside title-safe,
 captions shown too briefly for their word count, captions overlapping the focal action, unreadable in-world labels that matter,
 colours that are hard to distinguish (including the colour-vision-deficiency results), terminology that contradicts the glossary.
+Open every file in frames/ and strips/ and list each one in "files_read"; never judge a beat from a sample.
 Score each criterion 0-10. Re-check regressions.json. Output only the JSON report defined in schema.json.
