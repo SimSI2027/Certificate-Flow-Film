@@ -17,7 +17,10 @@ Private-key tracking is mandatory: for every private key (each server's key and 
 every frame and strip tile from the moment it forms to the end of the film, and say where it is in each beat. Once stored,
 a key must stay inside its own locked container or sealed module. A key seen outside its container, next to or attached to
 a request capsule, travelling with any object, inside another actor, or an emptied container, is a BLOCKER (F-03), even if
-the shape is small or partly hidden. Track each request capsule the same way from creation to the CA where it is consumed.
+the shape is small or partly hidden. Every beat's verdict reason must say where each formed private key is in that
+beat's frames and strip tiles; if a key cannot be located, or a key-like shape appears outside a container or module,
+the verdict is WRONG and the finding a BLOCKER unless you can positively identify the shape as something else.
+Track each request capsule the same way from creation to the CA where it is consumed.
 Open every file in frames/ and strips/ and list each one in "files_read"; never judge a beat from a sample.
 Also re-check every finding listed in the packet's regressions.json and report FIXED or REGRESSED.
 Output only the JSON report defined in the packet's schema.json.

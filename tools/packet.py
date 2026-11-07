@@ -97,6 +97,11 @@ Judging protocol (every reviewer):
   capsule from its creation to the place it is consumed. Once stored, a private key must stay inside its own locked
   container or sealed module; a key outside it, beside or attached to a capsule, travelling with anything, or an
   emptied container, is a key violation even when the shape is small or partly hidden.
+- PKI reviewers: from the beat where a private key forms onward, every beat's verdict `reason` must state where each
+  formed private key is in that beat's frames and strip tiles (for example "RDP key: inside its locked container, all
+  tiles"), comparing its shape with the key you saw form and lock. If a key cannot be located, or a key-like shape
+  appears outside a container or module, the verdict is WRONG and the finding is a BLOCKER (F-03), unless you can
+  positively identify the shape as something else. When in doubt, report the BLOCKER and say why.
 """
 
 
