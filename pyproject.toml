@@ -1,0 +1,42 @@
+[project]
+name = "certificate-flow-film"
+version = "0.1.0"
+description = "Certificate-Flow-Film: an ADCS PKI flow film built with scripted Blender and an adversarial review loop"
+requires-python = ">=3.12"
+license = "GPL-3.0-or-later"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["."]
+extend-exclude = ["qa", "renders", "output", "site"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "N", "PL"]
+ignore = [
+    "PLR0913",  # dataclass-style constructors and record tables take many arguments
+    "PLR2004",  # thresholds in tests are spec values, named where they matter
+    "RUF001",   # captions intentionally use the em dash
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Data tables: one record per line reads better than wrapped records.
+"cff/story/model.py" = ["E501", "N806", "PLR0915"]
+"tests/*" = ["PLR0912", "PLR0915"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["cff", "tools", "tests"]
+exclude = ["^qa/", "^renders/", "^output/", "^blender/", "^scripts/"]
+
+[[tool.mypy.overrides]]
+module = ["pytest", "_pytest.*"]
+ignore_missing_imports = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "covers(*ids): spec IDs (F-xx, AR-xx, B-xx, C-xx, L-xx) this test verifies; 'B-*' means every beat",
+]
+addopts = "-q --strict-markers"

@@ -86,7 +86,7 @@ def main():
     px = np.array(img.pixels[:], dtype=np.float32).reshape(-1, 4)[:, :3]
     result["mean"] = float(px.mean())
     result["std"] = float(px.std())
-    result["unique_levels"] = int(len(np.unique((px * 255).astype(np.uint8), axis=0)))
+    result["unique_levels"] = len(np.unique((px * 255).astype(np.uint8), axis=0))
     result["blank"] = bool(result["std"] < 0.01 or result["unique_levels"] < 16)
     with open(out_json, "w", encoding="utf-8") as fh:
         json.dump(result, fh, indent=2)
