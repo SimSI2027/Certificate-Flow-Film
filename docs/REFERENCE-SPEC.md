@@ -268,7 +268,7 @@ The request capsule is consumed at the press: the request ends its life inside I
 - small AIA/CDP ports
 
 #### B-04.5 Certificate installed
-The card returns and locks into the server **beside** the existing private key, forming one identity. The key has not moved.
+The card returns and locks into the server **beside** the existing private key, forming one identity. The key has not moved. A translucent copy of Issuing CA 1's certificate arrives with it (the enrollment response chain) and settles into the server's intermediate store. The original stays on the CA's crown.
 
 ### S5 — The hierarchy and the trust anchor (12 s)
 
@@ -277,7 +277,7 @@ The camera cranes up to a sealed gold vault on its own plinth, **with no cables*
 - Accuracy constraint: the root is offline and performs no signing in the present-tense part of the film. The seal does not animate closed. The root's key module does not glow and its press does not move outside the flashback.
 
 #### B-05.2 Offline ceremony (flashback)
-A desaturated flashback of setup, clearly marked as earlier. Issuing CA 1's own CA-certificate request is carried to the root on removable media. It is signed offline and carried back.
+A desaturated flashback of setup, clearly marked as earlier. Issuing CA 1's own CA-certificate request is carried to the root on removable media. From it, the root issues and signs Issuing CA 1's CA certificate offline, and the certificate is carried back.
 - Caption: *The Root CA signs the issuing CA certificate*
 - Accuracy constraint: this is a subordinate-CA request, sealed by Issuing CA 1's own key. It is not an end-entity request. The flashback is the only cut in the film (C-02).
 - Accuracy constraint: the CA request has its own visible identity. It carries a cyan CA=true band and a must-read tag, "Issuing CA 1's own CA request", and it is shown being sealed by Issuing CA 1's own key module. The RDP request was consumed in B-04.4 and never appears in the flashback.
@@ -290,7 +290,7 @@ Back in the present, a gold-to-cyan link joins Issuing CA 1's certificate to the
 ### S6 — Presentation and validation (20 s)
 
 #### B-06.1 Presentation
-A new connection attempt: a fresh amber pulse runs from the client to the server. In this new handshake, the server presents its certificate together with Issuing CA 1's certificate. A key pulse inside the closed key container shows proof of possession; the key does not move. No key material travels. The cards and a handshake proof (a signature impression, a shape distinct from every key) travel to the client.
+A new connection attempt: a fresh amber pulse runs from the client to the server. In this new handshake, the server presents its certificate together with Issuing CA 1's certificate. A key pulse inside the closed key container shows proof of possession; the key does not move. No key material travels. The cards and a handshake proof (a signature impression, a shape distinct from every key) travel to the client. The intermediate card is the server's own copy from B-04.5. On arrival, the client matches the impression against the server certificate's public key (proof verified), and the impression dissolves.
 
 #### B-06.2 Chain builds
 On the laptop side the cards dock upward: server certificate → Issuing CA 1 → a gold root **already** in the Trusted Root store. The root is shown with a brief "installed earlier by policy" memory shimmer.
@@ -332,7 +332,7 @@ A local key pair forms. The private key is locked and anchored, and the request 
 #### B-07.3 Eligibility
 The AD lookup shows both CAs:
 - Issuing CA 1 dims to muted grey ("WebServer-TLS not published here").
-- Issuing CA 2 illuminates in violet.
+- Issuing CA 2 illuminates in violet. Its existing CA certificate is already on its crown, dimmed.
 - Eligibility tags: template published, enrollment policy, permissions, CA available.
 
 The same accuracy constraint as B-04.1 applies: the lookup is a query to AD, and the request is not sent to AD.
@@ -347,18 +347,19 @@ The capsule travels **only** to Issuing CA 2.
 Faster, compressed versions of the same four checks, including the note "name supplied in request — enrollment restricted".
 
 #### B-08.2 TLS certificate
-The web request capsule is consumed at the press. Issuing CA 2's key-driven press stamps the TLS certificate (SAN `portal.1sn0s.lab`, Server Authentication EKU). It returns and locks beside the web server's private key.
+The web request capsule is consumed at the press. Issuing CA 2's key-driven press stamps the TLS certificate (SAN `portal.1sn0s.lab`, Server Authentication EKU). It returns and locks beside the web server's private key, with a translucent copy of Issuing CA 2's certificate for the server's intermediate store.
 - Caption: *Issuing CA 2 signs the TLS certificate*
 
 #### B-08.3 Same root
 Issuing CA 2's own certificate is revealed, linked in gold to the **same** root.
+- Accuracy constraint: the certificate already existed (it is on the crown, dimmed, from B-07.3). It was issued in an offline ceremony like B-05.2, which is not shown. The link reveals an existing issuer relationship. The root does nothing: its key module and press stay dark here and in B-09.2.
 
 ### S9 — Full picture and close (16 s)
 
 #### B-09.1 Browser validation
 A quick browser validation (about 5 s):
 - `portal.1sn0s.lab` → Issuing CA 2 → Root
-- the server presents its chain and proves possession
+- the server presents its chain and proves possession, and the client verifies the proof
 - compressed ticks: name, EKU, validity, revocation (with one CRL fetch per non-root link)
 - the channel turns green
 

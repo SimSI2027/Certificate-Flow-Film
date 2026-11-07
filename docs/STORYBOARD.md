@@ -128,7 +128,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** `rdp01.1sn0s.lab`, "Remote Desktop Authentication"
 
 ### B-04.5 — Certificate installed (36–38 s, frames 1081–1140)
-- **Shot:** the card returns along the cyan route to `rdp01.1sn0s.lab` and locks into the chassis beside the key container. The two glow together as one identity.
+- **Shot:** the card returns along the cyan route to `rdp01.1sn0s.lab` and locks into the chassis beside the key container. The two glow together as one identity. A translucent copy of Issuing CA 1's certificate travels with it (the response chain) and settles into the server's intermediate slot. The original stays on the CA's crown.
 - **Lens:** 35 mm, f/2.8
 - **Camera move:** an eased return chase, settling on a chassis close-up
 - **Focal subject:** the RDP certificate (`CERT-RDP`)
@@ -145,7 +145,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** `1SN0S Root CA`
 
 ### B-05.2 — Offline ceremony (flashback) (41.5–46.5 s, frames 1246–1395)
-- **Shot:** a cut into a desaturated, cooler flashback with a soft gate vignette, tagged "Earlier: offline signing ceremony". Inside Issuing CA 1's vault, its own key module seals a CA-request capsule. The capsule carries a cyan CA=true band and the tag "Issuing CA 1's own CA request", and is slotted into a removable-media cartridge. The cartridge is carried along a walkway (a footprint trail, never a conduit) to the root dais. The root's sealed key drives its press, which stamps Issuing CA 1's CA certificate (CA=true). The cartridge carries the certificate back to Issuing CA 1, which installs it in its crown.
+- **Shot:** a cut into a desaturated, cooler flashback with a soft gate vignette, tagged "Earlier: offline signing ceremony". Inside Issuing CA 1's vault, its own key module seals a CA-request capsule. The capsule carries a cyan CA=true band and the tag "Issuing CA 1's own CA request", and is slotted into a removable-media cartridge. The cartridge is carried along a walkway (a footprint trail, never a conduit) to the root dais. The capsule is consumed at the root. From it, the root's sealed key drives its press, which issues and stamps Issuing CA 1's CA certificate (CA=true). The cartridge carries the certificate back to Issuing CA 1, which installs it in its crown.
 - **Lens:** 35 mm, f/4
 - **Camera move:** a gentle lateral glide following the cartridge out and back
 - **Focal subject:** Issuing CA 1's CA request (`REQ-CA1`)
@@ -162,7 +162,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 ## S6 — Presentation and validation
 
 ### B-06.1 — Presentation (50–53 s, frames 1501–1590)
-- **Shot:** a new connection attempt. A fresh amber pulse runs from the laptop along the channel and arrives at `rdp01.1sn0s.lab`. The RDP certificate card and Issuing CA 1's certificate card lift from the chassis and set off back along the amber channel. Inside the closed key container, a key pulse glows, and a small handshake proof (a flat signature impression, unlike any key shape) follows the cards.
+- **Shot:** a new connection attempt. A fresh amber pulse runs from the laptop along the channel and arrives at `rdp01.1sn0s.lab`. The RDP certificate card and the server's translucent copy of Issuing CA 1's certificate lift from the chassis and set off back along the amber channel. Inside the closed key container, a key pulse glows, and a small handshake proof (a flat signature impression, unlike any key shape) follows the cards. At the laptop, the impression presses against the server card's public-key emblem, matches, and dissolves.
 - **Lens:** 35 mm, f/4
 - **Camera move:** a long eased crane down from the hierarchy to the server, then a turn to follow the cards
 - **Focal subject:** the RDP certificate (`CERT-RDP`)
@@ -177,7 +177,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** "Installed earlier by policy"
 
 ### B-06.3 — AIA is not trust (57–59 s, frames 1711–1770)
-- **Shot:** the small AIA port on the server card glows softly, and the distant `pki.1sn0s.lab` kiosk answers with a faint light. Nothing travels. Two small tags read "Missing intermediate? AIA can fetch it" and "Fetching never creates trust".
+- **Shot:** the small AIA port on the server card glows softly, and the distant `pki.1sn0s.lab` kiosk is passively highlighted as the place a fetch could go. Nothing is requested, nothing answers, and nothing travels. Two small tags read "Missing intermediate? AIA can fetch it" and "Fetching never creates trust".
 - **Lens:** 50 mm, f/2.8
 - **Camera move:** a slight push to the card's port, with a rack focus to the tags
 - **Focal subject:** the AIA indicator (`SVC-AIA`)
@@ -193,7 +193,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** the six check labels
 
 ### B-06.5 — Revocation per link (64–67 s, frames 1921–2010)
-- **Shot:** two restrained-amber CRL scrolls are fetched from the `pki.1sn0s.lab` kiosk. One docks against the server certificate (Issuing CA 1's CRL) and one against Issuing CA 1's certificate (the Root CA's CRL). The root card gets none. A small "OCSP if deployed" tag appears. The revocation tick resolves.
+- **Shot:** two restrained-amber CRL scrolls are fetched from the `pki.1sn0s.lab` kiosk. One docks against the server certificate (Issuing CA 1's CRL) and one against Issuing CA 1's certificate (the Root CA's CRL). The root card gets none. A small "OCSP if deployed" tag appears on the revocation check slot (not at the kiosk). Once both scrolls have docked, the revocation tick resolves.
 - **Lens:** 28 mm, f/4
 - **Camera move:** a pull-back and pan to bring the kiosk into frame, then back to the stack
 - **Focal subject:** the CDP fetches (`SVC-CDP`)
@@ -227,7 +227,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 ### B-07.3 — Eligibility (76–79.5 s, frames 2281–2385)
 - **Shot:** the capsule waits at `WEB01`'s outbound port with the AD node behind it. A steel-blue query runs to AD and back. Both CA vaults come into view:
   - Issuing CA 1 dims to muted grey, with the tag "WebServer-TLS not published here".
-  - Issuing CA 2 lights violet, with eligibility tags *Template published*, *Enrollment policy*, *Permissions* and *CA available*.
+  - Issuing CA 2 lights violet, with eligibility tags *Template published*, *Enrollment policy*, *Permissions* and *CA available*. Its existing CA certificate sits dimmed on its crown.
   - A violet route lights toward Issuing CA 2.
 - **Lens:** 28 mm, f/4
 - **Camera move:** a boom up to a wider view that holds both vaults
@@ -253,7 +253,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** `1SN0S Issuing CA 2`, the four check labels, the note
 
 ### B-08.2 — TLS certificate (85.5–90 s, frames 2566–2700)
-- **Shot:** the web request capsule dissolves into the press's intake. Issuing CA 2's sealed key drives its press, which stamps the TLS card (SAN `portal.1sn0s.lab`, "Server Authentication"). The card returns along the violet route and locks into `WEB01` beside its key container.
+- **Shot:** the web request capsule dissolves into the press's intake. Issuing CA 2's sealed key drives its press, which stamps the TLS card (SAN `portal.1sn0s.lab`, "Server Authentication"). The card returns along the violet route and locks into `WEB01` beside its key container, with a translucent copy of Issuing CA 2's certificate for its intermediate slot.
 - **Lens:** 50 mm, f/2.8, then 35 mm for the return
 - **Camera move:** a push-in at the stamp, a tilt to read the fields, then an eased return chase
 - **Focal subject:** the web certificate (`CERT-WEB`)
@@ -261,7 +261,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** `portal.1sn0s.lab`, "Server Authentication"
 
 ### B-08.3 — Same root (90–93 s, frames 2701–2790)
-- **Shot:** Issuing CA 2's own certificate lights on its vault crown, and a gold-to-violet trust link grows from the same root down to it.
+- **Shot:** a reveal sweep brightens Issuing CA 2's existing certificate, dimmed on its crown since B-07.3, and a gold-to-violet trust link is revealed between it and the same root. This reveals an existing issuer relationship. The root's key module and press stay dark.
 - **Lens:** 28 mm, f/4
 - **Camera move:** a crane up to frame Issuing CA 2's crown and the root together
 - **Focal subject:** Issuing CA 2's certificate (`CERT-CA2`)
@@ -270,7 +270,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 ## S9 — Full picture and close
 
 ### B-09.1 — Browser validation (93–98 s, frames 2791–2940)
-- **Shot:** at the laptop, a browser window opens `portal.1sn0s.lab`. A pulse reaches `WEB01`, which presents the TLS card and Issuing CA 2's card, with a quick handshake-proof impression. The cards dock up to the same gold root in the cradle. Compressed ticks resolve: *Name matches portal.1sn0s.lab*, *EKU permits TLS server auth*, *Currently valid* and *Revocation OK*, with two quick restrained-amber CRL flickers, one per non-root card. The web channel turns green.
+- **Shot:** at the laptop, a browser window opens `portal.1sn0s.lab`. A pulse reaches `WEB01`, which then presents the TLS card and its copy of Issuing CA 2's card, with a quick handshake-proof impression that matches the TLS card at the laptop and dissolves. The cards dock up to the same gold root in the cradle. Compressed ticks resolve: *Name matches portal.1sn0s.lab*, *EKU permits TLS server auth*, *Currently valid* and *Revocation OK*, with two quick restrained-amber CRL flickers, one per non-root card. The web channel turns green.
 - **Lens:** 35 mm, f/2.8
 - **Camera move:** a crane down from the hierarchy, arcing to the laptop
 - **Focal subject:** the web chain (`CHAIN-WEB`)
@@ -284,7 +284,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
   - `rdp01.1sn0s.lab` under Issuing CA 1 and `WEB01` under Issuing CA 2
   - the user at the desk, with both green channels
 
-  Cyan and violet trust paths rise from the two servers' certificates through their issuing CAs and converge in gold at the single root. The root stays cable-free.
+  Cyan and violet trust paths rise from the two servers' certificates through their issuing CAs and converge in gold at the single root. The root stays cable-free, and its key module and press stay dark.
 - **Lens:** 24 mm, f/5.6
 - **Camera move:** a slow rising arc to the hero position
 - **Focal subject:** the Root CA (`ROOT_CA`)

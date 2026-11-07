@@ -34,6 +34,7 @@ ENROLLMENT_TYPES = {
     EventType.REQUEST_SUBMITTED,
     EventType.CERT_RETURNED,
     EventType.CERT_INSTALLED,
+    EventType.INTERMEDIATE_STORED,
 }
 LEAF_KINDS = {CertKind.END_ENTITY, CertKind.SELF_SIGNED_END_ENTITY}
 
@@ -144,3 +145,62 @@ def test_PKI_S0R1_05_trust_store_recall_does_not_travel() -> None:  # noqa: N802
 @pytest.mark.covers("F-02", "B-02.2")
 def test_PKI_S0R1_07_self_signed_certificate_contents_match_notes() -> None:  # noqa: N802
     assert M.cert("CERT-RDP-SELF").san_dns == ()
+
+
+@pytest.mark.covers("F-10", "B-04.5", "B-08.2", "B-06.1", "B-09.1")
+def test_PKI_S0R2_01_server_holds_the_intermediate_it_presents() -> None:  # noqa: N802
+    for chain in M.chains:
+        intermediate = chain.certs[1]
+        present = next(
+            e for e in M.events_of(EventType.PRESENT_CERT) if e.object == intermediate and e.from_ == chain.server
+        )
+        stored = [
+            e for e in M.events_of(EventType.INTERMEDIATE_STORED) if e.object == intermediate and e.to == chain.server
+        ]
+        assert len(stored) == 1, chain.id
+        assert stored[0].from_ == M.cert(intermediate).subject_actor
+        assert stored[0].end_s <= present.start_s + EPS
+
+
+@pytest.mark.covers("F-10", "F-13", "B-06.1", "B-06.5", "B-09.1")
+def test_PKI_S0R2_02_presentation_and_revocation_follow_causal_order() -> None:  # noqa: N802
+    for channel in M.channels:
+        for attempt in _attempts(channel.id):
+            pulse = attempt[0]
+            for e in attempt:
+                if e.type == EventType.PRESENT_CERT:
+                    assert pulse.end_s <= e.start_s + EPS, f"{e.id} presents before {pulse.id} arrives"
+    for chain in M.chains:
+        revocation = next(
+            e
+            for e in M.events_of(EventType.VALIDATION_CHECK)
+            if e.object == chain.id and e.check is not None and e.check.value == "revocation"
+        )
+        fetches = [e for e in M.events_of(EventType.CRL_FETCH) if e.target in chain.certs]
+        assert fetches and all(f.end_s <= revocation.start_s + EPS for f in fetches), chain.id
+
+
+@pytest.mark.covers("F-10", "B-06.1", "B-09.1")
+def test_PKI_S0R2_03_handshake_proof_is_verified_with_the_certificate_key() -> None:  # noqa: N802
+    for proof in M.handshake_proofs:
+        sent = [e for e in M.events_of(EventType.HANDSHAKE_PROOF_SENT) if e.object == proof.id]
+        verified = [e for e in M.events_of(EventType.HANDSHAKE_PROOF_VERIFIED) if e.object == proof.id]
+        assert len(sent) == 1 and len(verified) == 1, proof.id
+        v = verified[0]
+        assert v.from_ == v.to == sent[0].to and sent[0].end_s <= v.start_s + EPS
+        assert v.target is not None and M.cert(v.target).public_key == proof.verified_with
+        later = [e for e in M.events if e.object == proof.id and e.start_s >= v.end_s - EPS]
+        assert not later, "the proof ends its life once verified"
+        session = next(
+            e for e in M.events_of(EventType.SESSION_ESTABLISHED) if M.channel(e.object).server == proof.server
+        )
+        assert v.end_s <= session.start_s + EPS
+
+
+@pytest.mark.covers("AR-07", "B-06.5")
+def test_PKI_S0R2_08_undeployed_responder_has_no_host_and_its_tag_is_on_the_client() -> None:  # noqa: N802
+    for service in M.services:
+        if not service.deployed:
+            assert service.host is None, service.id
+    tag = next(lbl for lbl in M.labels if lbl.id == "LBL-OCSP")
+    assert tag.attached_to in {c.id for c in M.chains}

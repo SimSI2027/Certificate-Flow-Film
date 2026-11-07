@@ -87,7 +87,7 @@ Kerberos server authentication is out of scope on screen (F-16; see "Kerberos sc
 
 **Meaning:** out of the box, the Remote Desktop service creates a self-signed certificate for the computer, with Server Authentication EKU (`CERT-RDP-SELF`, with its own key pair `KP-RDP-SELF`) (F-02).
 
-The certificate *is* signed, by its own private key. What it lacks is an issuer the client already trusts. It is not in the client's Trusted Root store, and no trusted CA vouches for it. So the client cannot verify the server's identity, and the Remote Desktop client warns ("The identity of the remote computer cannot be verified"), depending on its server-authentication setting. The film shows nothing being accepted.
+The certificate *is* signed, by its own private key. What it lacks is an issuer the client already trusts. It is not in the client's Trusted Root store, and no trusted CA vouches for it. So the certificate cannot be validated through the PKI; that is what the "Unverified" tag means. Where Kerberos server authentication is unavailable (see "Kerberos scope" below), the Remote Desktop client then warns ("The identity of the remote computer cannot be verified"), depending on its server-authentication setting. In this lab's exact configuration (a domain-joined client, a domain-joined server, an FQDN and NLA), Kerberos would usually authenticate the server, and no warning would appear. The film depicts the certificate-based case. The film shows nothing being accepted.
 
 The root certificate (B-05.1) is also self-signed. The difference is not the signature but the fact that the root was deliberately installed as a trust anchor (B-06.2).
 
@@ -196,6 +196,8 @@ The certificate contains:
 
 **Meaning:** the CA returns the issued certificate in the enrollment response. The enrollment client installs it in `LocalMachine\My` and associates it with the private key generated in B-03.1, which never moved (F-09, F-03).
 
+The response also carries the issuing CA's certificate as part of its chain. The server stores this copy of `CERT-CA1` in its Intermediate Certification Authorities store (model `E-04.5c`). This copy is what the server presents in B-06.1. It is shown as a translucent card, distinct from the CA's own certificate on Issuing CA 1's crown. (On domain members, issuing CA certificates published in AD can also reach the Intermediate store.)
+
 (Docs only, F-09: the Remote Desktop service needs read access to that private key in order to use the certificate. When the Group Policy template setting is used, the service uses the enrolled certificate for RDP's TLS.)
 
 ### B-05.1
@@ -206,7 +208,7 @@ The certificate contains:
 It is the **trust anchor** (F-17). That is not because it is self-signed, but because its certificate was deliberately placed in the Trusted Root store of every domain member (B-06.2, F-11). In the present-tense film the root performs no operation; the seal shows a property of the certificate, not a live signature.
 
 ### B-05.2
-**On screen:** a desaturated flashback, marked "Earlier: offline signing ceremony". Issuing CA 1's own CA request is sealed by Issuing CA 1's key module. The capsule carries a cyan CA=true band and the tag "Issuing CA 1's own CA request". It travels on removable media to the root, is signed offline, and is carried back. Caption *The Root CA signs the issuing CA certificate*.
+**On screen:** a desaturated flashback, marked "Earlier: offline signing ceremony". Issuing CA 1's own CA request is sealed by Issuing CA 1's key module. The capsule carries a cyan CA=true band and the tag "Issuing CA 1's own CA request". It travels on removable media to the root. From it, the root issues and signs Issuing CA 1's CA certificate offline, and the certificate is carried back. Caption *The Root CA signs the issuing CA certificate*.
 
 The band and tag make the capsule unmistakably a different request from the RDP request. The RDP request was consumed inside Issuing CA 1 in B-04.4, long after this ceremony, and never travels to the root.
 
@@ -232,7 +234,7 @@ The request in the flashback is a subordinate-CA request. No end-entity request 
 The caption's "trust anchor" applies only to the root (F-17). Issuing CA 1 is trusted only because its certificate chains to the trust anchor.
 
 ### B-06.1
-**On screen:** a new amber connection pulse runs from the client to the server. The server presents its card with Issuing CA 1's card. A key pulse glows inside the closed key container. The cards and a handshake proof (a signature impression, a shape unlike any key) travel to the client; the key stays.
+**On screen:** a new amber connection pulse runs from the client to the server. The server presents its card with its copy of Issuing CA 1's card. A key pulse glows inside the closed key container. The cards and a handshake proof (a signature impression, a shape unlike any key) travel to the client; the key stays. At the laptop, the impression is matched against the server card's public key and dissolves: the proof is verified.
 
 **Meaning:** this is a **new** connection attempt (model `E-06.1a`), not the unverified attempt from S2, which ended in B-02.2. In the TLS handshake inside this RDP connection, the server sends its certificate chain: `CERT-RDP` plus the issuing CA certificate `CERT-CA1`. The root is not needed, because the client must already have it (F-10).
 
@@ -240,7 +242,7 @@ The server then proves it holds the private key for `CERT-RDP`'s public key by s
 - in TLS 1.3, the CertificateVerify message
 - in TLS 1.2 with ECDHE, the ServerKeyExchange signature
 
-The client verifies that signature with the certificate's public key. The handshake proof on screen is this signature over handshake data. It is not key material. (Legacy TLS 1.2 static-RSA key exchange proves possession by decryption instead; it is not depicted.)
+The client verifies that signature with the certificate's public key (model `E-06.1f`, shown as the impression matching the card and dissolving). The handshake proof on screen is this signature over handshake data. It is not key material. Tick 2 in B-06.4, *Signatures verify*, refers to the certificate signatures in the chain. The handshake proof has its own verification visual here. (Legacy TLS 1.2 static-RSA key exchange proves possession by decryption instead; it is not depicted.)
 
 A certificate alone proves nothing, because certificates are public. Possession of the matching private key is what binds the connection to the certificate. The private key never leaves the server (F-03).
 
@@ -258,6 +260,8 @@ The caption's "validates the whole chain" previews B-06.4–B-06.5. Building the
 
 ### B-06.3
 **On screen:** a small AIA indicator: "Missing intermediate? AIA can fetch it" and "Fetching never creates trust".
+
+The kiosk is only highlighted passively as the place a fetch *could* go. Nothing is requested and nothing answers.
 
 **Meaning:** if the server had not sent `CERT-CA1`, the client could read the AIA extension in `CERT-RDP` and download Issuing CA 1's certificate from `pki.1sn0s.lab` (AR-06).
 
@@ -292,7 +296,7 @@ The root is not revocation-checked; nothing above it could revoke it.
 
 Each CRL is signed by its issuer, and the client verifies that signature and the CRL's freshness (nextUpdate). Issuing CAs may also publish delta CRLs, which the client would also consult. The film shows one fetch per link. CRLs are cached, so a real client may not download them on every connection.
 
-CDP/CRL is the ADCS default (AR-06). OCSP would be used only if an Online Responder were deployed (AR-07); none is.
+CDP/CRL is the ADCS default (AR-06). OCSP would be used only if an Online Responder were deployed (AR-07); none is. The "OCSP if deployed" tag therefore sits on the client's revocation check slot, not on the `pki.1sn0s.lab` kiosk, and the model gives the undeployed responder no host.
 
 ### B-06.6
 **On screen:** the channel turns green; the session window opens. Caption *Trusted RDP connection established*.
@@ -347,23 +351,29 @@ The note compresses F-07. This template takes the subject and SAN from the reque
 - not-a-CA Basic Constraints
 - AIA and CDP pointing to Issuing CA 2's certificate and CRL on `pki.1sn0s.lab`
 
-It is installed in `WEB01`'s `LocalMachine\My` with the existing private key (F-09), and bound to the site's HTTPS listener.
+It is installed in `WEB01`'s `LocalMachine\My` with the existing private key (F-09), and bound to the site's HTTPS listener. As in B-04.5, the response chain gives `WEB01` its own copy of `CERT-CA2` for its Intermediate store (model `E-08.2e`). That copy is what it presents in B-09.1.
 
 ### B-08.3
 **On screen:** Issuing CA 2's own certificate is revealed, linked in gold to the same root.
 
-**Meaning:** `CERT-CA2` was signed by the same Root CA, in an offline ceremony like B-05.2. Both issuing paths therefore terminate at one root (F-15, AR-03). The link is a trust relationship; the root stays cable-free.
+**Meaning:** `CERT-CA2` was signed by the same Root CA at setup, in an offline ceremony like B-05.2 (not shown). It already existed before Issuing CA 2 signed anything, and it sits dimmed on Issuing CA 2's crown from B-07.3. B-08.3 is a reveal sweep of that existing certificate and its issuer relationship. The root does nothing now: its key module and press stay dark here and in B-09.2. Both issuing paths therefore terminate at one root (F-15, AR-03). The link is a trust relationship; the root stays cable-free.
 
 ### B-09.1
 **On screen:** a quick browser validation: `portal.1sn0s.lab` → Issuing CA 2 → Root. Compressed ticks for name, EKU, validity and revocation (with one CRL fetch per non-root link). The channel turns green.
 
 **Meaning:** the same validation as S6, faster (F-10–F-13):
 - The browser on `CLIENT01` connects to `https://portal.1sn0s.lab`.
-- The web server sends `CERT-WEB` and `CERT-CA2`, and proves possession of its private key in the handshake.
+- After the connection arrives, the web server sends `CERT-WEB` and its copy of `CERT-CA2`, and proves possession of its private key in the handshake. The client verifies the proof (model `E-09.1q`).
 - The client builds the chain to the same pre-installed root.
 - Chain-to-root and signature checks are conveyed by the docking, without ticks of their own. Basic Constraints and critical extensions are checked as in B-06.4.
 - The ticks show the name (`portal.1sn0s.lab` matches the SAN dNSName), EKU (Server Authentication) and validity.
-- Revocation is checked per link: `CERT-WEB` against Issuing CA 2's CRL, and `CERT-CA2` against the Root's CRL. The root itself is not checked.
+- Revocation is checked per link: `CERT-WEB` against Issuing CA 2's CRL, and `CERT-CA2` against the Root's CRL. The root itself is not checked. The revocation tick resolves only after both CRLs have arrived.
+
+**Browser caveat (docs only).** Browser revocation behaviour depends on the browser and on policy:
+- Chromium-based browsers do not perform online CRL/OCSP checks by default. Enterprise policy can require them for locally installed anchors (`RequireOnlineRevocationChecksForLocalAnchors`).
+- Firefox does not use CDP CRLs.
+
+The film depicts a client configured to check CDP/CRL for each link, consistent with F-13. The Remote Desktop client in S6 uses the Windows certificate chain engine, which checks revocation.
 
 ### B-09.2
 **On screen:** the hero topology: the root on top, both issuing CAs, the RDP server under CA 1, the web server under CA 2, and the user using both. Cyan and violet trust paths rise and converge in gold at the single root. Caption *Different issuing paths. One trusted root.*
@@ -379,11 +389,16 @@ It is installed in `WEB01`'s `LocalMachine\My` with the existing private key (F-
 
 A domain-joined client that connects by FQDN to a domain-joined RDP server, with NLA, can authenticate the server through Kerberos as part of CredSSP. In that case the Remote Desktop client may show no warning even when the server uses its self-signed certificate.
 
-The film deliberately depicts **certificate-based server authentication**. That is what applies when:
-- Kerberos server authentication is unavailable (for example, connecting by IP address or a non-domain name, or from a non-domain client)
-- policy requires a certificate trusted through the PKI
+**This lab's configuration is that case.** `CLIENT01` and `RDP01` are both domain-joined, the user connects by FQDN, and NLA is in use. Kerberos would therefore usually satisfy server authentication here.
 
-Nothing on screen claims that Kerberos is absent or irrelevant; the scope is stated here.
+The film deliberately depicts **certificate-based server authentication**: the server identity proven and validated through the PKI. In practice, certificate-based server authentication is what applies whenever Kerberos server authentication is unavailable. Examples:
+- connecting by IP address, or by a name that has no matching service principal name (for example a DNS alias)
+- connecting from a client that is not domain-joined
+- the domain controller being unreachable
+
+The charter's F-16 also mentions the case where "policy requires a trusted certificate". These notes do not tie that case to any single named Windows setting. It stands for an organisation's requirement that RDP servers present PKI-validated certificates whether or not Kerberos is available, and it is not depicted as a specific configuration.
+
+On screen, the "Unverified" tag in B-02.2 means that the self-signed certificate cannot be validated through the PKI. It does not claim that every client would warn. Nothing on screen claims that Kerberos is absent or irrelevant; the scope is stated here.
 
 ## Shortened on-screen wording
 

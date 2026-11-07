@@ -168,10 +168,12 @@ class EventType(StrEnum):
     CA_SIGNS = "ca_signs"
     CERT_RETURNED = "cert_returned"
     CERT_INSTALLED = "cert_installed"
+    INTERMEDIATE_STORED = "intermediate_stored"  # copy of the issuing CA cert into the server's Intermediate store
     SELF_SIGNATURE_SHOWN = "self_signature_shown"
     ISSUER_LINK = "issuer_link"
     HANDSHAKE_SIGNATURE = "handshake_signature"
     HANDSHAKE_PROOF_SENT = "handshake_proof_sent"
+    HANDSHAKE_PROOF_VERIFIED = "handshake_proof_verified"
     CHAIN_LINK = "chain_link"
     TRUST_STORE_RECALL = "trust_store_recall"
     AIA_INDICATOR = "aia_indicator"
@@ -380,7 +382,7 @@ class HandshakeProof:
 class Service:
     id: str
     kind: ServiceKind
-    host: str
+    host: str | None  # None for a service that is not deployed in this lab
     deployed: bool
     trust_source: bool = False
 
@@ -652,7 +654,7 @@ def _beats() -> tuple[Beat, ...]:
         Beat("B-04.4", "CA signs", f"The request is consumed; {ca1}'s key, sealed in its module, drives the press that signs the end-entity certificate.", ("F-03", "F-07", "F-08", "AR-06"), "CERT-RDP"),
         Beat("B-04.5", "Certificate installed", "The certificate returns and locks in beside the existing private key.", ("F-09", "F-03"), "CERT-RDP"),
         Beat("B-05.1", "The trust anchor", f"A sealed, cable-free gold vault: {n.ROOT_CA_NAME}, self-signed, offline.", ("AR-01", "F-17", "F-11"), ROOT_CA),
-        Beat("B-05.2", "Offline ceremony (flashback)", f"Earlier, at setup: {ca1}'s request is carried to the root on removable media, signed offline and carried back.", ("AR-02", "F-03", "F-04"), "REQ-CA1", flashback=True),
+        Beat("B-05.2", "Offline ceremony (flashback)", f"Earlier, at setup: {ca1}'s own CA request is carried to the root on removable media; the root issues and signs {ca1}'s CA certificate offline, and the certificate is carried back.", ("AR-02", "F-03", "F-04"), "REQ-CA1", flashback=True),
         Beat("B-05.3", "Issuer link", f"Present: a gold-to-cyan link joins {ca1}'s certificate to the root. No end-entity request reaches the root.", ("AR-03", "F-15", "F-17"), "CERT-CA1"),
         Beat("B-06.1", "Presentation", f"A new connection attempt: the server presents its certificate with {ca1}'s certificate and proves possession of its private key.", ("F-10", "F-03", "F-01"), "CERT-RDP"),
         Beat("B-06.2", "Chain builds", "On the client the cards dock upward to a root already in the Trusted Root store, installed earlier by policy.", ("F-11", "AR-05"), "CHAIN-RDP"),
@@ -804,7 +806,7 @@ def _labels(chains: tuple[Chain, ...]) -> tuple[Label, ...]:
         Label("LBL-ROOT-STORE", LabelKind.TAG, "Installed earlier by policy", "TS-CLIENT-ROOT", ("B-06.2",)),
         Label("LBL-AIA-1", LabelKind.TAG, "Missing intermediate? AIA can fetch it", "SVC-AIA", ("B-06.3",)),
         Label("LBL-AIA-2", LabelKind.TAG, "Fetching never creates trust", "SVC-AIA", ("B-06.3",)),
-        Label("LBL-OCSP", LabelKind.TAG, "OCSP if deployed", "SVC-OCSP", ("B-06.5",)),
+        Label("LBL-OCSP", LabelKind.TAG, "OCSP if deployed", "CHAIN-RDP", ("B-06.5",)),
         Label("LBL-CA1-INELIGIBLE", LabelKind.TAG, f"{n.WEB_TEMPLATE} not published here", ISSUING_CA1, ("B-07.3",)),
         Label("LBL-CA2-NOTE", LabelKind.TAG, "Name supplied in request — enrollment restricted", ISSUING_CA2, ("B-08.1",)),
     ]
@@ -859,6 +861,7 @@ def _events() -> tuple[Event, ...]:
         Event("E-04.4b", "B-04.4", E.CA_SIGNS, "CERT-RDP", ISSUING_CA1, ISSUING_CA1, T.LOCAL, uses_key="KEY-CA1-PRIV"),
         Event("E-04.5a", "B-04.5", E.CERT_RETURNED, "CERT-RDP", ISSUING_CA1, RDP_SERVER, T.NETWORK),
         Event("E-04.5b", "B-04.5", E.CERT_INSTALLED, "CERT-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL),
+        Event("E-04.5c", "B-04.5", E.INTERMEDIATE_STORED, "CERT-CA1", ISSUING_CA1, RDP_SERVER, T.NETWORK, note="Copy returned with the enrollment response chain"),
         # S5
         Event("E-05.1a", "B-05.1", E.SELF_SIGNATURE_SHOWN, "CERT-ROOT", ROOT_CA, ROOT_CA, T.NONE),
         Event("E-05.2a", "B-05.2", E.PROOF_OF_POSSESSION, "REQ-CA1", ISSUING_CA1, ISSUING_CA1, T.LOCAL, uses_key="KEY-CA1-PRIV", era=F),
@@ -874,6 +877,7 @@ def _events() -> tuple[Event, ...]:
         Event("E-06.1c", "B-06.1", E.PRESENT_CERT, "CERT-CA1", RDP_SERVER, CLIENT, T.NETWORK),
         Event("E-06.1d", "B-06.1", E.HANDSHAKE_SIGNATURE, "HS-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL, uses_key="KEY-RDP-PRIV"),
         Event("E-06.1e", "B-06.1", E.HANDSHAKE_PROOF_SENT, "HS-RDP", RDP_SERVER, CLIENT, T.NETWORK),
+        Event("E-06.1f", "B-06.1", E.HANDSHAKE_PROOF_VERIFIED, "HS-RDP", CLIENT, CLIENT, T.LOCAL, target="CERT-RDP"),
         Event("E-06.2a", "B-06.2", E.CHAIN_LINK, "CERT-RDP", CLIENT, CLIENT, T.LOCAL, target="CERT-CA1"),
         Event("E-06.2b", "B-06.2", E.CHAIN_LINK, "CERT-CA1", CLIENT, CLIENT, T.LOCAL, target="CERT-ROOT"),
         Event("E-06.2c", "B-06.2", E.TRUST_STORE_RECALL, "TS-CLIENT-ROOT", AD, CLIENT, T.NONE, era=Era.RECALL),
@@ -907,6 +911,7 @@ def _events() -> tuple[Event, ...]:
         Event("E-08.2b", "B-08.2", E.CA_SIGNS, "CERT-WEB", ISSUING_CA2, ISSUING_CA2, T.LOCAL, uses_key="KEY-CA2-PRIV"),
         Event("E-08.2c", "B-08.2", E.CERT_RETURNED, "CERT-WEB", ISSUING_CA2, WEB_SERVER, T.NETWORK),
         Event("E-08.2d", "B-08.2", E.CERT_INSTALLED, "CERT-WEB", WEB_SERVER, WEB_SERVER, T.LOCAL),
+        Event("E-08.2e", "B-08.2", E.INTERMEDIATE_STORED, "CERT-CA2", ISSUING_CA2, WEB_SERVER, T.NETWORK, note="Copy returned with the enrollment response chain"),
         Event("E-08.3a", "B-08.3", E.ISSUER_LINK, "CERT-CA2", ROOT_CA, ISSUING_CA2, T.LOGICAL),
         # S9
         Event("E-09.1a", "B-09.1", E.CONNECTION_PULSE, "CH-WEB", CLIENT, WEB_SERVER, T.NETWORK),
@@ -914,6 +919,7 @@ def _events() -> tuple[Event, ...]:
         Event("E-09.1c", "B-09.1", E.PRESENT_CERT, "CERT-CA2", WEB_SERVER, CLIENT, T.NETWORK),
         Event("E-09.1d", "B-09.1", E.HANDSHAKE_SIGNATURE, "HS-WEB", WEB_SERVER, WEB_SERVER, T.LOCAL, uses_key="KEY-WEB-PRIV"),
         Event("E-09.1e", "B-09.1", E.HANDSHAKE_PROOF_SENT, "HS-WEB", WEB_SERVER, CLIENT, T.NETWORK),
+        Event("E-09.1q", "B-09.1", E.HANDSHAKE_PROOF_VERIFIED, "HS-WEB", CLIENT, CLIENT, T.LOCAL, target="CERT-WEB"),
         Event("E-09.1f", "B-09.1", E.CHAIN_LINK, "CERT-WEB", CLIENT, CLIENT, T.LOCAL, target="CERT-CA2"),
         Event("E-09.1g", "B-09.1", E.CHAIN_LINK, "CERT-CA2", CLIENT, CLIENT, T.LOCAL, target="CERT-ROOT"),
         Event("E-09.1h", "B-09.1", E.VALIDATION_CHECK, "CHAIN-WEB", CLIENT, CLIENT, T.LOCAL, check=V.CHAIN_TO_TRUSTED_ROOT, on_screen=False),
@@ -959,7 +965,7 @@ def build_model() -> StoryModel:
         services=(
             Service("SVC-AIA", ServiceKind.AIA, PKI_HTTP, deployed=True),
             Service("SVC-CDP", ServiceKind.CDP, PKI_HTTP, deployed=True),
-            Service("SVC-OCSP", ServiceKind.OCSP, PKI_HTTP, deployed=False),
+            Service("SVC-OCSP", ServiceKind.OCSP, None, deployed=False),
         ),
         trust_store=(
             TrustStoreEntry("TS-CLIENT-ROOT", CLIENT, "CERT-ROOT", STORE_TRUSTED_ROOT, AD, installed_before_film=True),

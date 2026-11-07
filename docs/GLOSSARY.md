@@ -158,7 +158,7 @@ The computer's certificate store for its own certificates. Each certificate is a
 A CA signing a certificate with its private key after its checks pass.
 
 ### Offline root ceremony
-The controlled procedure in which an administrator carries a subordinate CA's request to the offline root on removable media. The root signs the request, and the certificate (with the root certificate and CRL) is carried back. The root never joins the network.
+The controlled procedure in which an administrator carries a subordinate CA's request to the offline root on removable media. From that request, the root issues and signs the subordinate CA's certificate, and the certificate (with the root certificate and CRL) is carried back. A CA never signs the request itself; the requester already signed it. The root never joins the network.
 
 ### Removable media
 The transport used for the offline root ceremony (for example, a USB drive). It is not a network connection.
