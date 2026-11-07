@@ -137,3 +137,57 @@ Stage 0 converged in 3 of 5 rounds. The cinematic and legibility scores (≥ 8) 
 - **Line endings** are pinned to LF by `.gitattributes`, so these hashes hold on every checkout.
 - **Clean-round counter for Stage 1:** 0.
 - **Amendments:** none yet. Any future change follows Charter 2.2: a written Chief of Staff amendment here, a new "Frozen REFERENCE-SPEC SHA-256" line, and a reset of the stage's clean-round counter.
+
+## Stage 1 — Discriminator calibration (Charter 2.8), Session 4
+
+`python -m tools calibrate <fault>` builds a deliberately broken animatic with `blender/calibration.py` (build hooks that the normal entry point never sets; every scene is tagged `cff_fault`), runs the in-Blender hard discriminators on it, and with `--packet` builds a blind packet `qa/calibration/stage1-K<n>`. The packet is identical in form to a round packet, and it carries no fault name. Results and the packet-to-fault mapping are in `qa/calibration/results.json`; each discriminator reply is saved verbatim in its packet folder. Spec hash for every packet: `7cf45afa…6d23` (unchanged).
+
+| Fault | What the variant does |
+|---|---|
+| `private_key_leak` | After B-03.3 the RDP private key leaves its locked container, rides with the request capsule, and is left at Issuing CA 1's press when the capsule is consumed. |
+| `root_issues_leaf` | The root complex rises early (during B-04.1); the RDP request flies to the root's press; the root's module lights and its press stamps CERT-RDP, which then travels back; Issuing CA 1's press stays still. |
+| `flowchart` | A static, top-down, orthographic camera over flat boxes (the actor names) joined by straight lines; the 3D world is hidden. |
+| `caption_clip` | CAP-S4 is drawn at 14 px cap height and shifted so its plate starts at x = 30 px (title-safe starts at 96 px). |
+
+### Hard discriminators (mutation testing)
+
+First run (commit `cf3cf8a`, before strengthening):
+- `private_key_leak`: **CAUGHT** by `key_containment` (KEY-RDP-PRIV leaves RDP_SERVER's bounds from frame 731).
+- `root_issues_leaf`: **MISSED.** `root_isolation` tested only the vault and plinth, so a request parked at the root's press and a server certificate stamped there both passed. Unrelated checks failed only because of the mutation's side effects.
+- `caption_clip`: **MISSED.** The caption scene is not the context scene, so in background mode `frame_set` did not evaluate its matrices or colours. The title-safe check measured every plate at the frame centre, which made it vacuous. Cap height was read from a stored tag, not the glyphs.
+
+Strengthening (same commit):
+- **Captions:** the check now evaluates caption alpha and transforms directly from the F-curves, tests title-safe for the plate and the glyphs on every visible frame, measures cap height from the glyph geometry, and fails when the glyphs disagree with the tag.
+- **Root isolation:** end-entity requests and certificates that the root did not issue may not touch any part of the root complex (dais, reader, press, module, plinth, vault).
+- **New `build_provenance` check:** fails on any scene tagged `cff_fault`.
+- **Tests:** `tests/test_blender_static.py::test_normal_builds_never_enable_a_fault` and `::test_fault_lists_agree_and_every_fault_has_a_hard_expectation_or_a_discriminator`.
+
+Re-run: all three required faults are **CAUGHT**: `key_containment: KEY-RDP-PRIV`; `root_isolation: REQ-RDP` and `root_isolation: CERT-RDP`; `captions: title-safe` and `captions: cap height`. `flowchart` also fails `one_camera` (orthographic) and `camera_motion`. The normal film stays green: `tools verify` passes with 12 of 12 in-Blender checks, pytest 141 passed, ruff and mypy clean.
+
+The same unevaluated-scene problem was found in the packet still renderer, which rendered the caption layer with every caption at alpha 0. The fix (commit `fe33f99`) renders every still through the animation path. The real animatic's caption frames were rendered with the range renderer and were never affected.
+
+### Subagent discriminators
+
+| Packet | Fault | Discriminator | Result |
+|---|---|---|---|
+| stage1-K3 | flowchart | cinema (sonnet) | **CAUGHT.** All 33 shots DIAGRAM; BLOCKERs on C-01, C-09, C-02, C-03, C-07 and C-10. Protocol note: its `files_read` lists 16 of 33 strips and 18 of 103 frames, so it sampled. |
+| stage1-K2 | root_issues_leaf | pki (opus) | **CAUGHT.** B-04.2, B-04.3 and B-04.4 judged WRONG; BLOCKERs PKI-S1K2-01/02 (AR-02) and PKI-S1K2-03 (F-05). |
+| stage1-K4 | caption_clip | legibility (sonnet) | **CAUGHT.** LEG-K4-01 BLOCKER (L-01, also L-03) on CAP-S4. |
+| stage1-K1 | private_key_leak | pki (opus) | **MISSED.** B-03.3 to B-04.2 judged ACCURATE ("the private key stays in its closed container"). |
+| stage1-K5 | private_key_leak | pki (opus), after strengthening 1 | **MISSED.** The leaked key at Issuing CA 1's press was flagged only as MAJOR (PKI-K5-01: "if it is key material, BLOCKER"); B-03.x judged ACCURATE. |
+| stage1-K6 | private_key_leak | pki (opus), after strengthening 2 | **MISSED.** Its per-beat key log says the RDP key stays locked. It saw the leaked key at the capsule and at the press and explained both away as port and press fixtures. |
+
+Strengthening applied so far:
+1. After K1 (commit `cf3ed52`):
+   - private-key and capsule tracking duties, and "open every file and list it", in `.claude/agents/pki-discriminator.md`;
+   - "open every file" in the cinema and legibility agents;
+   - a judging protocol in every packet README, so it reaches a fresh instance even if agent definitions are not reloaded mid-session.
+2. After K5 (commit `1cd847f`):
+   - every PKI beat reason must locate each formed private key;
+   - an unlocatable key, or a key-like shape outside a container or module, is WRONG and BLOCKER unless positively identified as something else.
+
+**Chief of Staff diagnosis.** The fault is visible: the strips show the key at the capsule, and K5 and K6 both describe the leaked shape. But at 960x540 the grey-box key, the port plate and the press fixtures cannot be told apart, so the judge cannot tell which shape is which object. More prompt wording aimed at this one fault would overfit the calibration (Charter 2.7, independence).
+
+The next strengthening is evidence, not wording: a per-frame locator file in every packet, giving the measured screen bounds of each private key, request capsule and certificate card. These are measurements with no pass or fail claim, like the legibility manifest's text bounds, and the judge can verify each box against the frame.
+
+**Calibration status: NOT PASSED.** Three of four subagent faults and three of three hard-check faults are caught. pki-discriminator has not yet flagged `private_key_leak` as BLOCKER. No real Stage 1 round has been judged; `stage1-R1` was built and then withdrawn unjudged, so that it could carry the strengthened README. Clean-round counter: 0.

@@ -124,6 +124,7 @@
     "stage1-K2": "root_issues_leaf",
     "stage1-K3": "flowchart",
     "stage1-K4": "caption_clip",
-    "stage1-K5": "private_key_leak"
+    "stage1-K5": "private_key_leak",
+    "stage1-K6": "private_key_leak"
   }
 }

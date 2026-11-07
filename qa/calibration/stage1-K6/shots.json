@@ -1,0 +1,266 @@
+[
+  {
+    "beat": "B-01.1",
+    "focal_subject": "USER",
+    "frame": 45,
+    "lens_mm": 50.0,
+    "f_stop": 2.8,
+    "focus_distance_m": 6.45
+  },
+  {
+    "beat": "B-01.2",
+    "focal_subject": "CH-RDP",
+    "frame": 150,
+    "lens_mm": 36.9,
+    "f_stop": 3.38,
+    "focus_distance_m": 6.93
+  },
+  {
+    "beat": "B-02.1",
+    "focal_subject": "RDP_SERVER",
+    "frame": 240,
+    "lens_mm": 35.0,
+    "f_stop": 3.42,
+    "focus_distance_m": 7.3
+  },
+  {
+    "beat": "B-02.2",
+    "focal_subject": "CERT-RDP-SELF",
+    "frame": 315,
+    "lens_mm": 35.0,
+    "f_stop": 2.8,
+    "focus_distance_m": 17.88
+  },
+  {
+    "beat": "B-02.3",
+    "focal_subject": "TPL-RDPAUTH",
+    "frame": 390,
+    "lens_mm": 35.0,
+    "f_stop": 3.38,
+    "focus_distance_m": 16.39
+  },
+  {
+    "beat": "B-03.1",
+    "focal_subject": "KP-RDP",
+    "frame": 450,
+    "lens_mm": 42.2,
+    "f_stop": 3.42,
+    "focus_distance_m": 4.92
+  },
+  {
+    "beat": "B-03.2",
+    "focal_subject": "KEY-RDP-PRIV",
+    "frame": 518,
+    "lens_mm": 50.0,
+    "f_stop": 2.41,
+    "focus_distance_m": 2.48
+  },
+  {
+    "beat": "B-03.3",
+    "focal_subject": "REQ-RDP",
+    "frame": 593,
+    "lens_mm": 50.0,
+    "f_stop": 2.39,
+    "focus_distance_m": 4.38
+  },
+  {
+    "beat": "B-03.4",
+    "focal_subject": "REQ-RDP",
+    "frame": 675,
+    "lens_mm": 50.0,
+    "f_stop": 2.8,
+    "focus_distance_m": 4.43
+  },
+  {
+    "beat": "B-04.1",
+    "focal_subject": "AD",
+    "frame": 765,
+    "lens_mm": 39.9,
+    "f_stop": 3.38,
+    "focus_distance_m": 12.25
+  },
+  {
+    "beat": "B-04.2",
+    "focal_subject": "REQ-RDP",
+    "frame": 840,
+    "lens_mm": 35.0,
+    "f_stop": 4.0,
+    "focus_distance_m": 11.28
+  },
+  {
+    "beat": "B-04.3",
+    "focal_subject": "ISSUING_CA1",
+    "frame": 930,
+    "lens_mm": 35.0,
+    "f_stop": 3.42,
+    "focus_distance_m": 4.05
+  },
+  {
+    "beat": "B-04.4",
+    "focal_subject": "CERT-RDP",
+    "frame": 1035,
+    "lens_mm": 45.1,
+    "f_stop": 2.8,
+    "focus_distance_m": 7.95
+  },
+  {
+    "beat": "B-04.5",
+    "focal_subject": "CERT-RDP",
+    "frame": 1110,
+    "lens_mm": 42.8,
+    "f_stop": 2.8,
+    "focus_distance_m": 9.93
+  },
+  {
+    "beat": "B-05.1",
+    "focal_subject": "ROOT_CA",
+    "frame": 1193,
+    "lens_mm": 28.1,
+    "f_stop": 3.39,
+    "focus_distance_m": 19.6
+  },
+  {
+    "beat": "B-05.2",
+    "focal_subject": "REQ-CA1",
+    "frame": 1320,
+    "lens_mm": 35.0,
+    "f_stop": 4.0,
+    "focus_distance_m": 13.52
+  },
+  {
+    "beat": "B-05.3",
+    "focal_subject": "CERT-CA1",
+    "frame": 1448,
+    "lens_mm": 28.0,
+    "f_stop": 4.0,
+    "focus_distance_m": 28.01
+  },
+  {
+    "beat": "B-06.1",
+    "focal_subject": "CERT-RDP",
+    "frame": 1545,
+    "lens_mm": 34.6,
+    "f_stop": 4.0,
+    "focus_distance_m": 30.24
+  },
+  {
+    "beat": "B-06.2",
+    "focal_subject": "CHAIN-RDP",
+    "frame": 1650,
+    "lens_mm": 35.0,
+    "f_stop": 3.42,
+    "focus_distance_m": 10.6
+  },
+  {
+    "beat": "B-06.3",
+    "focal_subject": "SVC-AIA",
+    "frame": 1740,
+    "lens_mm": 42.2,
+    "f_stop": 2.8,
+    "focus_distance_m": 7.78
+  },
+  {
+    "beat": "B-06.4",
+    "focal_subject": "CHAIN-RDP",
+    "frame": 1845,
+    "lens_mm": 35.4,
+    "f_stop": 2.8,
+    "focus_distance_m": 6.97
+  },
+  {
+    "beat": "B-06.5",
+    "focal_subject": "SVC-CDP",
+    "frame": 1965,
+    "lens_mm": 28.4,
+    "f_stop": 3.38,
+    "focus_distance_m": 21.57
+  },
+  {
+    "beat": "B-06.6",
+    "focal_subject": "CH-RDP",
+    "frame": 2055,
+    "lens_mm": 34.6,
+    "f_stop": 3.42,
+    "focus_distance_m": 12.72
+  },
+  {
+    "beat": "B-07.1",
+    "focal_subject": "WEB_SERVER",
+    "frame": 2145,
+    "lens_mm": 35.0,
+    "f_stop": 3.38,
+    "focus_distance_m": 19.7
+  },
+  {
+    "beat": "B-07.2",
+    "focal_subject": "REQ-WEB",
+    "frame": 2235,
+    "lens_mm": 45.1,
+    "f_stop": 3.42,
+    "focus_distance_m": 5.96
+  },
+  {
+    "beat": "B-07.3",
+    "focal_subject": "AD",
+    "frame": 2333,
+    "lens_mm": 38.3,
+    "f_stop": 3.39,
+    "focus_distance_m": 12.88
+  },
+  {
+    "beat": "B-07.4",
+    "focal_subject": "REQ-WEB",
+    "frame": 2423,
+    "lens_mm": 34.2,
+    "f_stop": 4.0,
+    "focus_distance_m": 15.56
+  },
+  {
+    "beat": "B-08.1",
+    "focal_subject": "ISSUING_CA2",
+    "frame": 2513,
+    "lens_mm": 35.0,
+    "f_stop": 3.41,
+    "focus_distance_m": 3.86
+  },
+  {
+    "beat": "B-08.2",
+    "focal_subject": "CERT-WEB",
+    "frame": 2633,
+    "lens_mm": 35.0,
+    "f_stop": 2.8,
+    "focus_distance_m": 14.04
+  },
+  {
+    "beat": "B-08.3",
+    "focal_subject": "CERT-CA2",
+    "frame": 2745,
+    "lens_mm": 28.4,
+    "f_stop": 3.38,
+    "focus_distance_m": 19.2
+  },
+  {
+    "beat": "B-09.1",
+    "focal_subject": "CHAIN-WEB",
+    "frame": 2865,
+    "lens_mm": 35.0,
+    "f_stop": 3.41,
+    "focus_distance_m": 30.48
+  },
+  {
+    "beat": "B-09.2",
+    "focal_subject": "ROOT_CA",
+    "frame": 3030,
+    "lens_mm": 24.0,
+    "f_stop": 4.17,
+    "focus_distance_m": 30.65
+  },
+  {
+    "beat": "B-09.3",
+    "focal_subject": "ROOT_CA",
+    "frame": 3195,
+    "lens_mm": 24.0,
+    "f_stop": 5.6,
+    "focus_distance_m": 50.56
+  }
+]

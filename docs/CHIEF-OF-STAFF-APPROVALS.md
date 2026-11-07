@@ -96,3 +96,14 @@
 - **Ledger rounds:** none (the Stage 1 gate is Session 4).
 - **Commit / sync:** commits c040282, b5d507c, be0f4c1, 91ec326, bb483a2 plus the close-out commit; the sync result is in the Session 3 report.
 - **Decision: APPROVED** (Phase 4 build only; the Stage 1 gate is not approved and the clean-round counter is 0) — 2026-11-07. First attempt at this phase, accepted because every gate item is evidenced above.
+
+## Phase 4 gate — Calibration + animatic GAN rounds (Session 4, part 1)
+
+- **Scope:** Charter 2.8 calibration (`blender\calibration.py`, `python -m tools calibrate`, test that normal builds never enable a fault), then Stage 1 GAN rounds per Charter 2.4 until the Stage 1 gate (Charter 2.7).
+- **Acceptance criteria:** every discriminator flags its relevant faults as BLOCKER; the hard discriminators fail on private_key_leak, root_issues_leaf and caption_clip; then a Stage 1 round with 0 BLOCKER, 0 MAJOR, scores >= 8, every PKI beat ACCURATE and hard discriminators green.
+- **Review performed:** four faults built and checked; blind packets stage1-K1..K6 judged by fresh discriminators; every reply read, saved verbatim and triaged against the frozen spec (details in `docs\GAN-LEDGER.md`, "Stage 1 — Discriminator calibration"). Packet frames were inspected by the Chief of Staff before judging (this caught the unevaluated caption layer in the first K packets).
+- **Problems found and corrections:** the hard checks missed root_issues_leaf and caption_clip (vacuous title-safe check, root isolation limited to vault and plinth). Both were strengthened, and now all three are caught. The packet still renderer dropped the caption layer, which is fixed. pki-discriminator missed private_key_leak three times (K1, K5, K6); its definition and the packet judging protocol were strengthened twice, and that is still not enough.
+- **Tests run (real results):** `python -m tools verify` VERIFY GREEN on the normal film (ruff clean; mypy --strict clean, 51 files; pytest 141 passed; traceability current; palette 87 pairs 0 failing; planned-film audits 0 hard; in-Blender 12 of 12 checks passed; 3270 of 3270 frames, 0 blank). `tools calibrate all`: private_key_leak, root_issues_leaf and caption_clip CAUGHT by the hard checks; flowchart judged by the cinema discriminator. Spec hash `7cf45afa…6d23` unchanged.
+- **Ledger round references:** calibration packets stage1-K1..K6. No Stage 1 GAN round was judged (stage1-R1 was built, then withdrawn unjudged before the README protocol change).
+- **Commit / sync:** cf3cf8a, fe33f99, c42b786, cf3ed52, 1cd847f plus the close-out commit; sync result in the Session 4 report.
+- **Decision: REJECTED** (gate not reached; work carried over) — 2026-11-07. Calibration has not passed (pki-discriminator has not caught private_key_leak) and no Stage 1 round has run. Next action: add the measured object-locator evidence to packets, re-calibrate private_key_leak, then run stage1-R1.
