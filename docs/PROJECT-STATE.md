@@ -2,8 +2,18 @@
 
 Updated: 2026-11-06 (end of Session 2)
 
-## Next session
-- **Next session = 3**: Pipeline + animatic build (Phase 4, build part). **Model: Sonnet 5.5. Effort: High.**
+## Session 3 IN PROGRESS (usage limit reached mid-session; Phase 4 build NOT approved)
+Resume Session 3 on Sonnet 5.5 / High with the Resume prompt. Pre-flight passed (Phase 3 APPROVED, spec hash OK, synced). Spec untouched.
+Done (uncommitted-before-this-commit, UNVERIFIED by ruff/mypy, no tests yet for new modules):
+- `cff\theme\`: `colour.py` (sRGB/Lab/CIEDE2000/Machado CVD/WCAG), `palette.py` (L-07 worst-case dE00 15.8 incl. CVD; revocation amber dE 10.8 from pending), `motion.py` (easing presets, durations), `shots.py` (33 beat shots).
+- `cff\stage\`: `layout.py`, `tracks.py`, `objects.py` (catalogue), `choreography.py` (all on-screen events -> keyframe tracks; runs clean, 124 animated objects), `camera.py` (camera plan + C-02/C-03 audit helpers).
+- `cff\story\timing.py`: events retimed inside their beats (E-02.2a/b, E-04.1a/b, E-04.4a/b, E-06.1a-e, E-07.3a/b, E-08.2a-e, E-09.1a-p). pytest still 93 green. Regenerate TRACEABILITY.md (`python -m tools traceability`) after this.
+- Process slip: the timing retime was applied with a Python heredoc (against CLAUDE.md edit rules). Diff reviewed: exactly the 34 intended lines. Everything else used Edit/Write.
+Not started: `blender\` builders (build_scene, actors, world, lighting, camera_rig, materials, compositor, captions_scene, labels), `blender\checks\scene_checks.py`, tools commands (env, verify, build, render, captions, packet stage1, contact, palette, motion), tests for new modules (literal scan of blender\, palette, camera C-02, choreography coverage), animatic render (960x540, 300-frame chunks), frame inspection, approvals record.
+Exact next action: run scratchpad-style camera audit (`CameraPlan` + `camera.steps`, thresholds in camera.py) and tune `cff\theme\shots.py` until C-02/C-03 pass; add pytest for it; then build Blender side. Known design decisions: glow channel = object.color (emission tint, alpha=opacity); labels are billboard plates; root key module/press/reader sit on the dais bay, capsule never enters the vault shell; CERT-CA1 hides before the flashback and re-forms in it; lens ramp limited to 0.4 mm/frame.
+
+## Next session (planned once Session 3 completes)
+- **Next session = 3 (resume)**: Pipeline + animatic build (Phase 4, build part). **Model: Sonnet 5.5. Effort: High.**
 - Start it as a NEW Claude Code session and paste the Session 3 prompt from `docs\SESSION-PROMPTS.md`.
 - **Exact next action:**
   1. Confirm Phase 3 is APPROVED in `docs\CHIEF-OF-STAFF-APPROVALS.md`.
