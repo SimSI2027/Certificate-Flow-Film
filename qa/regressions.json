@@ -1,1 +1,74 @@
-[]
+[
+  {
+    "finding": "PKI-S0R1-01",
+    "round": "stage0-R1",
+    "severity": "MAJOR",
+    "criterion": "F-10",
+    "beat": "B-06.1",
+    "summary": "One TLS handshake presents one server certificate. The unverified S2 attempt must end; enrollment is server-side and policy-driven, never during a pending connection; S6 is a new connection attempt whose channel turns green.",
+    "hard_test": "tests/test_gan_findings.py::test_PKI_S0R1_01_one_certificate_per_connection_attempt"
+  },
+  {
+    "finding": "PKI-S0R1-02",
+    "round": "stage0-R1",
+    "severity": "MAJOR",
+    "criterion": "AR-02",
+    "beat": "B-05.2",
+    "summary": "Each request is consumed at its destination CA and never reappears. The subordinate-CA request in the flashback carries a CA=true band and a must-read 'Issuing CA 1's own CA request' tag, so it cannot read as the RDP request being forwarded to the root.",
+    "hard_test": "tests/test_gan_findings.py::test_PKI_S0R1_02_requests_end_at_their_destination_and_the_ca_request_is_labelled"
+  },
+  {
+    "finding": "PKI-S0R1-03",
+    "round": "stage0-R1",
+    "severity": "MINOR",
+    "criterion": "AR-02",
+    "beat": "B-05.1",
+    "summary": "The root's self-signed seal is revealed as an existing property, not animated closed; the root performs no operation in the present.",
+    "hard_test": "tests/test_gan_findings.py::test_PKI_S0R1_03_root_performs_no_operation_in_the_present"
+  },
+  {
+    "finding": "PKI-S0R1-04",
+    "round": "stage0-R1",
+    "severity": "MINOR",
+    "criterion": "F-03",
+    "beat": "B-06.1",
+    "summary": "The handshake proof has its own shape (a signature impression), distinct from every key and included in the C-11 silhouette checks.",
+    "hard_test": "tests/test_gan_findings.py::test_PKI_S0R1_04_handshake_proof_is_not_key_material"
+  },
+  {
+    "finding": "PKI-S0R1-05",
+    "round": "stage0-R1",
+    "severity": "MINOR",
+    "criterion": "AR-05",
+    "beat": "B-06.2",
+    "summary": "The trust-store recall does not travel (transport none, era recall); it is a shimmer on the card already in the cradle.",
+    "hard_test": "tests/test_gan_findings.py::test_PKI_S0R1_05_trust_store_recall_does_not_travel"
+  },
+  {
+    "finding": "PKI-S0R1-06",
+    "round": "stage0-R1",
+    "severity": "MINOR",
+    "criterion": "AR-05",
+    "beat": "B-04.1",
+    "summary": "B-04.1's text says the capsule pauses at the server's outbound port, framed with the AD node; it never goes to AD.",
+    "hard_test": "tests/test_model_integrity.py::test_requests_go_only_to_a_publishing_ca_after_discovery"
+  },
+  {
+    "finding": "PKI-S0R1-07",
+    "round": "stage0-R1",
+    "severity": "MINOR",
+    "criterion": "F-02",
+    "beat": "B-02.2",
+    "summary": "The model and the notes agree on the self-signed certificate's contents (subject CN; no SAN modelled).",
+    "hard_test": "tests/test_gan_findings.py::test_PKI_S0R1_07_self_signed_certificate_contents_match_notes"
+  },
+  {
+    "finding": "PKI-S0R1-08",
+    "round": "stage0-R1",
+    "severity": "MINOR",
+    "criterion": "F-05",
+    "beat": "B-03.1",
+    "summary": "The notes state that the template definition is read from the AD enrollment policy before key generation; B-04.1 is the CA-selection lookup.",
+    "hard_test": "none (documentation-only; not expressible as a model test)"
+  }
+]

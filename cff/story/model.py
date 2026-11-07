@@ -149,6 +149,7 @@ class LabelKind(StrEnum):
 class EventType(StrEnum):
     USER_INITIATES = "user_initiates"
     CONNECTION_PULSE = "connection_pulse"
+    CONNECTION_CLOSED = "connection_closed"
     LISTENER_ACTIVATES = "listener_activates"
     PRESENT_CERT = "present_cert"
     CLIENT_CANNOT_VERIFY = "client_cannot_verify"
@@ -163,6 +164,7 @@ class EventType(StrEnum):
     REQUEST_SUBMITTED = "request_submitted"
     OFFLINE_CARRY = "offline_carry"
     CA_CHECK = "ca_check"
+    REQUEST_CONSUMED = "request_consumed"  # the request ends its life at its destination CA
     CA_SIGNS = "ca_signs"
     CERT_RETURNED = "cert_returned"
     CERT_INSTALLED = "cert_installed"
@@ -638,7 +640,7 @@ def _beats() -> tuple[Beat, ...]:
         Beat("B-01.1", "User opens RDP", f"At {n.CLIENT_HOSTNAME} the user opens an RDP connection to {n.RDP_SERVER_FQDN}.", ("F-01",), USER),
         Beat("B-01.2", "Connection pulse", "An amber connection pulse travels the floor light-channel to the RDP server.", ("F-01",), "CH-RDP"),
         Beat("B-02.1", "Listener lights", f"Arrival at {n.RDP_SERVER_FQDN}; the RDP listener lights up.", ("F-01",), RDP_SERVER),
-        Beat("B-02.2", "Self-signed, unverified", "The server's out-of-the-box self-signed certificate reaches the client, which cannot verify it; the connection stays amber.", ("F-01", "F-02"), "CERT-RDP-SELF"),
+        Beat("B-02.2", "Self-signed, unverified", "The server's out-of-the-box self-signed certificate reaches the client, which cannot verify it; nothing is accepted and the attempt closes.", ("F-01", "F-02"), "CERT-RDP-SELF"),
         Beat("B-02.3", "Template from policy", f"Group Policy names the {n.RDP_TEMPLATE} template for the RDP server.", ("F-05", "F-07"), "TPL-RDPAUTH"),
         Beat("B-03.1", "Key pair forms", "A new key pair is generated inside the RDP server chassis.", ("F-03",), "KP-RDP"),
         Beat("B-03.2", "Private key anchored", "The private key settles into the server's locked key container and stays there.", ("F-03",), "KEY-RDP-PRIV"),
@@ -647,12 +649,12 @@ def _beats() -> tuple[Beat, ...]:
         Beat("B-04.1", "Who publishes the template?", f"The enrollment client asks AD ({n.AD_DOMAIN_FQDN}) which CA publishes {n.RDP_TEMPLATE}; only {ca1} is eligible.", ("F-05", "F-14", "AR-04", "AR-05"), AD),
         Beat("B-04.2", f"Into {ca1}", f"The request travels to {ca1} only.", ("F-05", "F-04"), "REQ-RDP"),
         Beat("B-04.3", "Four checks", f"{ca1} authenticates the requester and checks publication, Enroll permission and template policy.", ("F-06", "F-07", "AR-05"), ISSUING_CA1),
-        Beat("B-04.4", "CA signs", f"{ca1}'s key, sealed in its module, drives the press that signs the end-entity certificate.", ("F-03", "F-07", "F-08", "AR-06"), "CERT-RDP"),
+        Beat("B-04.4", "CA signs", f"The request is consumed; {ca1}'s key, sealed in its module, drives the press that signs the end-entity certificate.", ("F-03", "F-07", "F-08", "AR-06"), "CERT-RDP"),
         Beat("B-04.5", "Certificate installed", "The certificate returns and locks in beside the existing private key.", ("F-09", "F-03"), "CERT-RDP"),
         Beat("B-05.1", "The trust anchor", f"A sealed, cable-free gold vault: {n.ROOT_CA_NAME}, self-signed, offline.", ("AR-01", "F-17", "F-11"), ROOT_CA),
         Beat("B-05.2", "Offline ceremony (flashback)", f"Earlier, at setup: {ca1}'s request is carried to the root on removable media, signed offline and carried back.", ("AR-02", "F-03", "F-04"), "REQ-CA1", flashback=True),
         Beat("B-05.3", "Issuer link", f"Present: a gold-to-cyan link joins {ca1}'s certificate to the root. No end-entity request reaches the root.", ("AR-03", "F-15", "F-17"), "CERT-CA1"),
-        Beat("B-06.1", "Presentation", f"The server presents its certificate with {ca1}'s certificate and proves possession of its private key.", ("F-10", "F-03", "F-01"), "CERT-RDP"),
+        Beat("B-06.1", "Presentation", f"A new connection attempt: the server presents its certificate with {ca1}'s certificate and proves possession of its private key.", ("F-10", "F-03", "F-01"), "CERT-RDP"),
         Beat("B-06.2", "Chain builds", "On the client the cards dock upward to a root already in the Trusted Root store, installed earlier by policy.", ("F-11", "AR-05"), "CHAIN-RDP"),
         Beat("B-06.3", "AIA is not trust", "A small AIA indicator: a missing intermediate could be fetched; fetching never creates trust.", ("F-11", "AR-06"), "SVC-AIA"),
         Beat("B-06.4", "Validation checks", "Chain, signatures, validity, name, EKU resolve; revocation is pending.", ("F-12", "F-08"), "CHAIN-RDP"),
@@ -732,7 +734,7 @@ def _certificates() -> tuple[Certificate, ...]:
         Certificate("CERT-ROOT", CertKind.ROOT_SELF_SIGNED, n.ROOT_CA_NAME, ROOT_CA, (), "CERT-ROOT", "KEY-ROOT-PRIV", "KEY-ROOT-PUB", (), True, None, None, None, STORE_TRUSTED_ROOT, None),
         Certificate("CERT-CA1", CertKind.ISSUING_CA, n.ISSUING_CA1_NAME, ISSUING_CA1, (), "CERT-ROOT", "KEY-ROOT-PRIV", "KEY-CA1-PUB", (), True, None, "CERT-ROOT", "CRL-ROOT", STORE_CA, "B-05.2"),
         Certificate("CERT-CA2", CertKind.ISSUING_CA, n.ISSUING_CA2_NAME, ISSUING_CA2, (), "CERT-ROOT", "KEY-ROOT-PRIV", "KEY-CA2-PUB", (), True, None, "CERT-ROOT", "CRL-ROOT", STORE_CA, None),
-        Certificate("CERT-RDP-SELF", CertKind.SELF_SIGNED_END_ENTITY, n.RDP_SERVER_FQDN, RDP_SERVER, (n.RDP_SERVER_FQDN,), "CERT-RDP-SELF", "KEY-RDP-SELF-PRIV", "KEY-RDP-SELF-PUB", (OID_SERVER_AUTH,), False, None, None, None, "Remote Desktop", None),
+        Certificate("CERT-RDP-SELF", CertKind.SELF_SIGNED_END_ENTITY, n.RDP_SERVER_FQDN, RDP_SERVER, (), "CERT-RDP-SELF", "KEY-RDP-SELF-PRIV", "KEY-RDP-SELF-PUB", (OID_SERVER_AUTH,), False, None, None, None, "Remote Desktop", None),
         Certificate("CERT-RDP", CertKind.END_ENTITY, n.RDP_SERVER_FQDN, RDP_SERVER, (n.RDP_SERVER_FQDN,), "CERT-CA1", "KEY-CA1-PRIV", "KEY-RDP-PUB", (OID_REMOTE_DESKTOP_AUTH,), False, "TPL-RDPAUTH", "CERT-CA1", "CRL-CA1", STORE_PERSONAL, "B-04.4"),
         Certificate("CERT-WEB", CertKind.END_ENTITY, n.WEB_SITE_DNS_NAME, WEB_SERVER, (n.WEB_SITE_DNS_NAME,), "CERT-CA2", "KEY-CA2-PRIV", "KEY-WEB-PUB", (OID_SERVER_AUTH,), False, "TPL-WEBTLS", "CERT-CA2", "CRL-CA2", STORE_PERSONAL, "B-08.2"),
     )
@@ -798,6 +800,7 @@ def _labels(chains: tuple[Chain, ...]) -> tuple[Label, ...]:
         Label("LBL-CERT-WEB-SAN", LabelKind.CARD_FIELD, n.WEB_SITE_DNS_NAME, "CERT-WEB", ("B-08.2",)),
         Label("LBL-CERT-WEB-EKU", LabelKind.CARD_FIELD, n.EKU_SERVER_AUTH_NAME, "CERT-WEB", ("B-08.2",)),
         Label("LBL-FLASHBACK", LabelKind.TAG, "Earlier: offline signing ceremony", ROOT_CA, ("B-05.2",)),
+        Label("LBL-REQ-CA1", LabelKind.TAG, f"{n.ISSUING_CA1_ROLE}'s own CA request", "REQ-CA1", ("B-05.2",)),
         Label("LBL-ROOT-STORE", LabelKind.TAG, "Installed earlier by policy", "TS-CLIENT-ROOT", ("B-06.2",)),
         Label("LBL-AIA-1", LabelKind.TAG, "Missing intermediate? AIA can fetch it", "SVC-AIA", ("B-06.3",)),
         Label("LBL-AIA-2", LabelKind.TAG, "Fetching never creates trust", "SVC-AIA", ("B-06.3",)),
@@ -837,6 +840,7 @@ def _events() -> tuple[Event, ...]:
         Event("E-02.1a", "B-02.1", E.LISTENER_ACTIVATES, "CH-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL),
         Event("E-02.2a", "B-02.2", E.PRESENT_CERT, "CERT-RDP-SELF", RDP_SERVER, CLIENT, T.NETWORK),
         Event("E-02.2b", "B-02.2", E.CLIENT_CANNOT_VERIFY, "CERT-RDP-SELF", CLIENT, CLIENT, T.LOCAL),
+        Event("E-02.2c", "B-02.2", E.CONNECTION_CLOSED, "CH-RDP", CLIENT, RDP_SERVER, T.NETWORK),
         Event("E-02.3a", "B-02.3", E.POLICY_ASSIGNS_TEMPLATE, "TPL-RDPAUTH", AD, RDP_SERVER, T.NETWORK),
         # S3
         Event("E-03.1a", "B-03.1", E.KEYPAIR_GENERATED, "KP-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL),
@@ -851,25 +855,28 @@ def _events() -> tuple[Event, ...]:
     for suffix, ca_check in zip("abcd", CA_CHECK_ORDER, strict=True):
         ev.append(Event(f"E-04.3{suffix}", "B-04.3", E.CA_CHECK, "REQ-RDP", ISSUING_CA1, ISSUING_CA1, T.LOCAL, check=ca_check))
     ev += [
-        Event("E-04.4a", "B-04.4", E.CA_SIGNS, "CERT-RDP", ISSUING_CA1, ISSUING_CA1, T.LOCAL, uses_key="KEY-CA1-PRIV"),
+        Event("E-04.4a", "B-04.4", E.REQUEST_CONSUMED, "REQ-RDP", ISSUING_CA1, ISSUING_CA1, T.LOCAL),
+        Event("E-04.4b", "B-04.4", E.CA_SIGNS, "CERT-RDP", ISSUING_CA1, ISSUING_CA1, T.LOCAL, uses_key="KEY-CA1-PRIV"),
         Event("E-04.5a", "B-04.5", E.CERT_RETURNED, "CERT-RDP", ISSUING_CA1, RDP_SERVER, T.NETWORK),
         Event("E-04.5b", "B-04.5", E.CERT_INSTALLED, "CERT-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL),
         # S5
         Event("E-05.1a", "B-05.1", E.SELF_SIGNATURE_SHOWN, "CERT-ROOT", ROOT_CA, ROOT_CA, T.NONE),
         Event("E-05.2a", "B-05.2", E.PROOF_OF_POSSESSION, "REQ-CA1", ISSUING_CA1, ISSUING_CA1, T.LOCAL, uses_key="KEY-CA1-PRIV", era=F),
         Event("E-05.2b", "B-05.2", E.OFFLINE_CARRY, "REQ-CA1", ISSUING_CA1, ROOT_CA, T.OFFLINE_MEDIA, era=F),
-        Event("E-05.2c", "B-05.2", E.CA_SIGNS, "CERT-CA1", ROOT_CA, ROOT_CA, T.LOCAL, uses_key="KEY-ROOT-PRIV", era=F),
-        Event("E-05.2d", "B-05.2", E.OFFLINE_CARRY, "CERT-CA1", ROOT_CA, ISSUING_CA1, T.OFFLINE_MEDIA, era=F),
-        Event("E-05.2e", "B-05.2", E.CERT_INSTALLED, "CERT-CA1", ISSUING_CA1, ISSUING_CA1, T.LOCAL, era=F),
+        Event("E-05.2c", "B-05.2", E.REQUEST_CONSUMED, "REQ-CA1", ROOT_CA, ROOT_CA, T.LOCAL, era=F),
+        Event("E-05.2d", "B-05.2", E.CA_SIGNS, "CERT-CA1", ROOT_CA, ROOT_CA, T.LOCAL, uses_key="KEY-ROOT-PRIV", era=F),
+        Event("E-05.2e", "B-05.2", E.OFFLINE_CARRY, "CERT-CA1", ROOT_CA, ISSUING_CA1, T.OFFLINE_MEDIA, era=F),
+        Event("E-05.2f", "B-05.2", E.CERT_INSTALLED, "CERT-CA1", ISSUING_CA1, ISSUING_CA1, T.LOCAL, era=F),
         Event("E-05.3a", "B-05.3", E.ISSUER_LINK, "CERT-CA1", ROOT_CA, ISSUING_CA1, T.LOGICAL),
         # S6
-        Event("E-06.1a", "B-06.1", E.PRESENT_CERT, "CERT-RDP", RDP_SERVER, CLIENT, T.NETWORK),
-        Event("E-06.1b", "B-06.1", E.PRESENT_CERT, "CERT-CA1", RDP_SERVER, CLIENT, T.NETWORK),
-        Event("E-06.1c", "B-06.1", E.HANDSHAKE_SIGNATURE, "HS-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL, uses_key="KEY-RDP-PRIV"),
-        Event("E-06.1d", "B-06.1", E.HANDSHAKE_PROOF_SENT, "HS-RDP", RDP_SERVER, CLIENT, T.NETWORK),
+        Event("E-06.1a", "B-06.1", E.CONNECTION_PULSE, "CH-RDP", CLIENT, RDP_SERVER, T.NETWORK),
+        Event("E-06.1b", "B-06.1", E.PRESENT_CERT, "CERT-RDP", RDP_SERVER, CLIENT, T.NETWORK),
+        Event("E-06.1c", "B-06.1", E.PRESENT_CERT, "CERT-CA1", RDP_SERVER, CLIENT, T.NETWORK),
+        Event("E-06.1d", "B-06.1", E.HANDSHAKE_SIGNATURE, "HS-RDP", RDP_SERVER, RDP_SERVER, T.LOCAL, uses_key="KEY-RDP-PRIV"),
+        Event("E-06.1e", "B-06.1", E.HANDSHAKE_PROOF_SENT, "HS-RDP", RDP_SERVER, CLIENT, T.NETWORK),
         Event("E-06.2a", "B-06.2", E.CHAIN_LINK, "CERT-RDP", CLIENT, CLIENT, T.LOCAL, target="CERT-CA1"),
         Event("E-06.2b", "B-06.2", E.CHAIN_LINK, "CERT-CA1", CLIENT, CLIENT, T.LOCAL, target="CERT-ROOT"),
-        Event("E-06.2c", "B-06.2", E.TRUST_STORE_RECALL, "TS-CLIENT-ROOT", AD, CLIENT, T.NETWORK, era=Era.RECALL),
+        Event("E-06.2c", "B-06.2", E.TRUST_STORE_RECALL, "TS-CLIENT-ROOT", AD, CLIENT, T.NONE, era=Era.RECALL),
         Event("E-06.3a", "B-06.3", E.AIA_INDICATOR, "SVC-AIA", CLIENT, PKI_HTTP, T.NONE, target="CERT-CA1", conditional=True),
     ]
     for suffix, v_check in zip("abcde", VALIDATION_ORDER[:5], strict=True):
@@ -896,9 +903,10 @@ def _events() -> tuple[Event, ...]:
         ev.append(Event(f"E-08.1{suffix}", "B-08.1", E.CA_CHECK, "REQ-WEB", ISSUING_CA2, ISSUING_CA2, T.LOCAL, check=ca_check, note=note))
     V = ValidationCheck
     ev += [
-        Event("E-08.2a", "B-08.2", E.CA_SIGNS, "CERT-WEB", ISSUING_CA2, ISSUING_CA2, T.LOCAL, uses_key="KEY-CA2-PRIV"),
-        Event("E-08.2b", "B-08.2", E.CERT_RETURNED, "CERT-WEB", ISSUING_CA2, WEB_SERVER, T.NETWORK),
-        Event("E-08.2c", "B-08.2", E.CERT_INSTALLED, "CERT-WEB", WEB_SERVER, WEB_SERVER, T.LOCAL),
+        Event("E-08.2a", "B-08.2", E.REQUEST_CONSUMED, "REQ-WEB", ISSUING_CA2, ISSUING_CA2, T.LOCAL),
+        Event("E-08.2b", "B-08.2", E.CA_SIGNS, "CERT-WEB", ISSUING_CA2, ISSUING_CA2, T.LOCAL, uses_key="KEY-CA2-PRIV"),
+        Event("E-08.2c", "B-08.2", E.CERT_RETURNED, "CERT-WEB", ISSUING_CA2, WEB_SERVER, T.NETWORK),
+        Event("E-08.2d", "B-08.2", E.CERT_INSTALLED, "CERT-WEB", WEB_SERVER, WEB_SERVER, T.LOCAL),
         Event("E-08.3a", "B-08.3", E.ISSUER_LINK, "CERT-CA2", ROOT_CA, ISSUING_CA2, T.LOGICAL),
         # S9
         Event("E-09.1a", "B-09.1", E.CONNECTION_PULSE, "CH-WEB", CLIENT, WEB_SERVER, T.NETWORK),

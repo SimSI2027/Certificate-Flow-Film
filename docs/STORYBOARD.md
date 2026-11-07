@@ -48,7 +48,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** `rdp01.1sn0s.lab`
 
 ### B-02.2 — Self-signed, unverified (9–12 s, frames 271–360)
-- **Shot:** a pale card rises at the listener. Its faint seal loops back on itself (self-signed), with no issuer seal and the label "Self-signed". The card slides along the amber channel to the laptop. Over the laptop, an "Unverified" tag lights, and the card hovers there, not accepted. The channel stays amber.
+- **Shot:** a pale card rises at the listener. Its faint seal loops back on itself (self-signed), with no issuer seal and the label "Self-signed". The card slides along the amber channel to the laptop. Over the laptop, an "Unverified" tag lights, and the card hovers there, not accepted. The channel stays amber. The user does not accept: the card fades, and the amber pulse dies out of the channel as this attempt closes.
 - **Lens:** 35 mm, f/2.8
 - **Camera move:** the camera pans and trucks back along the channel so the laptop sits in the midground, with a rack focus from the card to the "Unverified" tag
 - **Focal subject:** the self-signed certificate (`CERT-RDP-SELF`)
@@ -56,7 +56,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** "Self-signed", "Unverified"
 
 ### B-02.3 — Template from policy (12–14 s, frames 361–420)
-- **Shot:** the self-signed card dims and recedes. An `RDPAuth` template badge drops from the AD node's direction and lands with a small settle on the RDP server's top plate.
+- **Shot:** the channel is dark; no connection is pending. On the server's own policy refresh, an `RDPAuth` template badge drops from the AD node's direction and lands with a small settle on the RDP server's top plate.
 - **Lens:** 35 mm, f/4
 - **Camera move:** a crane up, tilting down as the badge lands, ending over the server
 - **Focal subject:** the `RDPAuth` badge (`TPL-RDPAUTH`)
@@ -120,7 +120,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** the four check labels, `1SN0S Issuing CA 1`
 
 ### B-04.4 — CA signs (33–36 s, frames 991–1080)
-- **Shot:** deeper in the vault, Issuing CA 1's key glows inside a sealed module that stays shut. Its light drives a signing press through a linkage. The press stamps a certificate card, which shows the SAN `rdp01.1sn0s.lab`, "Remote Desktop Authentication", a validity bar and two small AIA/CDP ports.
+- **Shot:** the request capsule dissolves into the press's intake and is gone for good. Deeper in the vault, Issuing CA 1's key glows inside a sealed module that stays shut. Its light drives a signing press through a linkage. The press stamps a certificate card, which shows the SAN `rdp01.1sn0s.lab`, "Remote Desktop Authentication", a validity bar and two small AIA/CDP ports.
 - **Lens:** 50 mm, f/2.8
 - **Camera move:** a push-in to the press at the stamp, then a tilt to read the card's fields
 - **Focal subject:** the RDP certificate (`CERT-RDP`)
@@ -137,7 +137,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 ## S5 — The hierarchy and the trust anchor
 
 ### B-05.1 — The trust anchor (38–41.5 s, frames 1141–1245)
-- **Shot:** rising from the CA hall, a sealed gold vault appears on its own tall plinth, with open air and no cables around it. Its self-signed seal ring closes on itself. The nameplate reads `1SN0S Root CA`.
+- **Shot:** rising from the CA hall, a sealed gold vault appears on its own tall plinth, with open air and no cables around it. A slow sweep of light reveals its existing self-signed seal, a ring that closes on itself. The ring does not animate, and the root's key module and press stay dark and still. The nameplate reads `1SN0S Root CA`.
 - **Lens:** 28 mm, f/4
 - **Camera move:** a crane up about 6 m with a tilt up, easing to a hover
 - **Focal subject:** the Root CA vault (`ROOT_CA`)
@@ -145,12 +145,12 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** `1SN0S Root CA`
 
 ### B-05.2 — Offline ceremony (flashback) (41.5–46.5 s, frames 1246–1395)
-- **Shot:** a cut into a desaturated, cooler flashback with a soft gate vignette, tagged "Earlier: offline signing ceremony". Issuing CA 1's own CA-request capsule is sealed inside its vault and slotted into a removable-media cartridge. The cartridge is carried along a walkway (a footprint trail, never a conduit) to the root dais. The root's sealed key drives its press, which stamps Issuing CA 1's CA certificate (CA=true). The cartridge carries the certificate back to Issuing CA 1, which installs it in its crown.
+- **Shot:** a cut into a desaturated, cooler flashback with a soft gate vignette, tagged "Earlier: offline signing ceremony". Inside Issuing CA 1's vault, its own key module seals a CA-request capsule. The capsule carries a cyan CA=true band and the tag "Issuing CA 1's own CA request", and is slotted into a removable-media cartridge. The cartridge is carried along a walkway (a footprint trail, never a conduit) to the root dais. The root's sealed key drives its press, which stamps Issuing CA 1's CA certificate (CA=true). The cartridge carries the certificate back to Issuing CA 1, which installs it in its crown.
 - **Lens:** 35 mm, f/4
 - **Camera move:** a gentle lateral glide following the cartridge out and back
 - **Focal subject:** Issuing CA 1's CA request (`REQ-CA1`)
 - **Caption:** *The Root CA signs the issuing CA certificate* (`CAP-S5a`)
-- **Must-read text:** "Earlier: offline signing ceremony"
+- **Must-read text:** "Earlier: offline signing ceremony", "Issuing CA 1's own CA request"
 
 ### B-05.3 — Issuer link (46.5–50 s, frames 1396–1500)
 - **Shot:** a cut back to the present, in full colour. From the root, a gold-to-cyan trust link grows down to Issuing CA 1's certificate on its vault crown. The root stays cable-free; the link is light, not cable.
@@ -162,14 +162,14 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 ## S6 — Presentation and validation
 
 ### B-06.1 — Presentation (50–53 s, frames 1501–1590)
-- **Shot:** back at `rdp01.1sn0s.lab`. The RDP certificate card and Issuing CA 1's certificate card lift from the chassis and set off along the amber channel. Inside the closed key container, a key pulse glows, and only a small sealed proof glint leaves to follow the cards.
+- **Shot:** a new connection attempt. A fresh amber pulse runs from the laptop along the channel and arrives at `rdp01.1sn0s.lab`. The RDP certificate card and Issuing CA 1's certificate card lift from the chassis and set off back along the amber channel. Inside the closed key container, a key pulse glows, and a small handshake proof (a flat signature impression, unlike any key shape) follows the cards.
 - **Lens:** 35 mm, f/4
 - **Camera move:** a long eased crane down from the hierarchy to the server, then a turn to follow the cards
 - **Focal subject:** the RDP certificate (`CERT-RDP`)
 - **Caption:** none
 
 ### B-06.2 — Chain builds (53–57 s, frames 1591–1710)
-- **Shot:** at the laptop, the cards dock upward in a short vertical stack: the server certificate, then Issuing CA 1 above it, then the gold root card, which was already sitting in the Trusted Root cradle above the laptop. A brief shimmer and the tag "Installed earlier by policy" mark the root card.
+- **Shot:** at the laptop, the cards dock upward in a short vertical stack: the server certificate, then Issuing CA 1 above it, then the gold root card, which was already sitting in the Trusted Root cradle above the laptop. A brief shimmer and the tag "Installed earlier by policy" mark the root card. The shimmer plays on the card in place; nothing travels from AD.
 - **Lens:** 35 mm, f/2.8
 - **Camera move:** the camera arrives with the cards and booms up with the docking
 - **Focal subject:** the RDP chain (`CHAIN-RDP`)
@@ -201,7 +201,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** "OCSP if deployed", "Revocation OK"
 
 ### B-06.6 — Trusted session (67–70 s, frames 2011–2100)
-- **Shot:** the channel turns from amber to green, from the laptop to the server, and the laptop screen opens the remote session window.
+- **Shot:** the new connection's channel turns from amber to green, from the laptop to the server, and the laptop screen opens the remote session window.
 - **Lens:** 35 mm, f/2.8
 - **Camera move:** a low tracking glide along the green channel toward the laptop screen
 - **Focal subject:** the RDP channel (`CH-RDP`)
@@ -253,7 +253,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Must-read text:** `1SN0S Issuing CA 2`, the four check labels, the note
 
 ### B-08.2 — TLS certificate (85.5–90 s, frames 2566–2700)
-- **Shot:** Issuing CA 2's sealed key drives its press, which stamps the TLS card (SAN `portal.1sn0s.lab`, "Server Authentication"). The card returns along the violet route and locks into `WEB01` beside its key container.
+- **Shot:** the web request capsule dissolves into the press's intake. Issuing CA 2's sealed key drives its press, which stamps the TLS card (SAN `portal.1sn0s.lab`, "Server Authentication"). The card returns along the violet route and locks into `WEB01` beside its key container.
 - **Lens:** 50 mm, f/2.8, then 35 mm for the return
 - **Camera move:** a push-in at the stamp, a tilt to read the fields, then an eased return chase
 - **Focal subject:** the web certificate (`CERT-WEB`)
@@ -270,7 +270,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 ## S9 — Full picture and close
 
 ### B-09.1 — Browser validation (93–98 s, frames 2791–2940)
-- **Shot:** at the laptop, a browser window opens `portal.1sn0s.lab`. A pulse reaches `WEB01`, which presents the TLS card and Issuing CA 2's card, with a quick proof glint. The cards dock up to the same gold root in the cradle. Compressed ticks resolve: *Name matches portal.1sn0s.lab*, *EKU permits TLS server auth*, *Currently valid* and *Revocation OK*, with two quick restrained-amber CRL flickers, one per non-root card. The web channel turns green.
+- **Shot:** at the laptop, a browser window opens `portal.1sn0s.lab`. A pulse reaches `WEB01`, which presents the TLS card and Issuing CA 2's card, with a quick handshake-proof impression. The cards dock up to the same gold root in the cradle. Compressed ticks resolve: *Name matches portal.1sn0s.lab*, *EKU permits TLS server auth*, *Currently valid* and *Revocation OK*, with two quick restrained-amber CRL flickers, one per non-root card. The web channel turns green.
 - **Lens:** 35 mm, f/2.8
 - **Camera move:** a crane down from the hierarchy, arcing to the laptop
 - **Focal subject:** the web chain (`CHAIN-WEB`)

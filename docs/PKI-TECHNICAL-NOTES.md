@@ -46,7 +46,7 @@ Public CAs do not issue certificates for internal names, so the lab's names come
 | `CERT-CA2` | CN=1SN0S Issuing CA 2 | Root CA | none (unrestricted) | CA=true | same as CA 1 | same as CA 1 |
 | `CERT-RDP` | CN=rdp01.1sn0s.lab; SAN dNSName=rdp01.1sn0s.lab | Issuing CA 1 | Remote Desktop Authentication 1.3.6.1.4.1.311.54.1.2 | not a CA | `http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-1.crt` | `http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-1.crl` |
 | `CERT-WEB` | CN=portal.1sn0s.lab; SAN dNSName=portal.1sn0s.lab | Issuing CA 2 | Server Authentication 1.3.6.1.5.5.7.3.1 | not a CA | `http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-2.crt` | `http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-2.crl` |
-| `CERT-RDP-SELF` | CN=rdp01.1sn0s.lab | itself (its own separate key `KP-RDP-SELF`) | Server Authentication | not a CA | — | — |
+| `CERT-RDP-SELF` | CN=rdp01.1sn0s.lab (no SAN is modelled or shown) | itself (its own separate key `KP-RDP-SELF`) | Server Authentication | not a CA | — | — |
 
 URL file names are illustrative. ADCS also offers LDAP AIA/CDP locations by default. This lab publishes HTTP locations, which suit any client and are common practice. The offline root's CRL and certificate are copied to `pki.1sn0s.lab` by an administrator, because the root has no network connection.
 
@@ -83,13 +83,15 @@ Kerberos server authentication is out of scope on screen (F-16; see "Kerberos sc
 **Meaning:** the Remote Desktop service on `RDP01` accepts the connection. The server, not the client, owns and presents the certificate used for server authentication (F-01). The caption states the problem: the server needs a certificate that clients can validate up to a root they already trust.
 
 ### B-02.2
-**On screen:** a pale self-signed card with only its own self-seal; the client shows it as unverified; the channel stays amber.
+**On screen:** a pale self-signed card with only its own self-seal; the client shows it as unverified; the channel stays amber. The attempt then ends and the amber pulse dies out.
 
 **Meaning:** out of the box, the Remote Desktop service creates a self-signed certificate for the computer, with Server Authentication EKU (`CERT-RDP-SELF`, with its own key pair `KP-RDP-SELF`) (F-02).
 
 The certificate *is* signed, by its own private key. What it lacks is an issuer the client already trusts. It is not in the client's Trusted Root store, and no trusted CA vouches for it. So the client cannot verify the server's identity, and the Remote Desktop client warns ("The identity of the remote computer cannot be verified"), depending on its server-authentication setting. The film shows nothing being accepted.
 
 The root certificate (B-05.1) is also self-signed. The difference is not the signature but the fact that the root was deliberately installed as a trust anchor (B-06.2).
+
+A TLS handshake carries exactly one server Certificate message. This attempt therefore ends here, because the user does not accept the warning (model `E-02.2c`, connection closed). The trusted connection in S6 is a **new** connection attempt, with a new handshake that presents the CA-issued certificate.
 
 ### B-02.3
 **On screen:** an `RDPAuth` template badge drops from the AD node onto the RDP server.
@@ -100,12 +102,16 @@ The policy is stored in AD and SYSVOL on the domain controller and applied by th
 
 The badge represents the template *name* being assigned. No certificate and no key comes from AD. `RDPAuth` builds the subject from AD (F-07).
 
+**Order of events.** Enrollment is driven by policy processing on the server, independently of any client connection, and in practice normally before users connect. The client's failed attempt in B-02.2 did not cause it. The film shows the problem first and the server-side fix second for narrative clarity. No client connection is pending while the server enrolls (S3–S4).
+
 ### B-03.1
 **On screen:** a key pair forms inside the server chassis. Caption *The private key stays on the server*.
 
 **Meaning:** enrollment starts by generating a new key pair on `RDP01`, in a machine key container of the server's key storage provider (F-03). The key pair is generated locally; no other machine ever generates or receives it.
 
 This is a new key pair. It is not the self-signed certificate's key from B-02.2.
+
+Before generating the key, the enrollment client reads the `RDPAuth` template definition from the AD enrollment policy. The definition covers the key algorithm and size, the key storage provider and the subject rules, so the key and request are built to the template's requirements. That read is part of the policy-driven enrollment introduced in B-02.3. It is not shown as a separate visual. The later lookup in B-04.1 is the **CA-selection** step: which CA publishes the template.
 
 ### B-03.2
 **On screen:** the private key, with its lock motif, settles into a locked key container and is anchored.
@@ -171,7 +177,9 @@ Caption *Issuing CA 1 verifies, then signs*.
 Because `RDPAuth` builds the subject from AD, the CA looks up the computer object and takes its DNS name for the subject and SAN (F-07). It does not use names from the request. Only after all four checks does it sign.
 
 ### B-04.4
-**On screen:** Issuing CA 1's key stays in a sealed module and drives a press that stamps the card. The card shows SAN `rdp01.1sn0s.lab`, the Remote Desktop Authentication EKU, a validity bar and small AIA/CDP ports.
+**On screen:** the request capsule is consumed at the press. Issuing CA 1's key stays in a sealed module and drives a press that stamps the card. The card shows SAN `rdp01.1sn0s.lab`, the Remote Desktop Authentication EKU, a validity bar and small AIA/CDP ports.
+
+The request ends its life here (model `E-04.4a`). The CA records the request and the issued certificate in its database. The request is never forwarded anywhere, and it never appears again; in particular, it is not in the S5 flashback.
 
 **Meaning:** the CA signs the end-entity certificate (`CERT-RDP`) with Issuing CA 1's private key. That key stays in the CA's protected key storage (an HSM or the CA's KSP) and never leaves it (F-03). The press represents the signing operation; nothing from the key is stamped onto the card except the signature.
 
@@ -191,14 +199,16 @@ The certificate contains:
 (Docs only, F-09: the Remote Desktop service needs read access to that private key in order to use the certificate. When the Group Policy template setting is used, the service uses the enrolled certificate for RDP's TLS.)
 
 ### B-05.1
-**On screen:** the camera cranes up to a sealed gold vault on its own cable-free plinth: `1SN0S Root CA`. Its self-signed seal closes on itself.
+**On screen:** the camera cranes up to a sealed gold vault on its own cable-free plinth: `1SN0S Root CA`. A sweep of light reveals its existing self-signed seal, a ring that closes on itself. The seal does not animate closed, and the root's key module and press stay dark and still.
 
 **Meaning:** the Root CA is offline, standalone and not domain-joined (AR-01). It is never connected to the network, which is why there are no cables. Its certificate is self-signed: it signs itself.
 
 It is the **trust anchor** (F-17). That is not because it is self-signed, but because its certificate was deliberately placed in the Trusted Root store of every domain member (B-06.2, F-11). In the present-tense film the root performs no operation; the seal shows a property of the certificate, not a live signature.
 
 ### B-05.2
-**On screen:** a desaturated flashback, marked "Earlier: offline signing ceremony". Issuing CA 1's request travels on removable media to the root, is signed offline, and is carried back. Caption *The Root CA signs the issuing CA certificate*.
+**On screen:** a desaturated flashback, marked "Earlier: offline signing ceremony". Issuing CA 1's own CA request is sealed by Issuing CA 1's key module. The capsule carries a cyan CA=true band and the tag "Issuing CA 1's own CA request". It travels on removable media to the root, is signed offline, and is carried back. Caption *The Root CA signs the issuing CA certificate*.
+
+The band and tag make the capsule unmistakably a different request from the RDP request. The RDP request was consumed inside Issuing CA 1 in B-04.4, long after this ceremony, and never travels to the root.
 
 **Meaning:** this happened at setup, before the film's present (AR-02):
 1. When Issuing CA 1 was installed as an enterprise subordinate CA, it generated its own key pair in its protected storage. It then produced a subordinate-CA certificate request (PKCS #10), signed with its own private key (proof of possession; F-04), as a request file.
@@ -222,15 +232,15 @@ The request in the flashback is a subordinate-CA request. No end-entity request 
 The caption's "trust anchor" applies only to the root (F-17). Issuing CA 1 is trusted only because its certificate chains to the trust anchor.
 
 ### B-06.1
-**On screen:** the server presents its card with Issuing CA 1's card. A key pulse shows proof of possession; only the signed proof travels; the key stays.
+**On screen:** a new amber connection pulse runs from the client to the server. The server presents its card with Issuing CA 1's card. A key pulse glows inside the closed key container. The cards and a handshake proof (a signature impression, a shape unlike any key) travel to the client; the key stays.
 
-**Meaning:** in the TLS handshake inside the RDP connection, the server sends its certificate chain: `CERT-RDP` plus the issuing CA certificate `CERT-CA1`. The root is not needed, because the client must already have it (F-10).
+**Meaning:** this is a **new** connection attempt (model `E-06.1a`), not the unverified attempt from S2, which ended in B-02.2. In the TLS handshake inside this RDP connection, the server sends its certificate chain: `CERT-RDP` plus the issuing CA certificate `CERT-CA1`. The root is not needed, because the client must already have it (F-10).
 
 The server then proves it holds the private key for `CERT-RDP`'s public key by signing handshake data:
 - in TLS 1.3, the CertificateVerify message
 - in TLS 1.2 with ECDHE, the ServerKeyExchange signature
 
-The client verifies that signature with the certificate's public key. (Legacy TLS 1.2 static-RSA key exchange proves possession by decryption instead; it is not depicted.)
+The client verifies that signature with the certificate's public key. The handshake proof on screen is this signature over handshake data. It is not key material. (Legacy TLS 1.2 static-RSA key exchange proves possession by decryption instead; it is not depicted.)
 
 A certificate alone proves nothing, because certificates are public. Possession of the matching private key is what binds the connection to the certificate. The private key never leaves the server (F-03).
 
@@ -242,7 +252,7 @@ A certificate alone proves nothing, because certificates are public. Possession 
 - `CERT-CA1` is issued by the root
 - the root certificate is found in `CLIENT01`'s Trusted Root Certification Authorities store
 
-The root was put there **earlier**, by AD publication or Group Policy (AR-05). `CLIENT01` is a domain member, and roots published to AD's Certification Authorities container, or deployed by a Group Policy Public Key Policy, are placed in members' trusted root store. The shimmer recalls that earlier step. Nothing is added to the trust store now.
+The root was put there **earlier**, by AD publication or Group Policy (AR-05). `CLIENT01` is a domain member, and roots published to AD's Certification Authorities container, or deployed by a Group Policy Public Key Policy, are placed in members' trusted root store. The shimmer recalls that earlier step. It plays only on the card already sitting in the cradle; nothing travels from AD, and nothing is added to the trust store now (model `E-06.2c`: transport none, era recall).
 
 The caption's "validates the whole chain" previews B-06.4–B-06.5. Building the chain does not prove identity; the name check does that (F-11, F-12).
 
@@ -287,7 +297,7 @@ CDP/CRL is the ADCS default (AR-06). OCSP would be used only if an Online Respon
 ### B-06.6
 **On screen:** the channel turns green; the session window opens. Caption *Trusted RDP connection established*.
 
-**Meaning:** all checks passed, so the client accepts the server's identity (F-12). The TLS session completes. With NLA, the user's credentials are then sent through CredSSP inside this authenticated channel, and the remote session opens. Green appears only now.
+**Meaning:** all checks passed on this new connection, so the client accepts the server's identity (F-12). The TLS session completes. With NLA, the user's credentials are then sent through CredSSP inside this authenticated channel, and the remote session opens. Green appears only now.
 
 ### B-07.1
 **On screen:** the camera glides to `WEB01`, which serves `portal.1sn0s.lab` and carries a `WebServer-TLS` badge.
@@ -329,7 +339,7 @@ Issuing CA 1 does not publish `WebServer-TLS`, so it is ineligible. Only Issuing
 The note compresses F-07. This template takes the subject and SAN from the request, so the CA will issue whatever name an allowed requester asks for. That is why Enroll is restricted to authorized web-server accounts. (A CA certificate manager approval step is also possible, but is not depicted.)
 
 ### B-08.2
-**On screen:** Issuing CA 2's key-driven press stamps the TLS card (SAN `portal.1sn0s.lab`, Server Authentication EKU). It returns and locks beside the web server's private key. Caption *Issuing CA 2 signs the TLS certificate*.
+**On screen:** the web request capsule is consumed at the press. Issuing CA 2's key-driven press stamps the TLS card (SAN `portal.1sn0s.lab`, Server Authentication EKU). It returns and locks beside the web server's private key. Caption *Issuing CA 2 signs the TLS certificate*.
 
 **Meaning:** Issuing CA 2 signs `CERT-WEB` with its own private key, which stays in its protected storage (F-03). The certificate has:
 - subject and SAN `portal.1sn0s.lab`
@@ -407,6 +417,7 @@ Nothing on screen claims that Kerberos is absent or irrelevant; the scope is sta
 | *WebServer-TLS not published here* | Issuing CA 1's Enrollment Services object does not list that template, so it is ineligible. |
 | *Name supplied in request — enrollment restricted* | The requester chooses the subject/SAN, so only authorized web-server accounts have Enroll. |
 | *Earlier: offline signing ceremony* | A flashback to setup: the subordinate-CA request was carried to the offline root on removable media. |
+| *Issuing CA 1's own CA request* | The subordinate-CA certificate request generated by Issuing CA 1 at setup, signed with Issuing CA 1's own key. It is not an end-entity request. |
 
 ## Fact index
 

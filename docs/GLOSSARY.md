@@ -189,7 +189,8 @@ A complete DNS name, for example `rdp01.1sn0s.lab`.
 
 | Shape | Represents |
 |---|---|
-| Request capsule (glass) | A signed certificate request: public key plus request information |
+| Request capsule (glass) | A signed certificate request: public key plus request information. A cyan CA=true band marks a subordinate-CA request |
+| Handshake proof (signature impression) | The server's signature over TLS handshake data; never key material |
 | Certificate card | A certificate; its seal shows who signed it |
 | Key container | Protected key storage on its owner |
 | Template badge | A certificate template |

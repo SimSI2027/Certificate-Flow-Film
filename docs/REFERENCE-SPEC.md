@@ -218,11 +218,13 @@ Arrival at `rdp01.1sn0s.lab`; the RDP listener lights up.
 - Caption: *The RDP server needs a trusted identity*
 
 #### B-02.2 Self-signed, unverified
-A pale self-signed card appears at the listener. It carries only its own self-seal and no issuer seal. The client side shows it as unverified. The connection stays amber; nothing has been accepted.
+A pale self-signed card appears at the listener. It carries only its own self-seal and no issuer seal. The client side shows it as unverified. The connection stays amber; nothing has been accepted. The attempt then ends: the user does not accept, and the amber pulse dies out of the channel.
 - Accuracy constraint: the card is not shown as unsigned. It is shown as signed only by itself.
+- Accuracy constraint: one connection attempt presents one server certificate. This unverified attempt is closed; the trusted connection in S6 is a new attempt.
 
 #### B-02.3 Template from policy
 An `RDPAuth` template badge drops in from policy (from the AD node, where Group Policy lives) onto the RDP server.
+- Accuracy constraint: enrollment is driven by Group Policy processing on the server. The client's connection does not cause it, and no client connection is pending while the server enrolls (S3–S4).
 
 ### S3 — Keys born locally, request sealed (10 s)
 
@@ -243,7 +245,7 @@ A beam from the private key **seals** the capsule (proof of possession). The key
 ### S4 — Finding the right CA, then evaluation (14 s)
 
 #### B-04.1 Who publishes RDPAuth?
-The capsule pauses at the AD node (`1SN0S.LAB`). A lookup for "who publishes RDPAuth?" lights a route to Issuing CA 1 only.
+The capsule pauses at the server's outbound port, framed with the AD node (`1SN0S.LAB`). A lookup for "who publishes RDPAuth?" lights a route to Issuing CA 1 only.
 - Accuracy constraint: the request has not been submitted and is not sent to AD. The capsule is held at the RDP server's outbound port, framed together with the AD node. The lookup is a separate steel-blue query pulse that travels to AD and back. The answer comes from the Enrollment Services objects. The capsule never enters the AD node, and AD neither receives, signs nor forwards the request.
 
 #### B-04.2 Into Issuing CA 1
@@ -259,7 +261,7 @@ Four checks resolve with staggered ticks:
 - Caption: *Issuing CA 1 verifies, then signs*
 
 #### B-04.4 CA signs
-Issuing CA 1's own key stays in a sealed module and drives a signing press, which stamps a certificate card. The card shows:
+The request capsule is consumed at the press: the request ends its life inside Issuing CA 1 and never reappears. Issuing CA 1's own key stays in a sealed module and drives a signing press, which stamps a certificate card. The card shows:
 - the SAN `rdp01.1sn0s.lab`
 - the Remote Desktop Authentication EKU
 - a validity bar
@@ -271,13 +273,14 @@ The card returns and locks into the server **beside** the existing private key, 
 ### S5 — The hierarchy and the trust anchor (12 s)
 
 #### B-05.1 The trust anchor
-The camera cranes up to a sealed gold vault on its own plinth, **with no cables**: `1SN0S Root CA`. Its self-signed seal closes on itself.
-- Accuracy constraint: the root is offline and performs no signing in the present-tense part of the film.
+The camera cranes up to a sealed gold vault on its own plinth, **with no cables**: `1SN0S Root CA`. Its self-signed seal, a ring that closes on itself, is revealed by a sweep of light as an existing property.
+- Accuracy constraint: the root is offline and performs no signing in the present-tense part of the film. The seal does not animate closed. The root's key module does not glow and its press does not move outside the flashback.
 
 #### B-05.2 Offline ceremony (flashback)
 A desaturated flashback of setup, clearly marked as earlier. Issuing CA 1's own CA-certificate request is carried to the root on removable media. It is signed offline and carried back.
 - Caption: *The Root CA signs the issuing CA certificate*
 - Accuracy constraint: this is a subordinate-CA request, sealed by Issuing CA 1's own key. It is not an end-entity request. The flashback is the only cut in the film (C-02).
+- Accuracy constraint: the CA request has its own visible identity. It carries a cyan CA=true band and a must-read tag, "Issuing CA 1's own CA request", and it is shown being sealed by Issuing CA 1's own key module. The RDP request was consumed in B-04.4 and never appears in the flashback.
 
 #### B-05.3 Issuer link
 Back in the present, a gold-to-cyan link joins Issuing CA 1's certificate to the root. No end-entity request ever travels to the root.
@@ -287,7 +290,7 @@ Back in the present, a gold-to-cyan link joins Issuing CA 1's certificate to the
 ### S6 — Presentation and validation (20 s)
 
 #### B-06.1 Presentation
-The server presents its certificate together with Issuing CA 1's certificate. A key pulse shows proof of possession; the key does not move. Only the signed handshake proof travels to the client.
+A new connection attempt: a fresh amber pulse runs from the client to the server. In this new handshake, the server presents its certificate together with Issuing CA 1's certificate. A key pulse inside the closed key container shows proof of possession; the key does not move. No key material travels. The cards and a handshake proof (a signature impression, a shape distinct from every key) travel to the client.
 
 #### B-06.2 Chain builds
 On the laptop side the cards dock upward: server certificate → Issuing CA 1 → a gold root **already** in the Trusted Root store. The root is shown with a brief "installed earlier by policy" memory shimmer.
@@ -315,7 +318,7 @@ During check 6, two amber CRL fetches come from the CDP, one for each link:
 A small "OCSP if deployed" tag appears. There is no fetch for the root.
 
 #### B-06.6 Trusted session
-The channel turns from amber to green and the session window opens.
+The new connection's channel turns from amber to green and the session window opens.
 - Caption: *Trusted RDP connection established*
 
 ### S7 — A second workload (12 s)
@@ -344,7 +347,7 @@ The capsule travels **only** to Issuing CA 2.
 Faster, compressed versions of the same four checks, including the note "name supplied in request — enrollment restricted".
 
 #### B-08.2 TLS certificate
-Issuing CA 2's key-driven press stamps the TLS certificate (SAN `portal.1sn0s.lab`, Server Authentication EKU). It returns and locks beside the web server's private key.
+The web request capsule is consumed at the press. Issuing CA 2's key-driven press stamps the TLS certificate (SAN `portal.1sn0s.lab`, Server Authentication EKU). It returns and locks beside the web server's private key.
 - Caption: *Issuing CA 2 signs the TLS certificate*
 
 #### B-08.3 Same root
@@ -483,11 +486,12 @@ Each criterion has a requirement, a measurement and a pass threshold. "Beat hold
   - Rendered role samples stay within CIEDE2000 ΔE ≤ 10 of the palette test frame.
 
 ### C-11 Greyscale-distinct shapes
-- **Requirement.** A shape vocabulary that stays distinct even in greyscale. The 13 shapes are: request capsule, certificate card, public key, private key, key container, template badge, CA vault, root vault (on a cable-free plinth), trust link, network channel, validation tick, CRL scroll fetch and AIA indicator.
-- **Measurement.** Binary silhouettes of the 13 shapes, normalised to equal bounding-box area and centred.
+- **Requirement.** A shape vocabulary that stays distinct even in greyscale. The 14 shapes are: request capsule, certificate card, public key, private key, key container, template badge, CA vault, root vault (on a cable-free plinth), trust link, network channel, validation tick, CRL scroll fetch, AIA indicator and handshake proof (a signature impression). The subordinate-CA request uses the request-capsule shape and is told apart by a CA=true band and its tag (B-05.2).
+- **Measurement.** Binary silhouettes of the 14 shapes, normalised to equal bounding-box area and centred.
 - **Threshold.**
   - Pairwise silhouette IoU ≤ 0.75 for every pair.
   - Private key vs public key IoU ≤ 0.6.
+  - Handshake proof vs private key IoU ≤ 0.6, and handshake proof vs public key IoU ≤ 0.6.
 
 ## Legibility criteria
 
