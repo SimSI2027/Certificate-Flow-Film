@@ -1,0 +1,137 @@
+{
+  "discriminator": "pki-discriminator",
+  "round": "stage0-R1",
+  "spec_sha256": "cf5b596203deb0978544c52460d66afae35f3be73551ee0a92ecccc51b3bf2a7",
+  "verdicts": [
+    {"beat": "B-01.1", "frames": ["REFERENCE-SPEC.md#B-01.1", "STORYBOARD.md#B-01.1", "model:E-01.1a", "model:LBL-HOST-CLIENT"], "verdict": "ACCURATE", "reason": "The user initiates from CLIENT01 using the FQDN rdp01.1sn0s.lab, which is the name later matched against the SAN (F-01, F-12)."},
+    {"beat": "B-01.2", "frames": ["REFERENCE-SPEC.md#B-01.2", "model:E-01.2a", "model:CH-RDP"], "verdict": "ACCURATE", "reason": "A network channel shows a pending connection from the client to the server. Nothing is marked trusted. This beat is where the continuity problem in PKI-S0R1-01 starts: this is the only connection pulse CH-RDP ever gets."},
+    {"beat": "B-02.1", "frames": ["REFERENCE-SPEC.md#B-02.1", "model:E-02.1a", "model:LBL-HOST-RDP"], "verdict": "ACCURATE", "reason": "The server owns the identity problem (F-01)."},
+    {"beat": "B-02.2", "frames": ["REFERENCE-SPEC.md#B-02.2", "STORYBOARD.md#B-02.2", "model:CERT-RDP-SELF", "model:E-02.2a", "model:E-02.2b"], "verdict": "ACCURATE", "reason": "The card is signed by its own key, has no trusted issuer and is presented by the server (F-02). The Kerberos case is scoped out in the docs (F-16). There is a minor SAN inconsistency between the notes and the model (PKI-S0R1-07). The beat itself is accurate; the problem is that the same pending connection is reused later (PKI-S0R1-01)."},
+    {"beat": "B-02.3", "frames": ["REFERENCE-SPEC.md#B-02.3", "PKI-TECHNICAL-NOTES.md#B-02.3", "model:E-02.3a", "model:TPL-RDPAUTH"], "verdict": "ACCURATE", "reason": "The Group Policy setting 'Server authentication certificate template' names RDPAuth. No key or certificate comes from AD."},
+    {"beat": "B-03.1", "frames": ["REFERENCE-SPEC.md#B-03.1", "model:KP-RDP", "model:E-03.1a"], "verdict": "ACCURATE", "reason": "A new key pair is generated locally in the machine key container (F-03). There is a minor ordering nuance (PKI-S0R1-08)."},
+    {"beat": "B-03.2", "frames": ["REFERENCE-SPEC.md#B-03.2", "model:KEY-RDP-PRIV", "model:E-03.2a"], "verdict": "ACCURATE", "reason": "The private key is anchored in its container and never moves (F-03)."},
+    {"beat": "B-03.3", "frames": ["REFERENCE-SPEC.md#B-03.3", "model:REQ-RDP", "model:E-03.3a", "model:CAP-S3b"], "verdict": "ACCURATE", "reason": "PKCS #10 in CMC carries the public key and request info, with contains_private_key=false and subject_in_request=null because RDPAuth builds the subject from AD (F-04, F-07)."},
+    {"beat": "B-03.4", "frames": ["REFERENCE-SPEC.md#B-03.4", "model:E-03.4a"], "verdict": "ACCURATE", "reason": "Proof of possession is a signature made in place by KEY-RDP-PRIV. Only light leaves the container (F-03, F-04)."},
+    {"beat": "B-04.1", "frames": ["REFERENCE-SPEC.md#B-04.1", "STORYBOARD.md#B-04.1", "model:DISC-RDP", "model:E-04.1a", "model:E-04.1b"], "verdict": "ACCURATE", "reason": "A separate query goes to the Enrollment Services objects, and only Issuing CA 1 is eligible. The capsule stays at the server's outbound port (F-05, AR-04, AR-05). The first sentence of the frozen beat text contradicts its own constraint (PKI-S0R1-06)."},
+    {"beat": "B-04.2", "frames": ["REFERENCE-SPEC.md#B-04.2", "model:E-04.2a", "model:REQ-RDP"], "verdict": "ACCURATE", "reason": "The request is submitted only to the eligible CA that publishes the template, along a route clear of AD and the root."},
+    {"beat": "B-04.3", "frames": ["REFERENCE-SPEC.md#B-04.3", "PKI-TECHNICAL-NOTES.md#B-04.3", "model:E-04.3a", "model:E-04.3b", "model:E-04.3c", "model:E-04.3d"], "verdict": "ACCURATE", "reason": "All four F-06 checks are shown in order: authentication, publication, Enroll plus Request Certificates, and template policy including the PoP signature."},
+    {"beat": "B-04.4", "frames": ["REFERENCE-SPEC.md#B-04.4", "model:CERT-RDP", "model:E-04.4a"], "verdict": "ACCURATE", "reason": "KEY-CA1-PRIV stays in its module. The certificate has SAN dNSName rdp01.1sn0s.lab from AD, the Remote Desktop Authentication EKU 1.3.6.1.4.1.311.54.1.2, CA=false, and AIA/CDP on pki.1sn0s.lab (F-07, F-08, AR-06)."},
+    {"beat": "B-04.5", "frames": ["REFERENCE-SPEC.md#B-04.5", "model:E-04.5a", "model:E-04.5b"], "verdict": "ACCURATE", "reason": "The certificate goes into LocalMachine\\My and is associated with the existing private key, which has not moved (F-09)."},
+    {"beat": "B-05.1", "frames": ["REFERENCE-SPEC.md#B-05.1", "STORYBOARD.md#B-05.1", "model:ROOT_CA", "model:E-05.1a"], "verdict": "ACCURATE", "reason": "The root is offline, standalone and cable-free, and is the trust anchor. The 'seal closes on itself' animation risks reading as a live signature (PKI-S0R1-03)."},
+    {"beat": "B-05.2", "frames": ["REFERENCE-SPEC.md#B-05.2", "STORYBOARD.md#B-05.2", "model:REQ-CA1", "model:E-05.2a", "model:E-05.2b", "model:E-05.2c", "model:REQ-RDP", "model:LBL-FLASHBACK"], "verdict": "MISLEADING", "reason": "The underlying data is correct: a subordinate-CA PKCS #10 is carried on offline media. But on screen, nothing distinguishes the request capsule leaving Issuing CA 1's vault for the root from REQ-RDP, which was last seen entering that same vault and never leaves the model. The beat can read as the RDP request being forwarded to the root (PKI-S0R1-02)."},
+    {"beat": "B-05.3", "frames": ["REFERENCE-SPEC.md#B-05.3", "model:E-05.3a", "model:CERT-CA1", "model:CAP-S5b"], "verdict": "ACCURATE", "reason": "The issued-by link is shown as a logical relationship, not a cable. 'Trust anchor' is used for the root only (AR-03, F-15, F-17)."},
+    {"beat": "B-06.1", "frames": ["REFERENCE-SPEC.md#B-06.1", "STORYBOARD.md#B-06.1", "model:E-06.1a", "model:E-06.1b", "model:E-06.1c", "model:E-06.1d", "model:E-01.2a", "model:E-02.2a"], "verdict": "MISLEADING", "reason": "The certificate is presented with CERT-CA1 and the handshake signature (F-10). But there is no new connection. The same pending CH-RDP connection that already carried CERT-RDP-SELF at 9 s now presents CERT-RDP at 50 s, which implies one TLS handshake that switches certificates after an enrollment the connection appears to trigger (PKI-S0R1-01). The proof-glint shape is undefined (PKI-S0R1-04)."},
+    {"beat": "B-06.2", "frames": ["REFERENCE-SPEC.md#B-06.2", "model:CHAIN-RDP", "model:E-06.2a", "model:E-06.2b", "model:E-06.2c", "model:TS-CLIENT-ROOT"], "verdict": "ACCURATE", "reason": "The chain is built up to a root that is already in the Trusted Root store, installed earlier by AD or Group Policy. Building the chain is not presented as proof of identity. The model's E-06.2c is marked transport 'network' (PKI-S0R1-05)."},
+    {"beat": "B-06.3", "frames": ["REFERENCE-SPEC.md#B-06.3", "model:E-06.3a", "model:SVC-AIA", "model:LBL-AIA-2"], "verdict": "ACCURATE", "reason": "AIA appears as a conditional aid, nothing is fetched, and it is explicitly not a trust source (F-11, AR-06)."},
+    {"beat": "B-06.4", "frames": ["REFERENCE-SPEC.md#B-06.4", "PKI-TECHNICAL-NOTES.md#B-06.4", "model:E-06.4a", "model:E-06.4b", "model:E-06.4c", "model:E-06.4d", "model:E-06.4e", "model:E-06.4f"], "verdict": "ACCURATE", "reason": "The checks are distinct, and the name match is a separate identity check. Basic Constraints and critical extensions are documented under check 1. The EKU accepts RDA or Server Authentication (F-12, F-08)."},
+    {"beat": "B-06.5", "frames": ["REFERENCE-SPEC.md#B-06.5", "model:E-06.5a", "model:E-06.5b", "model:E-06.5c", "model:CRL-ROOT", "model:CRL-CA1"], "verdict": "ACCURATE", "reason": "Revocation is checked per link: CERT-RDP against CRL-CA1 and CERT-CA1 against CRL-ROOT. The root gets no fetch, and OCSP appears only as 'if deployed' (F-13, AR-07)."},
+    {"beat": "B-06.6", "frames": ["REFERENCE-SPEC.md#B-06.6", "model:E-06.6a", "model:CH-RDP", "model:E-01.2a"], "verdict": "MISLEADING", "reason": "The green colour is correctly gated on all checks passing. But the channel that turns green is the original amber connection from 3 s, on which the self-signed certificate was presented and left unaccepted. This completes the single-handshake misrepresentation (PKI-S0R1-01)."},
+    {"beat": "B-07.1", "frames": ["REFERENCE-SPEC.md#B-07.1", "model:TPL-WEBTLS", "model:E-07.1a"], "verdict": "ACCURATE", "reason": "The second workload uses a request-supplied-subject template chosen by an authorized request, not by autoenrollment."},
+    {"beat": "B-07.2", "frames": ["REFERENCE-SPEC.md#B-07.2", "model:KP-WEB", "model:REQ-WEB", "model:E-07.2a", "model:E-07.2d"], "verdict": "ACCURATE", "reason": "The key is generated locally, PoP signs the request, the request carries the subject and SAN, and contains_private_key=false (F-03, F-04, F-07)."},
+    {"beat": "B-07.3", "frames": ["REFERENCE-SPEC.md#B-07.3", "model:DISC-WEB", "model:E-07.3a", "model:E-07.3b", "model:LBL-CA1-INELIGIBLE"], "verdict": "ACCURATE", "reason": "Discovery happens before sending. Issuing CA 1 is ineligible because it does not publish the template, and AD only answers a lookup (F-05, F-14, AR-04)."},
+    {"beat": "B-07.4", "frames": ["REFERENCE-SPEC.md#B-07.4", "model:E-07.4a"], "verdict": "ACCURATE", "reason": "The request goes only to Issuing CA 2. It never goes to Issuing CA 1 or the root."},
+    {"beat": "B-08.1", "frames": ["REFERENCE-SPEC.md#B-08.1", "model:E-08.1a", "model:E-08.1b", "model:E-08.1c", "model:E-08.1d", "model:LBL-CA2-NOTE"], "verdict": "ACCURATE", "reason": "The same four checks run, and the restricted-Enroll rationale for a request-supplied subject is correct (F-06, F-07)."},
+    {"beat": "B-08.2", "frames": ["REFERENCE-SPEC.md#B-08.2", "model:CERT-WEB", "model:E-08.2a", "model:E-08.2b", "model:E-08.2c"], "verdict": "ACCURATE", "reason": "KEY-CA2-PRIV signs CERT-WEB with SAN portal.1sn0s.lab and the Server Authentication EKU 1.3.6.1.5.5.7.3.1. The certificate is installed beside the existing key (F-08, F-09)."},
+    {"beat": "B-08.3", "frames": ["REFERENCE-SPEC.md#B-08.3", "model:CERT-CA2", "model:E-08.3a"], "verdict": "ACCURATE", "reason": "Issuing CA 2 is root-signed with CA=true, links logically to the same root, and the root stays cable-free (F-15, AR-03)."},
+    {"beat": "B-09.1", "frames": ["REFERENCE-SPEC.md#B-09.1", "model:CHAIN-WEB", "model:E-09.1a", "model:E-09.1d", "model:E-09.1m", "model:E-09.1n", "model:E-09.1o"], "verdict": "ACCURATE", "reason": "A new connection pulse is followed by presentation of the chain and PoP. The name, EKU, validity and per-link CRL checks are shown, with no root fetch (F-10 to F-13)."},
+    {"beat": "B-09.2", "frames": ["REFERENCE-SPEC.md#B-09.2", "model:E-09.2a", "model:E-09.2b", "model:CAP-S9a"], "verdict": "ACCURATE", "reason": "Two issuing paths are shown as logical trust links converging at one cable-free trust anchor (F-14, F-15, F-17)."},
+    {"beat": "B-09.3", "frames": ["REFERENCE-SPEC.md#B-09.3", "model:TITLE-S9", "model:E-09.3a"], "verdict": "ACCURATE", "reason": "The title card makes no PKI claim that contradicts the facts."}
+  ],
+  "findings": [
+    {
+      "id": "PKI-S0R1-01",
+      "severity": "MAJOR",
+      "criterion": "F-10",
+      "beat": "B-06.1",
+      "frames": ["REFERENCE-SPEC.md#B-01.2", "REFERENCE-SPEC.md#B-02.2", "REFERENCE-SPEC.md#B-06.1", "REFERENCE-SPEC.md#B-06.6", "STORYBOARD.md#B-02.2", "model:E-01.2a", "model:E-02.2a", "model:E-06.1a", "model:E-06.6a", "model:E-09.1a"],
+      "evidence": "CH-RDP's only connection_pulse is E-01.2a (3.0-7.0 s). On that same channel, E-02.2a presents CERT-RDP-SELF at 9.0 s. B-02.2 says 'The connection stays amber; nothing has been accepted', and the storyboard says the self-signed card 'hovers there, not accepted'. Enrollment then runs from 12 s to 38 s. At 50 s, E-06.1a presents CERT-RDP with no new connection, and E-06.6a turns the same CH-RDP green ('The channel turns from amber to green'). By contrast, the web flow starts with its own pulse, E-09.1a.",
+      "why": "A TLS handshake carries exactly one server Certificate message. Once CERT-RDP-SELF has been sent, that handshake either fails or the user accepts the warning. It cannot stay pending for about 40 s while the server enrolls, and then present a different certificate. The sequence also implies that the client's connection attempt caused the enrollment. In fact, RDP enrollment is driven by Group Policy processing on the server (F-05), independently of client connections and normally before them. A knowledgeable ADCS engineer would correct this.",
+      "direction": "End the S2 attempt explicitly: the unverified attempt drops and the amber pulse dies out. Present S3-S4 as server-side, policy-driven enrollment that the connection did not cause. Start S6 with a new connection attempt (a fresh amber pulse and handshake on CH-RDP, with a model event) before the CA-issued certificate is presented, so that B-06.6 greens that new connection. If this changes frozen beat content, it needs a Chief of Staff amendment."
+    },
+    {
+      "id": "PKI-S0R1-02",
+      "severity": "MAJOR",
+      "criterion": "AR-02",
+      "beat": "B-05.2",
+      "frames": ["REFERENCE-SPEC.md#B-05.2", "STORYBOARD.md#B-05.2", "REFERENCE-SPEC.md#C-11", "model:REQ-CA1", "model:REQ-RDP", "model:E-04.3d", "model:E-05.2b", "model:LBL-FLASHBACK"],
+      "evidence": "The storyboard says 'Issuing CA 1's own CA-request capsule is sealed inside its vault and slotted into a removable-media cartridge ... carried ... to the root dais.' C-11 has a single 'request capsule' shape for all requests. In B-05.2, the only must-read label is LBL-FLASHBACK ('Earlier: offline signing ceremony'), and nothing labels the capsule as Issuing CA 1's subordinate-CA request. REQ-RDP's last event is E-04.3d (32.6 s), and it has no consumption or exit event, so it is still inside the Issuing CA 1 vault when a capsule leaves that vault for the root at 42.5 s.",
+      "why": "The viewer sees a white request capsule enter Issuing CA 1, and about 10 s later sees a white request capsule leave Issuing CA 1 for the Root CA. That reads as the issuing CA forwarding the end-entity request to the root, which is exactly what the beat's accuracy constraint and AR-02 forbid. Desaturation tells the viewer when this happens, not which request this is.",
+      "direction": "Give the subordinate-CA request its own visible identity: a must-read tag such as 'Issuing CA 1 CA request', plus a cyan CA=true mark on the capsule. Show it being sealed by Issuing CA 1's own key module. Give REQ-RDP an explicit end of life inside Issuing CA 1 (consumed or archived) before S5, and keep it out of the flashback."
+    },
+    {
+      "id": "PKI-S0R1-03",
+      "severity": "MINOR",
+      "criterion": "AR-02",
+      "beat": "B-05.1",
+      "frames": ["REFERENCE-SPEC.md#B-05.1", "STORYBOARD.md#B-05.1", "model:E-05.1a"],
+      "evidence": "'Its self-signed seal closes on itself' / 'Its self-signed seal ring closes on itself' happens in the present tense. E-05.1a is self_signature_shown with uses_key null.",
+      "why": "A seal animating closed reads as a sealing act, which suggests the root is signing in the present, against the beat's constraint that the root performs no signing in the present-tense film.",
+      "direction": "Reveal an existing seal as a static property, for example lit by light. Show no key-module glow and no press activity at the root outside the flashback."
+    },
+    {
+      "id": "PKI-S0R1-04",
+      "severity": "MINOR",
+      "criterion": "F-03",
+      "beat": "B-06.1",
+      "frames": ["REFERENCE-SPEC.md#B-06.1", "STORYBOARD.md#B-06.1", "REFERENCE-SPEC.md#C-11", "model:HS-RDP", "model:E-06.1d", "model:HS-WEB", "model:E-09.1e"],
+      "evidence": "'A key pulse shows proof of possession ... Only the signed handshake proof travels to the client' and 'a small sealed proof glint leaves to follow the cards'. The C-11 shape vocabulary of 13 shapes has no handshake-proof shape. The spec sentence 'Only the signed handshake proof travels' also conflicts with the certificate cards, which travel too.",
+      "why": "A moving object that leaves the key container with no defined shape could be built to resemble a key or a key fragment, and would then read as the private key leaving the server.",
+      "direction": "Define a handshake-proof shape (for example, a signature impression) that is distinct from the private and public keys. Include it in the silhouette IoU checks against the private key. Make the notes say that this is a signature over handshake data, not key material."
+    },
+    {
+      "id": "PKI-S0R1-05",
+      "severity": "MINOR",
+      "criterion": "AR-05",
+      "beat": "B-06.2",
+      "frames": ["REFERENCE-SPEC.md#B-06.2", "PKI-TECHNICAL-NOTES.md#B-06.2", "model:E-06.2c", "model:TS-CLIENT-ROOT"],
+      "evidence": "E-06.2c (trust_store_recall) runs from AD to CLIENT with transport 'network' at 55.2-56.6 s. The notes say 'Nothing is added to the trust store now'.",
+      "why": "If a network transport is rendered as AD-to-client travel during validation, it shows the root being delivered in the middle of the handshake, as if trust were obtained on demand.",
+      "direction": "Mark the recall as non-travelling (transport none, era recall) and render it only as the memory shimmer on the card that is already in the cradle."
+    },
+    {
+      "id": "PKI-S0R1-06",
+      "severity": "MINOR",
+      "criterion": "AR-05",
+      "beat": "B-04.1",
+      "frames": ["REFERENCE-SPEC.md#B-04.1", "STORYBOARD.md#B-04.1", "model:E-04.1a"],
+      "evidence": "The beat text begins 'The capsule pauses at the AD node (1SN0S.LAB)'. The accuracy constraint in the same beat says the capsule is held at the RDP server's outbound port and never enters the AD node.",
+      "why": "Read alone, the opening sentence says the request goes to AD, which contradicts AR-05. The storyboard follows the constraint, but derived text and implementers may follow the first sentence.",
+      "direction": "Implement only the constraint. At the next authorised amendment, reword to 'the capsule pauses at the server's outbound port, framed with the AD node'."
+    },
+    {
+      "id": "PKI-S0R1-07",
+      "severity": "MINOR",
+      "criterion": "F-02",
+      "beat": "B-02.2",
+      "frames": ["PKI-TECHNICAL-NOTES.md#Architecture in one page", "model:CERT-RDP-SELF"],
+      "evidence": "The notes' certificate table lists CERT-RDP-SELF as 'CN=rdp01.1sn0s.lab' with no SAN. The model gives san_dns ['rdp01.1sn0s.lab'].",
+      "why": "The single source of truth and the frozen notes disagree about the out-of-the-box certificate's contents.",
+      "direction": "Make the model and the notes agree on whether the RDP self-signed certificate carries a SAN dNSName."
+    },
+    {
+      "id": "PKI-S0R1-08",
+      "severity": "MINOR",
+      "criterion": "F-05",
+      "beat": "B-03.1",
+      "frames": ["PKI-TECHNICAL-NOTES.md#B-02.3", "PKI-TECHNICAL-NOTES.md#B-03.1", "REFERENCE-SPEC.md#B-04.1"],
+      "evidence": "B-02.3's notes say 'The badge represents the template name being assigned'. The key pair is then generated in B-03.1, and the first AD consultation shown is in B-04.1, after the request is sealed.",
+      "why": "The enrollment client reads the template definition (key algorithm, size, KSP, subject rules) from the AD enrollment policy before it generates the key and builds the request. The current notes imply that AD is first consulted only for CA selection.",
+      "direction": "State in the notes that the template definition is read from the AD enrollment policy before key generation. Keep the 'who publishes RDPAuth?' lookup in B-04.1 as the CA-selection step."
+    }
+  ],
+  "scores": {
+    "L-08": 9
+  },
+  "regressions_checked": [],
+  "files_read": [
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\README.md",
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\manifest.json",
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\schema.json",
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\regressions.json",
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\docs\\REFERENCE-SPEC.md",
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\docs\\GLOSSARY.md",
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\docs\\PKI-TECHNICAL-NOTES.md",
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\docs\\STORYBOARD.md",
+    "E:\\ClaudeCode\\Projects\\Certificate-Flow-Film\\qa\\rounds\\stage0-R1\\model-dump.json"
+  ]
+}
