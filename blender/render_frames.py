@@ -1,0 +1,47 @@
+"""Render a frame range of one scene to a PNG sequence (resumable).
+
+Usage: blender -b <film.blend> --factory-startup --python-exit-code 1 -P blender/render_frames.py --
+           --scene BEAUTY|CAPTIONS --first N --last M --out <dir> [--tier animatic]
+Existing frames are skipped (``use_overwrite = False``) and a placeholder is written first
+(``use_placeholder = True``), so an interrupted chunk resumes where it stopped.
+"""
+
+from __future__ import annotations
+
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import bpy
+
+from blender.common import option, script_args
+from blender.render_settings import apply_tier
+from cff.theme import render
+
+FRAME_PATTERN = "f_"
+
+
+def render_range(scene_name: str, first: int, last: int, out_dir: Path, tier_name: str) -> dict[str, object]:
+    scene = bpy.data.scenes[scene_name]
+    apply_tier(scene, render.tier(tier_name), transparent=scene_name == "CAPTIONS")
+    scene.frame_start, scene.frame_end = first, last
+    out_dir.mkdir(parents=True, exist_ok=True)
+    scene.render.filepath = str(out_dir / FRAME_PATTERN)
+    started = time.perf_counter()
+    bpy.ops.render.render(animation=True, scene=scene_name)
+    return {"scene": scene_name, "first": first, "last": last, "seconds": round(time.perf_counter() - started, 1), "dir": str(out_dir)}
+
+
+def main() -> None:
+    args = script_args()
+    scene_name = option(args, "scene", "BEAUTY")
+    first, last = int(option(args, "first", "1") or 1), int(option(args, "last", "1") or 1)
+    out = option(args, "out")
+    tier_name = option(args, "tier", "animatic")
+    assert scene_name and out and tier_name
+    print("RENDER-SUMMARY", render_range(scene_name, first, last, Path(out), tier_name))
+
+
+main()
