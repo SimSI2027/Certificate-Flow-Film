@@ -1,0 +1,11 @@
+# Stable LF line endings everywhere, so frozen-file SHA-256 hashes (docs/REFERENCE-SPEC.md)
+# are identical on every checkout regardless of core.autocrlf.
+* text=auto eol=lf
+
+*.ttf binary
+*.otf binary
+*.png binary
+*.jpg binary
+*.wav binary
+*.mp4 binary
+*.blend binary
