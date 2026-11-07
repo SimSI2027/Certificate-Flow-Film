@@ -90,3 +90,50 @@ The browser claim in 07 was checked against known behaviour: Chromium does not c
 - `test_PKI_S0R2_08_undeployed_responder_has_no_host_and_its_tag_is_on_the_client`
 
 **Gate decision.** R2 itself met the Stage 0 criteria (0 BLOCKER/MAJOR, every beat ACCURATE), but the MINOR fixes changed the spec text. The Chief of Staff requires a confirming round (R3) on the exact text to be frozen before recording the freeze hash.
+
+### stage0-R3
+
+- **Candidate:** `96d6bdb397b517a6d9c7d183008b0b5a00f60132`
+- **Spec SHA-256 (candidate):** `7cf45afa01572b7e9d30a6fb376807fb10a4f6a693af41ffed1d96bce2686d23`
+- **Packet:** `qa/rounds/stage0-R3/`. The report `pki-discriminator.json` was saved as delivered in the hand-back.
+- **Discriminator:** fresh `pki-discriminator` (opus). It read only packet files.
+- **Beat verdicts:** 33 ACCURATE, 0 MISLEADING, 0 WRONG.
+- **Findings:** 0 BLOCKER, 0 MAJOR, 3 MINOR.
+- **Regressions:** all 17 earlier findings (R1 and R2) FIXED.
+- **Scores:** L-08 = 9 (advisory).
+- **Hard discriminators:** `pytest` 91 passed; `ruff check` clean; `mypy --strict` clean.
+
+**Triage (Chief of Staff).** All 3 MINORs are ACCEPTED. None of them changes `docs/REFERENCE-SPEC.md`, so the spec text R3 judged is exactly the text being frozen.
+
+| Finding | Fix |
+|---|---|
+| PKI-S0R3-01 | Each server's intermediate is now its own model object: `CERT-CA1-COPY-RDP` and `CERT-CA2-COPY-WEB` (`copy_of`, `holder`, store `Intermediate Certification Authorities`). `INTERMEDIATE_STORED`, `PRESENT_CERT`, `CHAIN_LINK` and `CRL_FETCH` events and both chains reference the copies, so the crown originals never move (C-07). |
+| PKI-S0R3-02 | Glossary "Standalone CA": "does not require AD and does not use certificate templates"; the lab's root is standalone and not domain-joined. |
+| PKI-S0R3-03 | Notes for B-02.2: "no CA that chains to a trusted root vouches for it". |
+
+**New hard tests:**
+- `test_PKI_S0R3_01_servers_present_their_own_copy_and_crown_originals_never_move`
+- `tests/test_spec_freeze.py::test_reference_spec_matches_latest_frozen_hash`. This makes the freeze enforceable: any spec edit without a recorded amendment fails.
+
+After the fixes: `pytest` 93 passed, `ruff check` clean, `mypy --strict` clean, and `python -m tools traceability --check` current.
+
+**Gate decision: PASSED.** The latest round has:
+- 0 BLOCKER and 0 MAJOR
+- every PKI beat ACCURATE (33/33)
+- every MINOR fixed
+- all hard discriminators green
+
+Stage 0 converged in 3 of 5 rounds. The cinematic and legibility scores (≥ 8) are Stage 1+ criteria; no frames exist at Stage 0.
+
+## Stage 0 freeze
+
+- **Frozen REFERENCE-SPEC SHA-256:** `7cf45afa01572b7e9d30a6fb376807fb10a4f6a693af41ffed1d96bce2686d23`
+- **Frozen at:** 2026-11-06, after stage0-R3. This is the same hash stage0-R3 judged.
+- **Companion frozen files:** same change control; hashes recorded here for audit.
+  - `docs/GLOSSARY.md`: `f8bf9613c99c53889f42aff220f9a8f27a1da0b6e24a23a979445646fd3f0346`
+  - `docs/PKI-TECHNICAL-NOTES.md`: `fa2bad9bd8e974a21015b5d0d724052c6f65bda8d6187f318e7f53f83cbdfb12`
+
+  Both include the R3 MINOR fixes applied after the round, exactly as the discriminator directed.
+- **Line endings** are pinned to LF by `.gitattributes`, so these hashes hold on every checkout.
+- **Clean-round counter for Stage 1:** 0.
+- **Amendments:** none yet. Any future change follows Charter 2.2: a written Chief of Staff amendment here, a new "Frozen REFERENCE-SPEC SHA-256" line, and a reset of the stage's clean-round counter.
