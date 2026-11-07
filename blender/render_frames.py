@@ -34,13 +34,35 @@ def render_range(scene_name: str, first: int, last: int, out_dir: Path, tier_nam
     return {"scene": scene_name, "first": first, "last": last, "seconds": round(time.perf_counter() - started, 1), "dir": str(out_dir)}
 
 
+def render_list(scene_name: str, wanted: list[int], out_dir: Path, tier_name: str) -> dict[str, object]:
+    """Render scattered frames one still at a time (packet samples); frames already on disk are skipped."""
+    scene = bpy.data.scenes[scene_name]
+    apply_tier(scene, render.tier(tier_name), transparent=scene_name == "CAPTIONS")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    started = time.perf_counter()
+    done = 0
+    for frame in wanted:
+        target = out_dir / f"{FRAME_PATTERN}{frame:04d}.png"
+        if target.exists() and target.stat().st_size > 0:
+            continue
+        scene.frame_set(frame)
+        scene.render.filepath = str(target)
+        bpy.ops.render.render(write_still=True, scene=scene_name)
+        done += 1
+    return {"scene": scene_name, "frames": len(wanted), "rendered": done, "seconds": round(time.perf_counter() - started, 1), "dir": str(out_dir)}
+
+
 def main() -> None:
     args = script_args()
     scene_name = option(args, "scene", "BEAUTY")
-    first, last = int(option(args, "first", "1") or 1), int(option(args, "last", "1") or 1)
     out = option(args, "out")
     tier_name = option(args, "tier", "animatic")
     assert scene_name and out and tier_name
+    listed = option(args, "frames")
+    if listed:
+        print("RENDER-SUMMARY", render_list(scene_name, [int(f) for f in listed.split(",")], Path(out), tier_name))
+        return
+    first, last = int(option(args, "first", "1") or 1), int(option(args, "last", "1") or 1)
     print("RENDER-SUMMARY", render_range(scene_name, first, last, Path(out), tier_name))
 
 

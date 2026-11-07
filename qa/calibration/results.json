@@ -1,0 +1,106 @@
+{
+  "private_key_leak": {
+    "fault": "private_key_leak",
+    "hard_checks_expected": [
+      "key_containment: KEY-RDP-PRIV"
+    ],
+    "hard_checks_caught": [
+      "key_containment: KEY-RDP-PRIV"
+    ],
+    "hard_checks_missed": [],
+    "failing_checks": {
+      "key_containment": [
+        "frame 731: KEY-RDP-PRIV leaves RDP_SERVER's bounds",
+        "frame 732: KEY-RDP-PRIV leaves RDP_SERVER's bounds",
+        "frame 733: KEY-RDP-PRIV leaves RDP_SERVER's bounds",
+        "frame 734: KEY-RDP-PRIV leaves RDP_SERVER's bounds"
+      ]
+    },
+    "verdict": "CAUGHT",
+    "relevant_discriminators": [
+      "pki-discriminator"
+    ]
+  },
+  "root_issues_leaf": {
+    "fault": "root_issues_leaf",
+    "hard_checks_expected": [
+      "root_isolation: REQ-RDP",
+      "root_isolation: CERT-RDP"
+    ],
+    "hard_checks_caught": [
+      "root_isolation: REQ-RDP",
+      "root_isolation: CERT-RDP"
+    ],
+    "hard_checks_missed": [],
+    "failing_checks": {
+      "root_isolation": [
+        "frame 858: REQ-RDP (end-entity) reaches the Root CA complex",
+        "frame 1025: CERT-RDP (end-entity) reaches the Root CA complex"
+      ],
+      "no_pops": [
+        "frame 1083: CERT-RDP moves 3.78 m in one frame (limit 3.6)"
+      ],
+      "camera_motion": [
+        "frame 846: camera moves 0.041 of the focus distance",
+        "frame 847: camera moves 0.043 of the focus distance",
+        "frame 848: camera moves 0.045 of the focus distance",
+        "frame 849: camera moves 0.047 of the focus distance"
+      ],
+      "labels": [
+        "LBL-CERT-RDP-EKU: legible on 0 of 90 must-read frames (visible 56, mean cap 16 px; too small 47, outside title-safe 52, turned 0, behind 0; needs 45)",
+        "LBL-CERT-RDP-SAN: legible on 0 of 90 must-read frames (visible 56, mean cap 16 px; too small 47, outside title-safe 52, turned 0, behind 0; needs 45)"
+      ]
+    },
+    "verdict": "CAUGHT",
+    "relevant_discriminators": [
+      "pki-discriminator"
+    ]
+  },
+  "caption_clip": {
+    "fault": "caption_clip",
+    "hard_checks_expected": [
+      "captions: title-safe",
+      "captions: cap height"
+    ],
+    "hard_checks_caught": [
+      "captions: title-safe",
+      "captions: cap height"
+    ],
+    "hard_checks_missed": [],
+    "failing_checks": {
+      "captions": [
+        "CAP-S4: frame 860: PLATE-CAP-S4 (30,952)-(260,989) leaves the title-safe area",
+        "CAP-S4: cap height 14.0 px < 30.0 (measured from the glyphs)",
+        "CAP-S4: glyphs are 14.0 px but the caption is tagged 38.0 px"
+      ]
+    },
+    "verdict": "CAUGHT",
+    "relevant_discriminators": [
+      "legibility-discriminator"
+    ]
+  },
+  "flowchart": {
+    "fault": "flowchart",
+    "hard_checks_expected": [],
+    "hard_checks_caught": [],
+    "hard_checks_missed": [],
+    "failing_checks": {
+      "one_camera": [
+        "beauty camera is not perspective (C-09)"
+      ],
+      "camera_motion": [
+        "cuts at [], declared [1246, 1396]"
+      ],
+      "labels": [
+        "LBL-AD: legible on 0 of 195 must-read frames (visible 195, mean cap 7 px; too small 195, outside title-safe 0, turned 0, behind 0; needs 45)",
+        "LBL-AIA-1: legible on 0 of 60 must-read frames (visible 49, mean cap 5 px; too small 49, outside title-safe 0, turned 0, behind 0; needs 45)",
+        "LBL-AIA-2: legible on 0 of 60 must-read frames (visible 49, mean cap 5 px; too small 49, outside title-safe 0, turned 0, behind 0; needs 45)",
+        "LBL-CA1: legible on 0 of 180 must-read frames (visible 180, mean cap 5 px; too small 180, outside title-safe 0, turned 0, behind 0; needs 45)"
+      ]
+    },
+    "verdict": "N/A (judged by the cinema discriminator)",
+    "relevant_discriminators": [
+      "cinema-discriminator"
+    ]
+  }
+}

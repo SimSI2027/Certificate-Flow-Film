@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # the repository root, so `blender` and `cff` import
@@ -19,12 +20,18 @@ from blender.common import ROOT, option, reset_scene, script_args
 from blender.render_settings import apply_tier
 from cff.stage import choreography, labels
 from cff.stage.camera import CameraPlan
+from cff.stage.tracks import Timeline
 from cff.theme import render
 
 BEAUTY_SCENE = "BEAUTY"
 
 
-def build(out_path: str, tier_name: str) -> dict[str, object]:
+TimelineHook = Callable[[Timeline], None]
+SceneHook = Callable[[bpy.types.Scene, dict[str, bpy.types.Object]], None]
+
+
+def build(out_path: str, tier_name: str, timeline_hook: TimelineHook | None = None, scene_hook: SceneHook | None = None) -> dict[str, object]:
+    """Build and save the film. The hooks default to None; this entry script never sets them."""
     started = time.perf_counter()
     tier = render.tier(tier_name)
     scene = reset_scene()
@@ -42,6 +49,8 @@ def build(out_path: str, tier_name: str) -> dict[str, object]:
 
     timeline = choreography.build_timeline()
     labels.add_label_tracks(timeline)
+    if timeline_hook is not None:
+        timeline_hook(timeline)
     plan = CameraPlan(timeline)
 
     camera = camera_rig.build_rig(scene, rig, plan, use_dof=True)
@@ -50,6 +59,8 @@ def build(out_path: str, tier_name: str) -> dict[str, object]:
     keys = write_timeline(timeline, {**objects, **label_objects})
     compositor.build_compositor(scene, tier)
     captions_scene.build_caption_scene(tier)
+    if scene_hook is not None:
+        scene_hook(scene, {**objects, **label_objects})
 
     bpy.context.window_manager  # noqa: B018  (touch: keeps the background context alive for saving)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
@@ -72,4 +83,5 @@ def main() -> None:
     print("BUILD-SUMMARY", summary)
 
 
-main()
+if __name__ == "__main__":  # Blender runs -P scripts as __main__; importing this module builds nothing
+    main()

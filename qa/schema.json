@@ -8,7 +8,7 @@
   "additionalProperties": false,
   "properties": {
     "discriminator": { "type": "string", "enum": ["pki-discriminator", "cinema-discriminator", "legibility-discriminator"] },
-    "round": { "type": "string", "pattern": "^stage[0-4]-R[0-9]+$" },
+    "round": { "type": "string", "pattern": "^stage[0-4]-[RK][0-9]+$" },
     "spec_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "verdicts": {
       "type": "array",

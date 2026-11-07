@@ -20,8 +20,9 @@ from dataclasses import dataclass, field
 
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
+from blender.captions_scene import TEXT_TO_EM
 from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL
 from cff.stage import camera as stage_camera
 from cff.stage import labels as stage_labels
@@ -54,6 +55,7 @@ ALPHA_VISIBLE = 0.01
 LABEL_SCALE_SHOWN = 0.7  # a label counts as on screen once its entrance has reached 70% of full size
 LABEL_FRACTION_REQUIRED = 0.9
 SAMPLE_STEP = 1
+FAULT_TAG = "cff_fault"  # set on every scene of a deliberately broken variant (Charter 2.8)
 
 Failures = list[str]
 
@@ -215,6 +217,12 @@ def check_dynamic(scene: bpy.types.Scene) -> list[Result]:
         "REQ-CA1": {m.ISSUING_CA1},
     }
     sealed_centre = (sealed[0] + sealed[1]) / 2
+    # The whole root complex (dais, reader bay, press, key module, plinth, vault) at its rest pose. End-entity requests
+    # and end-entity certificates may never reach any of it (AR-02; found by the Charter 2.8 mutation run, root_issues_leaf: a request
+    # parked at the root's press and a server certificate stamped there both passed the vault-and-plinth test).
+    complex_bounds = union([world_bounds(objs[o.id]) for o in CATALOGUE if o.owner == m.ROOT_CA])
+    end_entity = sorted({r.id for r in m.MODEL.requests if r.kind is m.RequestKind.END_ENTITY}
+                        | {c.id for c in m.MODEL.certificates if m.MODEL.issuer_actor(c.id) != m.ROOT_CA and c.id in objs})
     touchers = [o for o in CATALOGUE if o.owner != m.ROOT_CA and o.kind is not Kind.TRUST_LINK]
     contain, isolate, routes, pops = Result("key_containment"), Result("root_isolation"), Result("route_integrity"), Result("no_pops")
     moving = [o for o in CATALOGUE if o.kind not in {Kind.CHANNEL, Kind.ROUTE}]
@@ -245,6 +253,11 @@ def check_dynamic(scene: bpy.types.Scene) -> list[Result]:
                 if overlaps(box, bounds) and f"{c.id}:{actor}" not in reported:
                     reported.add(f"{c.id}:{actor}")
                     routes.failures.append(f"frame {frame}: {c.id} enters {actor}'s bounds")
+        for oid in end_entity:
+            ob = objs[oid]
+            if is_visible(ob) and overlaps(world_bounds(ob), complex_bounds, ROOT_CLEARANCE_M) and f"ee:{oid}" not in reported:
+                reported.add(f"ee:{oid}")
+                isolate.failures.append(f"frame {frame}: {oid} (end-entity) reaches the Root CA complex")
         for ch in channels:
             if frame == scene.frame_start and overlaps(world_bounds(objs[ch.id]), sealed, ROOT_CLEARANCE_M):
                 isolate.failures.append(f"{ch.id}: network geometry touches the Root CA plinth or vault")
@@ -333,8 +346,43 @@ def check_camera_motion(scene: bpy.types.Scene) -> Result:
 # --- captions and labels ---------------------------------------------------------------------------------------
 
 
-def _caption_alpha(ob: bpy.types.Object) -> float:
-    return float(ob.color[3])
+def _animated(ob: bpy.types.Object, data_path: str, index: int, frame: int, default: float) -> float:
+    """An animated property evaluated straight from the object's slotted action (or its static value).
+
+    The caption layer is a second scene. In background mode only the context scene (BEAUTY) has a depsgraph, so
+    ``frame_set`` on the caption scene does not reliably update its matrices or colours (found by the Charter 2.8 mutation run,
+    caption_clip: the title-safe check measured every plate at the frame centre). Reading the F-curves directly is exact.
+    """
+    ad = ob.animation_data
+    if ad is not None and ad.action is not None and ad.action_slot is not None:
+        for layer in ad.action.layers:
+            for strip in layer.strips:
+                bag = strip.channelbag(ad.action_slot)
+                if bag is not None:
+                    curve = bag.fcurves.find(data_path, index=index)
+                    if curve is not None:
+                        return float(curve.evaluate(frame))
+    return default
+
+
+def _caption_alpha(ob: bpy.types.Object, frame: int) -> float:
+    return _animated(ob, "color", 3, frame, float(ob.color[3]))
+
+
+def _caption_matrix(ob: bpy.types.Object, frame: int) -> Matrix:
+    """World matrix of a caption part (plate or glyphs) at ``frame``: the animated root times the part's own transform."""
+    root = ob.parent
+    loc = Vector([_animated(root, "location", i, frame, root.location[i]) for i in range(3)])
+    root_matrix = Matrix.LocRotScale(loc, root.rotation_euler, root.scale)
+    return root_matrix @ ob.matrix_parent_inverse @ ob.matrix_basis
+
+
+def _caption_bounds(ob: bpy.types.Object, frame: int) -> tuple[Vector, Vector]:
+    matrix = _caption_matrix(ob, frame)
+    corners = [matrix @ Vector(c) for c in ob.bound_box]
+    lo = Vector((min(c.x for c in corners), min(c.y for c in corners), min(c.z for c in corners)))
+    hi = Vector((max(c.x for c in corners), max(c.y for c in corners), max(c.z for c in corners)))
+    return lo, hi
 
 
 def check_captions() -> Result:
@@ -351,8 +399,7 @@ def check_captions() -> Result:
     glyphs = {k: next(c for c in ob.children if c.name.startswith("TXT-")) for k, ob in texts.items()}
     visible_frames: dict[str, list[int]] = {k: [] for k in texts}
     for frame in frames(scene):
-        scene.frame_set(frame)
-        shown = [k for k in texts if _caption_alpha(plates[k]) > ALPHA_VISIBLE or _caption_alpha(glyphs[k]) > ALPHA_VISIBLE]
+        shown = [k for k in texts if _caption_alpha(plates[k], frame) > ALPHA_VISIBLE or _caption_alpha(glyphs[k], frame) > ALPHA_VISIBLE]
         if len(shown) > 1:
             r.failures.append(f"frame {frame}: {len(shown)} captions visible at once ({', '.join(shown)})")
         for k in shown:
@@ -362,21 +409,28 @@ def check_captions() -> Result:
     for (_a0, a1, ka), (b0, _b1, kb) in itertools.pairwise(order):
         if b0 - a1 - 1 < clear:
             r.failures.append(f"{ka} and {kb}: only {b0 - a1 - 1} frames fully clear (need {clear})")
-    # geometry at the middle of each hold (title-safe and cap height)
-    scene.frame_set(scene.frame_start)
+    # geometry on every visible frame (title-safe) and at the middle of each hold (cap height, measured from the glyphs)
     ref_w, ref_h = render.CAPTION_REFERENCE_WIDTH_PX, render.CAPTION_REFERENCE_HEIGHT_PX
     for caption in story_captions.CAPTIONS:
         ob = texts[caption.id]
-        scene.frame_set(timing.FRAME_START + round((caption.hold_start_s + caption.hold_end_s) / 2 * timing.FPS))
-        bpy.context.view_layer.update()
-        lo, hi = world_bounds(plates[caption.id])
-        x0, x1 = ref_w / 2 + lo.x * px_per_unit, ref_w / 2 + hi.x * px_per_unit
-        y0, y1 = ref_h / 2 - hi.y * px_per_unit, ref_h / 2 - lo.y * px_per_unit
-        if x0 < TITLE_SAFE[0] or x1 > TITLE_SAFE[2] or y0 < TITLE_SAFE[1] or y1 > TITLE_SAFE[3]:
-            r.failures.append(f"{caption.id}: caption plate ({x0:.0f},{y0:.0f})-({x1:.0f},{y1:.0f}) leaves the title-safe area")
-        cap_px = float(ob[PROP_CAP]) * px_per_unit
+        for frame in visible_frames[caption.id]:
+            for part in (plates[caption.id], glyphs[caption.id]):
+                lo, hi = _caption_bounds(part, frame)
+                x0, x1 = ref_w / 2 + lo.x * px_per_unit, ref_w / 2 + hi.x * px_per_unit
+                y0, y1 = ref_h / 2 - hi.y * px_per_unit, ref_h / 2 - lo.y * px_per_unit
+                if x0 < TITLE_SAFE[0] or x1 > TITLE_SAFE[2] or y0 < TITLE_SAFE[1] or y1 > TITLE_SAFE[3]:
+                    r.failures.append(f"{caption.id}: frame {frame}: {part.name} ({x0:.0f},{y0:.0f})-({x1:.0f},{y1:.0f}) leaves the title-safe area")
+                    break
+            else:
+                continue
+            break
+        mid = timing.FRAME_START + round((caption.hold_start_s + caption.hold_end_s) / 2 * timing.FPS)
+        glyph = glyphs[caption.id]
+        cap_px = glyph.data.size / TEXT_TO_EM * _caption_matrix(glyph, mid).to_scale().y * px_per_unit
         if cap_px < CAPTION_MIN_CAP_PX:
-            r.failures.append(f"{caption.id}: cap height {cap_px:.1f} px < {CAPTION_MIN_CAP_PX}")
+            r.failures.append(f"{caption.id}: cap height {cap_px:.1f} px < {CAPTION_MIN_CAP_PX} (measured from the glyphs)")
+        if abs(cap_px - float(ob[PROP_CAP]) * px_per_unit) > 0.5:
+            r.failures.append(f"{caption.id}: glyphs are {cap_px:.1f} px but the caption is tagged {float(ob[PROP_CAP]) * px_per_unit:.1f} px")
         hold = caption.hold_s
         if hold + 1e-9 < caption.required_hold_s:
             r.failures.append(f"{caption.id}: hold {hold:.2f} s < {caption.required_hold_s:.2f} s")
@@ -457,8 +511,17 @@ def _parent_chain_visible(ob: bpy.types.Object) -> bool:
     return True
 
 
+def check_provenance() -> Result:
+    """A film build carries no fault tag: deliberately broken variants (Charter 2.8) can never pass as the film."""
+    r = Result("build_provenance")
+    for s in bpy.data.scenes:
+        if FAULT_TAG in s:
+            r.failures.append(f"scene {s.name} is a deliberately broken variant ({s[FAULT_TAG]})")
+    return r
+
+
 def run_all(scene: bpy.types.Scene) -> list[Result]:
-    results = [check_frame_range(scene), check_camera_count(scene), check_shape_vocabulary(scene), check_keyframes()]
+    results = [check_provenance(), check_frame_range(scene), check_camera_count(scene), check_shape_vocabulary(scene), check_keyframes()]
     results += check_dynamic(scene)
     results.append(check_camera_motion(scene))
     results.append(check_captions())

@@ -53,10 +53,12 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _git_head() -> tuple[str, bool]:
+def _git_head(ignore_prefix: str | None = None) -> tuple[str, bool]:
+    """HEAD and whether the tree is dirty (paths under ``ignore_prefix``, e.g. packets built from the same commit, are ignored)."""
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True)
     status = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True, check=True)
-    return head.stdout.strip(), bool(status.stdout.strip())
+    lines = [line for line in status.stdout.splitlines() if line.strip() and not (ignore_prefix and line[3:].startswith(ignore_prefix))]
+    return head.stdout.strip(), bool(lines)
 
 
 def next_round(stage: str) -> int:
@@ -94,16 +96,37 @@ def _frame_entry(path: Path, folder: Path, beat: str | None, frame: int | None) 
     return {"path": path.relative_to(folder).as_posix(), "beat": beat, "frame": frame, "sha256": sha256(path)}
 
 
-def build_stage1(round_number: int | None = None, tier: str = "animatic") -> Path:
-    """A Stage 1 packet: composited frames, motion strips, shots.json, manifest, regressions and schema. No source, no claims."""
-    missing = frames.missing_frames(tier)
+def stage1_frames() -> list[int]:
+    """Every frame a Stage 1 packet shows: three samples per beat, both sides of each cut, and the motion-strip frames."""
+    wanted: set[int] = set()
+    for beat in MODEL.beats:
+        wanted.update(frames.sample_frames(beat.id))
+        wanted.update(frames.strip_frames(beat.id))
+    for cut_beat in timing.DECLARED_CUT_BEATS:
+        first = timing.seconds_to_frame(timing.beat_window(cut_beat)[0])
+        wanted.update((first - 1, first))
+    return sorted(wanted)
+
+
+def build_stage1(round_number: int | None = None, tier: str = "animatic", folder: Path | None = None, round_name: str | None = None) -> Path:
+    """A Stage 1 packet: composited frames, motion strips, shots.json, manifest, regressions and schema. No source, no claims.
+
+    A real round needs every frame of ``tier`` rendered. A calibration packet (``folder`` and ``round_name`` given, ``tier`` naming
+    its frames folder under ``renders/``) needs only the frames the packet shows. Both look the same to a discriminator.
+    """
+    if folder is None:
+        missing = frames.missing_frames(tier)
+        number = next_round("stage1") if round_number is None else round_number
+        folder = ROUNDS / f"stage1-R{number}"
+        round_name = f"stage1-R{number}"
+    else:
+        have = frames.present_frames(tier)
+        missing = [f for f in stage1_frames() if f not in have]
     if missing:
         raise RuntimeError(f"{len(missing)} {tier} frames are not rendered yet (first missing: {missing[0]})")
-    number = next_round("stage1") if round_number is None else round_number
-    folder = ROUNDS / f"stage1-R{number}"
     if folder.exists():
         raise FileExistsError(f"{folder} already exists; packets are immutable")
-    candidate, dirty = _git_head()
+    candidate, dirty = _git_head(ignore_prefix=folder.parent.relative_to(ROOT).as_posix() + "/")
     if dirty:
         raise RuntimeError("working tree is dirty: commit the candidate before building its packet")
     (folder / "docs").mkdir(parents=True)
@@ -144,8 +167,8 @@ def build_stage1(round_number: int | None = None, tier: str = "animatic") -> Pat
     files = sorted(p for p in folder.rglob("*") if p.is_file())
     manifest = {
         "stage": "stage1",
-        "round": f"stage1-R{number}",
-        "tier": tier,
+        "round": round_name,
+        "tier": "animatic",
         "candidate": candidate,
         "spec_sha256": sha256(SPEC),
         "frozen_files": list(FROZEN_FILES),

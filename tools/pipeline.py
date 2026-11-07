@@ -10,7 +10,7 @@ from pathlib import Path
 from cff.stage import audit, camera, choreography, labels
 from cff.story import captions as story_captions
 from cff.story import model, timing
-from cff.theme import palette_check
+from cff.theme import palette_check, render
 from tools import frames, toolchain
 
 ROOT = toolchain.ROOT
@@ -56,29 +56,48 @@ def write_progress(tier: str, payload: dict[str, object]) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8", newline="\n")
 
 
-def render_layer(tier: str, layer: str, wanted: list[int], rebuild: bool = False) -> int:
-    """Render the frames in ``wanted`` that are not yet on disk, in resumable chunks. Returns a process-style exit code."""
+def render_layer(tier: str, layer: str, wanted: list[int], rebuild: bool = False, *, blend: Path = BLEND, frames_dir: str | None = None) -> int:
+    """Render the frames in ``wanted`` that are not yet on disk, in resumable chunks. Returns a process-style exit code.
+
+    ``frames_dir`` (default: the tier name) is the folder under ``renders/`` that holds the frames; ``blend`` is the file rendered.
+    """
     scene = "BEAUTY" if layer == "beauty" else "CAPTIONS"
-    out_dir = frames.tier_dir(tier) / layer
-    have = frames.present_frames(tier, layer)
+    where = frames_dir or tier
+    out_dir = frames.tier_dir(where) / layer
+    have = frames.present_frames(where, layer)
     todo = [f for f in wanted if f not in have]
     chunks = frames.chunk_ranges(todo)
-    log = frames.tier_dir(tier) / f"render-{layer}.log"
+    log = frames.tier_dir(where) / f"render-{layer}.log"
     started = time.perf_counter()
     done = 0
-    if rebuild or not BLEND.exists():
+    if blend == BLEND and (rebuild or not BLEND.exists()):
         code = build(tier)
         if code != 0:
             return code
     for first, last in chunks:
-        code = toolchain.run_blender(SCRIPTS / "render_frames.py", BLEND, ["--scene", scene, "--first", str(first), "--last", str(last), "--out", str(out_dir), "--tier", tier], log)
+        code = toolchain.run_blender(SCRIPTS / "render_frames.py", blend, ["--scene", scene, "--first", str(first), "--last", str(last), "--out", str(out_dir), "--tier", tier], log)
         if code != 0:
-            write_progress(tier, {"layer": layer, "status": "failed", "chunk": [first, last], "exit_code": code})
+            write_progress(where, {"layer": layer, "status": "failed", "chunk": [first, last], "exit_code": code})
             return code
         done += last - first + 1
-        write_progress(tier, {"layer": layer, "status": "running", "frames_done_this_run": done, "frames_todo": len(todo),
-                              "present": len(frames.present_frames(tier, layer)), "of": len(wanted), "elapsed_s": round(time.perf_counter() - started, 1), "last_chunk": [first, last]})
-    write_progress(tier, {"layer": layer, "status": "complete", "present": len(frames.present_frames(tier, layer)), "of": len(wanted), "elapsed_s": round(time.perf_counter() - started, 1)})
+        write_progress(where, {"layer": layer, "status": "running", "frames_done_this_run": done, "frames_todo": len(todo),
+                               "present": len(frames.present_frames(where, layer)), "of": len(wanted), "elapsed_s": round(time.perf_counter() - started, 1), "last_chunk": [first, last]})
+    write_progress(where, {"layer": layer, "status": "complete", "present": len(frames.present_frames(where, layer)), "of": len(wanted), "elapsed_s": round(time.perf_counter() - started, 1)})
+    return 0
+
+
+def render_frame_list(tier: str, layer: str, wanted: list[int], blend: Path, frames_dir: str) -> int:
+    """Render scattered frames (a packet's samples) in batches of one Blender call per chunk; resumable."""
+    scene = "BEAUTY" if layer == "beauty" else "CAPTIONS"
+    out_dir = frames.tier_dir(frames_dir) / layer
+    have = frames.present_frames(frames_dir, layer)
+    todo = sorted(f for f in set(wanted) if f not in have)
+    log = frames.tier_dir(frames_dir) / f"render-{layer}.log"
+    for start in range(0, len(todo), render.CHUNK_FRAMES):
+        batch = ",".join(str(f) for f in todo[start : start + render.CHUNK_FRAMES])
+        code = toolchain.run_blender(SCRIPTS / "render_frames.py", blend, ["--scene", scene, "--frames", batch, "--out", str(out_dir), "--tier", tier], log)
+        if code != 0:
+            return code
     return 0
 
 

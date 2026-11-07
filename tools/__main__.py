@@ -1,6 +1,6 @@
 """Project CLI: ``python -m tools <command>``.
 
-Commands: env, verify, build, render, captions, packet, contact, palette, motion, traceability, model-dump,
+Commands: env, calibrate, verify, build, render, captions, packet, contact, palette, motion, traceability, model-dump,
 spec-hash, sync-check. Blender is always called as
 ``"<blender.exe>" -b [file.blend] --factory-startup --python-exit-code 1 -P <script.py> -- <args>``.
 """
@@ -111,9 +111,25 @@ def _cmd_motion(_: argparse.Namespace) -> int:
     return 1 if bad else 0
 
 
+def _cmd_calibrate(args: argparse.Namespace) -> int:
+    from tools import calibrate  # noqa: PLC0415  (imported only by this command, so no other command can reach a fault)
+
+    faults = calibrate.FAULTS if args.fault == "all" else (args.fault,)
+    worst = 0
+    for fault in faults:
+        worst = max(worst, calibrate.run(fault, make_packet=args.packet, skip_checks=args.skip_checks))
+    return worst
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m tools")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("calibrate", help="build a deliberately broken animatic (Charter 2.8), run the hard checks on it, optionally build a blind packet")
+    p.add_argument("fault", choices=["private_key_leak", "root_issues_leaf", "flowchart", "caption_clip", "all"])
+    p.add_argument("--packet", action="store_true", help="also render the packet frames and build qa/calibration/stage1-K<n>")
+    p.add_argument("--skip-checks", action="store_true", help="skip the in-Blender checks (packet only)")
+    p.set_defaults(func=_cmd_calibrate)
 
     p = sub.add_parser("env", help="print the toolchain (Blender, FFmpeg, Python) and check it against the pin")
     p.add_argument("--json", action="store_true")

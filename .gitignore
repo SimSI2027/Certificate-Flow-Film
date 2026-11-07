@@ -12,6 +12,8 @@ __pycache__/
 renders/
 qa/rounds/**/frames/
 qa/rounds/**/strips/
+qa/calibration/**/frames/
+qa/calibration/**/strips/
 output/animatic/
 *.blend
 *.blend1

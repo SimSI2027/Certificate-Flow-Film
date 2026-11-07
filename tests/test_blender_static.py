@@ -96,3 +96,51 @@ def test_calibration_code_is_unreachable_from_normal_builds() -> None:
     for path in _py_files("blender"):
         if path.name != "calibration.py":
             assert "calibration" not in path.read_text(encoding="utf-8"), path
+
+
+def _calls(path: Path, name: str) -> list[ast.Call]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    def named(call: ast.Call) -> bool:
+        return (isinstance(call.func, ast.Name) and call.func.id == name) or (isinstance(call.func, ast.Attribute) and call.func.attr == name)
+
+    return [n for n in ast.walk(tree) if isinstance(n, ast.Call) and named(n)]
+
+
+def test_normal_builds_never_enable_a_fault() -> None:
+    """Charter 2.8: fault code paths run only under ``python -m tools calibrate``."""
+    # the normal build entry point calls build() with no hooks, and only runs as a script
+    build_scene = ROOT / "blender" / "build_scene.py"
+    calls = _calls(build_scene, "build")
+    assert calls
+    for call in calls:
+        assert not call.keywords and len(call.args) == 2, f"build_scene.py:{call.lineno} passes hooks to build()"
+    assert 'if __name__ == "__main__":' in build_scene.read_text(encoding="utf-8")
+    # no tools module except the calibrate command references the faults or the calibration script
+    for path in _py_files("tools") + _py_files("cff"):
+        text = path.read_text(encoding="utf-8")
+        if path.name in {"calibrate.py", "__main__.py"}:
+            continue
+        assert "calibration.py" not in text and "calibrate" not in text and "cff_fault" not in text, path
+        for fault in ("private_key_leak", "root_issues_leaf", "flowchart", "caption_clip"):
+            assert fault not in text, f"{path} mentions fault {fault}"
+    # the CLI imports the calibrate module lazily, inside its own command only
+    main = ast.parse((ROOT / "tools" / "__main__.py").read_text(encoding="utf-8"))
+    top_imports = [n for n in main.body if isinstance(n, ast.ImportFrom)]
+    assert all("calibrate" not in [a.name for a in n.names] for n in top_imports)
+    # the pipeline builds and verifies with build_scene.py, never the fault script
+    pipeline = (ROOT / "tools" / "pipeline.py").read_text(encoding="utf-8")
+    assert '"build_scene.py"' in pipeline
+
+
+def test_fault_lists_agree_and_every_fault_has_a_hard_expectation_or_a_discriminator() -> None:
+    from tools import calibrate  # noqa: PLC0415  (kept local: no other test module touches the fault definitions)
+
+    script = ast.parse((ROOT / "blender" / "calibration.py").read_text(encoding="utf-8"))
+    faults = next(n.value for n in script.body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "FAULTS" for t in n.targets))
+    assert isinstance(faults, ast.Tuple)
+    assert tuple(e.value for e in faults.elts if isinstance(e, ast.Constant)) == calibrate.FAULTS
+    for fault in ("private_key_leak", "root_issues_leaf", "caption_clip"):
+        assert calibrate.EXPECTED[fault], f"{fault}: the hard discriminators must be expected to fail (Charter 2.8)"
+    assert set(calibrate.RELEVANT_DISCRIMINATORS) == set(calibrate.FAULTS)
+    assert "FAULT_TAG = \"cff_fault\"" in (ROOT / "blender" / "checks" / "scene_checks.py").read_text(encoding="utf-8")
+    assert "FAULT_PROP = \"cff_fault\"" in (ROOT / "blender" / "calibration.py").read_text(encoding="utf-8")
