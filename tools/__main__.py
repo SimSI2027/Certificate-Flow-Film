@@ -1,7 +1,7 @@
 """Project CLI: ``python -m tools <command>``.
 
-Commands implemented so far (Session 2): traceability, model-dump, packet stage0, spec-hash.
-Session 3 adds env, verify, build, render, captions, contact, palette, motion and sync-check.
+Commands implemented so far (Session 2): traceability, model-dump, packet stage0, spec-hash, sync-check.
+Session 3 adds env, verify, build, render, captions, contact, palette and motion.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 from cff.story.export import model_dump
-from tools import packet, traceability
+from tools import packet, sync, traceability
 
 
 def _cmd_traceability(args: argparse.Namespace) -> int:
@@ -57,6 +57,15 @@ def _cmd_spec_hash(_: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_sync_check(_: argparse.Namespace) -> int:
+    result = sync.check()
+    print(f"local HEAD : {result.local_head}")
+    print(f"origin/main: {result.remote_head or '(missing)'}")
+    print(f"clean tree : {result.clean}")
+    print("SYNC OK" if result.ok else "SYNC FAILED")
+    return 0 if result.ok else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m tools")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -72,6 +81,8 @@ def main(argv: list[str] | None = None) -> int:
     p.set_defaults(func=_cmd_packet)
     p = sub.add_parser("spec-hash", help="print the SHA-256 of docs/REFERENCE-SPEC.md")
     p.set_defaults(func=_cmd_spec_hash)
+    p = sub.add_parser("sync-check", help="verify a clean tree and local HEAD == origin/main")
+    p.set_defaults(func=_cmd_sync_check)
     args = parser.parse_args(argv)
     result: int = args.func(args)
     return result
