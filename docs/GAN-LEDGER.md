@@ -230,3 +230,41 @@ K7 side findings (PKI-K7-07..10: no visible handshake proof or B-09.1 CRL fetche
 
 **Gate decision: NOT PASSED** (3 BLOCKER, 30 MAJOR). Rounds used: 1 of 5. Clean-round counter: 0.
 
+**Triage (Chief of Staff, Session 4 part 3, Opus 5.5, effort High by the user's instruction).** All 43 findings are **ACCEPTED**; none is rejected, so no second pki concurrence is needed. Severities are kept as filed. Root causes verified by the Chief of Staff before acceptance:
+- **Caption damage (LEG-01, CIN-05 captions, LEG-15):** the caption materials used EEVEE's `DITHERED` render method, which stipples the text and the 92% plate. A probe render of frame 1650 with `BLENDED` is clean (same scene, same samples). The label plates use the same method.
+- **Text size (LEG-03, CIN-14, LEG-11):** the bundled fonts' capital height is 0.509 (Inter) and 0.520 (DejaVu Sans Mono) of the Blender font size, measured from the evaluated 'H' glyph mesh. The code assumed 0.72, and the hard check computed cap height from that same constant rather than from the glyph geometry. Captions were about 27 px at 1080p (< 30), labels about 72% of their planned size.
+- **LEG-02 (BLOCKER, F-03):** the shape the reply tracks in B-03.2 is `KEY-RDP-PUB` (the public key: a ring bow with teeth), not the private key; the locator puts `KEY-RDP-PRIV` in `KC-RDP`. The finding is still accepted, re-scoped: the public key is drawn as a key, so a viewer cannot tell which key stays home, which defeats F-03 on screen and C-11 (private vs public key silhouette). Direction: the public key takes a non-key silhouette (the storyboard's "open, notched form"), visibly enters the capsule, and the occupied container reads as holding the private key.
+- **Seal left behind (PKI-01, CIN-11):** `SEAL-*` rings are keyed to the capsule's home and stay at the server when the capsule travels.
+
+| Finding | Sev | Decision | Fix theme |
+|---|---|---|---|
+| PKI-S1R1-01 | MAJOR | ACCEPTED | seal ring travels with its capsule and is consumed with it |
+| PKI-S1R1-02 | MAJOR | ACCEPTED | capsule held at the server's outbound port, framed clear of AD; query pulse readable |
+| PKI-S1R1-03 | MAJOR | ACCEPTED | check lists laid out unoccluded, one line each |
+| PKI-S1R1-04 | MAJOR | ACCEPTED | present-tense check lists exit before the flashback |
+| PKI-S1R1-05 | MAJOR | ACCEPTED | trust links: gold at the root blending into the CA colour; not white |
+| PKI-S1R1-06 | MAJOR | ACCEPTED | proof of possession framed at film scale in B-06.1 and B-09.1 |
+| PKI-S1R1-07..12 | MINOR | ACCEPTED | FQDN at the client; card validity bar and ports; CA 1 grey in B-07.3; CA=true band; B-09.1 CRL fetches; B-06.6 caption after green |
+| CIN-S1R1-01 | BLOCKER | ACCEPTED | no label may approach the lens: labels hold a fixed on-screen size and fade when too near |
+| CIN-S1R1-02, -03 | MAJOR | ACCEPTED | trust links curved, gradient, grown when introduced. CIN-03's "make CA-to-server segments neutral" is scoped by B-09.2, which asks for cyan and violet trust paths rising to gold; network routes stay neutral when not lit |
+| CIN-S1R1-04 | MAJOR | ACCEPTED | check lists compact, beside the subject |
+| CIN-S1R1-05 | MAJOR | ACCEPTED | dithered speckle removed (captions, plates); render noise reduced |
+| CIN-S1R1-06 | MAJOR | ACCEPTED | tighter framing for B-02.2, B-06.1, B-06.5 |
+| CIN-S1R1-07, -08 | MAJOR | ACCEPTED | label overlap and title-safe (shared with LEG-08/09) |
+| CIN-S1R1-09 | MAJOR | ACCEPTED | caption clear of the focal subject (shared with LEG-12) |
+| CIN-S1R1-10 | MAJOR | ACCEPTED | camera kept out of label space; smoother B-07.3/B-08.2 moves |
+| CIN-S1R1-11 | MAJOR | ACCEPTED | same defect as PKI-01 |
+| CIN-S1R1-12 | MAJOR | ACCEPTED | stronger key and rim; less emissive wash (C-05 applies at every tier) |
+| CIN-S1R1-13 | MAJOR | ACCEPTED | background layer (far set geometry, horizon) and near layers (C-04) |
+| CIN-S1R1-14 | MAJOR | ACCEPTED | flashback tags readable (shared with LEG-11) |
+| CIN-S1R1-15, -16 | MINOR | ACCEPTED | no check text in the flashback; tapered, fading proof-of-possession beam |
+| LEG-S1R1-01 | BLOCKER | ACCEPTED | caption materials `BLENDED`; caption layer composited last |
+| LEG-S1R1-02 | BLOCKER | ACCEPTED (re-scoped above) | public key non-key silhouette; key states unambiguous |
+| LEG-S1R1-03 | MAJOR | ACCEPTED | real cap ratio; captions >= 30 px and labels >= 18 px measured from glyph meshes |
+| LEG-S1R1-04..11 | MAJOR | ACCEPTED | label pass: unoccluded, fixed on-screen size, title-safe, no overlaps, root name on a plate |
+| LEG-S1R1-12 | MAJOR | ACCEPTED | caption vs focal-subject bounds (L-05) measured and cleared |
+| LEG-S1R1-13 | MAJOR | ACCEPTED | packet carries the palette and CVD results |
+| LEG-S1R1-14, -15 | MINOR | ACCEPTED | client tags offset; opaque caption plate |
+
+Hard tests named after these IDs are listed with the R2 candidate.
+
