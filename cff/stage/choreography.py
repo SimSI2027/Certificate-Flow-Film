@@ -38,6 +38,7 @@ SETTLE_BOUNCE = 0.04
 HOLD_EASE = "EASE_IN_OUT"
 SEAL_CLOSED_SCALE = 0.7  # the proof-of-possession ring tightens round its capsule and stays on it
 CHECKS_CLEAR_S = 0.3  # a CA's check slots leave this long into the next beat, with their written list
+INELIGIBLE_VAULT_GLOW = 0.25  # a grey cast over the ineligible CA's vault (brighter reads as white under AgX)
 
 
 def role_rgb(role: ColourRole) -> tuple[float, float, float]:
@@ -661,6 +662,9 @@ class Choreographer:
         self.show("RING-AD-1", f0b, rise=(0.0, 0.0, 0.3), glow=glow_value(R.INELIGIBLE, 0.3))
         self.show("RING-AD-2", f0b + 3, rise=(0.0, 0.0, 0.3), glow=glow_value(R.ISSUING_CA2, palette.GLOW_ACTIVE))
         self.glow_to("TRIM-CA1", f0b + 6, f0b + 24, glow_value(R.INELIGIBLE, 0.5))
+        self.glow_to(m.ISSUING_CA1, f0b + 6, f0b + 24, glow_value(R.INELIGIBLE, INELIGIBLE_VAULT_GLOW))  # the whole vault greys (PKI-S1R1-09)
+        self.glow_to(m.ISSUING_CA1, self.beat("B-08.1"), self.beat("B-08.1", 0.6), OFF_GLOW, "EASE_IN_OUT")  # eligible again for its own template
+        self.glow_to("TRIM-CA1", self.beat("B-08.1"), self.beat("B-08.1", 0.6), glow_value(R.ISSUING_CA1, 0.25), "EASE_IN_OUT")
         self.glow_to("TRIM-CA2", f0b + 6, f0b + 24, glow_value(R.ISSUING_CA2, palette.GLOW_ACTIVE))
         self.glow_to("EVAL-CA2", f0b + 6, f0b + 24, glow_value(R.ISSUING_CA2, 0.25))
         span = max(3, (f1b - f0b - 24) // (len(lo.ROUTE_CA2) - 1))
@@ -767,7 +771,7 @@ class Choreographer:
             f0, f1 = self.event(ev_id)
             self.show(scroll, f0, 6, rise=(0.0, 0.0, 0.0), glow=rev, at=lo.add(dock, (0.62, 0.0, 0.0)))
             self.hide(scroll, max(f0 + 6, f1 - 6), 6, sink=(0.0, 0.0, 0.0))
-        self.glow_pulse(m.PKI_HTTP, self.beat("B-09.1", 3.2), self.beat("B-09.1", 3.8), hex_glow(palette.TEXT_HEX, 0.5), rest=hex_glow(palette.TEXT_HEX, 0.1))
+        self.glow_pulse(m.PKI_HTTP, self.event("E-09.1m")[0], self.event("E-09.1n")[1], hex_glow(palette.TEXT_HEX, 0.5), rest=hex_glow(palette.TEXT_HEX, 0.1))
         f0, f1 = self.event("E-09.1p")
         self.recolour_path("CH-WEB", len(lo.CHANNEL_WEB) - 1, f0, f1, green, reverse=False)
         for letter, _ in rows:

@@ -33,8 +33,8 @@ they are listed so coverage gaps are visible, not claimed as existing.
 | B-06.2 | S6 | Chain builds | 53–57 | 1591–1710 | `CHAIN-RDP` | F-11, AR-05 | 3 | 17 tests | pki-, cinema- and legibility-discriminator |
 | B-06.3 | S6 | AIA is not trust | 57–59 | 1711–1770 | `SVC-AIA` | F-11, AR-06 | 1 | 16 tests | pki-, cinema- and legibility-discriminator |
 | B-06.4 | S6 | Validation checks | 59–64 | 1771–1920 | `CHAIN-RDP` | F-12, F-08 | 6 | 17 tests | pki-, cinema- and legibility-discriminator |
-| B-06.5 | S6 | Revocation per link | 64–67 | 1921–2010 | `SVC-CDP` | F-13, AR-06, AR-07 | 4 | 19 tests | pki-, cinema- and legibility-discriminator |
-| B-06.6 | S6 | Trusted session | 67–70 | 2011–2100 | `CH-RDP` | F-12, F-01 | 1 | 17 tests | pki-, cinema- and legibility-discriminator |
+| B-06.5 | S6 | Revocation per link | 64–66.4 | 1921–1992 | `SVC-CDP` | F-13, AR-06, AR-07 | 4 | 19 tests | pki-, cinema- and legibility-discriminator |
+| B-06.6 | S6 | Trusted session | 66.4–70 | 1993–2100 | `CH-RDP` | F-12, F-01 | 1 | 17 tests | pki-, cinema- and legibility-discriminator |
 | B-07.1 | S7 | Web server | 70–73 | 2101–2190 | `WEB_SERVER` | F-07, F-14 | 1 | 15 tests | pki-, cinema- and legibility-discriminator |
 | B-07.2 | S7 | Local key, sealed request | 73–76 | 2191–2280 | `REQ-WEB` | F-03, F-04 | 4 | 17 tests | pki-, cinema- and legibility-discriminator |
 | B-07.3 | S7 | Eligibility | 76–79.5 | 2281–2385 | `AD` | F-05, F-14, AR-04, AR-05 | 2 | 18 tests | pki-, cinema- and legibility-discriminator |

@@ -192,7 +192,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Caption:** none (`CAP-S6a` fades out at 63.3 s)
 - **Must-read text:** the six check labels
 
-### B-06.5 — Revocation per link (64–67 s, frames 1921–2010)
+### B-06.5 — Revocation per link (64–66.4 s, frames 1921–1992)
 - **Shot:** two restrained-amber CRL scrolls are fetched from the `pki.1sn0s.lab` kiosk. One docks against the server certificate (Issuing CA 1's CRL) and one against Issuing CA 1's certificate (the Root CA's CRL). The root card gets none. A small "OCSP if deployed" tag appears on the revocation check slot (not at the kiosk). Once both scrolls have docked, the revocation tick resolves.
 - **Lens:** 28 mm, f/4
 - **Camera move:** a pull-back and pan to bring the kiosk into frame, then back to the stack
@@ -200,7 +200,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Caption:** none
 - **Must-read text:** "OCSP if deployed", "Revocation OK"
 
-### B-06.6 — Trusted session (67–70 s, frames 2011–2100)
+### B-06.6 — Trusted session (66.4–70 s, frames 1993–2100)
 - **Shot:** the new connection's channel turns from amber to green, from the laptop to the server, and the laptop screen opens the remote session window.
 - **Lens:** 35 mm, f/2.8
 - **Camera move:** a low tracking glide along the green channel toward the laptop screen

@@ -50,9 +50,9 @@ def trust_link(bm: bmesh.types.BMesh, o: StageObject) -> None:
 
 
 def beam(bm: bmesh.types.BMesh, o: StageObject) -> None:
-    """A beam of light, unit length along +Z from its start."""
-    sx, sy, _ = o.size
-    p.box_span(bm, -sx / 2, sx / 2, -sy / 2, sy / 2, 0.0, 1.0)
+    """A tapering beam of light, unit length along +Z from its start: wide at the container, narrow at the seal (CIN-S1R1-16)."""
+    sx, _, _ = o.size
+    p.cone(bm, sx / 2, sx / 7, 1.0, 16, (0.0, 0.0, 0.5), "Z")
 
 
 def seal_ring(bm: bmesh.types.BMesh, o: StageObject) -> None:

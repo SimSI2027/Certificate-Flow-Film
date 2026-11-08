@@ -31,8 +31,10 @@ def card(bm: bmesh.types.BMesh, o: StageObject) -> None:
     p.torus(bm, 0.035, 0.01, (w * 0.28, -t / 2 - 0.01, -h * 0.28), "Y", 14, 5)  # public-key emblem
     p.box(bm, 0.07, 0.012, 0.016, (w * 0.34, -t / 2 - 0.01, -h * 0.28))
     if o.variant == "end_entity":
-        for x in (-0.06, 0.06):  # AIA and CDP ports
-            p.box(bm, 0.05, 0.016, 0.03, (x, -t / 2 - 0.008, -h * 0.38))
+        for x in (-0.12, 0.0):  # AIA and CDP ports, larger so they read in the medium shots (PKI-S1R1-08)
+            p.box(bm, 0.08, 0.02, 0.05, (x, -t / 2 - 0.01, -h * 0.36))
+        p.box(bm, w * 0.7, 0.016, h * 0.06, (0.0, -t / 2 - 0.008, h * 0.12))  # validity bar
+        p.box(bm, w * 0.42, 0.02, h * 0.06, (-w * 0.14, -t / 2 - 0.012, h * 0.12))  # the elapsed part of the validity period
     if o.variant == "root_cert":
         p.cone(bm, 0.07, 0.02, 0.12, 6, (w * 0.0, -t / 2 - 0.02, -h * 0.12), "Y")
 

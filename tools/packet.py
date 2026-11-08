@@ -13,10 +13,12 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from cff.stage import camera, choreography
+from cff.stage import camera, caption_layout, choreography, labels, signs
+from cff.story import captions as story_captions
 from cff.story import timing
 from cff.story.export import model_dump
 from cff.story.model import MODEL
+from cff.theme import palette_check, typography
 from tools import frames, toolchain
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,13 +80,17 @@ Judge the animatic as film, not as a diagram, against the frozen spec (REFERENCE
 L-01..L-08, facts F-01..F-17, architecture AR-01..AR-07).
 
 Contents:
-- `frames/`: composited animatic frames (3D beauty pass + caption layer). Three per beat (`B-xx.y_a/b/c`: just after
+- `frames/`: composited animatic frames (3D beauty pass, then the sign layer with the in-world name plates, then the
+  caption layer). Three per beat (`B-xx.y_a/b/c`: just after
   entry, middle, just before exit) and the frames on both sides of each cut (`T-cut-*`).
 - `strips/`: one motion strip per beat (6 frames from first to last, left to right, top to bottom).
 - `shots.json`: per beat, the model's focal subject and the camera lens, f-stop and focus distance at the middle frame.
 - `locator.json`: Measured object positions. For every frame shown in `frames/` and `strips/` (by frame number), the
   screen bounds of each visible private key, request capsule, certificate card, key container and key module, projected
   from the 3D scene. These are measurements, not verdicts; occlusion is not measured, so check each box against the image.
+- `legibility.json`: measurements for legibility: CIEDE2000 between the key role colours under normal vision,
+  deuteranopia and protanopia; each caption's timings, band, cap height and plate bounds; for every packet frame, each
+  visible sign's text, opacity, cap height and plate bounds (1080p pixels). Measurements, not verdicts.
 - `model-dump.json`: the story data (events, certificates, labels, captions with timings).
 - `docs/`: the frozen spec, glossary, PKI notes and the storyboard.
 - `schema.json`: the required report format. `regressions.json`: previously accepted findings to re-check.
@@ -123,6 +129,36 @@ def stage1_frames() -> list[int]:
         first = timing.seconds_to_frame(timing.beat_window(cut_beat)[0])
         wanted.update((first - 1, first))
     return sorted(wanted)
+
+
+def legibility_evidence() -> dict[str, object]:
+    """``legibility.json``: measurements for the legibility reviewer (LEG-S1R1-13). No verdicts.
+
+    - ``palette``: CIEDE2000 between the eight key role colours (token values) under normal vision and Machado 2009
+      deuteranopia and protanopia (severity 1.0), with the minimum each pair needs.
+    - ``captions``: text, timings, band, cap height and plate bounds at 1080p (the plate width is an upper bound).
+    - ``signs``: for every packet frame, each sign with any opacity: text, opacity, cap height and plate bounds at 1080p.
+    """
+    pairs = [{"condition": p.condition, "a": p.a.value, "b": p.b.value, "delta_e00": round(p.delta_e, 2), "minimum": p.minimum}
+             for p in palette_check.pairs()]
+    caps = []
+    for c in story_captions.CAPTIONS:
+        cap_px = typography.TITLE_CAP_PX if c.kind is story_captions.CaptionKind.TITLE else typography.CAPTION_CAP_PX
+        caps.append({"id": c.id, "text": c.text, "appear_s": round(c.appear_s, 3), "hold_start_s": round(c.hold_start_s, 3),
+                     "hold_end_s": round(c.hold_end_s, 3), "vanish_s": round(c.vanish_s, 3), "band": caption_layout.bands()[c.id],
+                     "cap_height_px_1080": cap_px, "plate_px_1080": [round(v) for v in caption_layout.plate_rect(c.id)]})
+    planned = signs.plan_signs()
+    by_frame: dict[str, list[dict[str, object]]] = {}
+    for frame in stage1_frames():
+        shown = []
+        for label_id, plan in planned.items():
+            f = plan.frames.get(frame)
+            if f is not None and f.alpha > 0.0:
+                shown.append({"label": label_id, "text": labels.BY_ID[label_id].text, "opacity": round(f.alpha, 2),
+                              "cap_height_px_1080": typography.SIGN_CAP_PX, "plate_px_1080": [round(v) for v in f.rect]})
+        by_frame[str(frame)] = shown
+    return {"reference": "1920x1080 pixels; frames are 960x540, so halve every pixel value", "title_safe_px_1080": list(typography.TITLE_SAFE_PX),
+            "palette": pairs, "captions": caps, "signs_by_frame": by_frame}
 
 
 def write_locator(blend: Path, out: Path) -> None:
@@ -186,6 +222,7 @@ def build_stage1(round_number: int | None = None, tier: str = "animatic", folder
                            "focus_distance_m": round(state.focus_distance, 2)})
     _write_json(folder / "shots.json", shots_data)
     write_locator(blend, folder / "locator.json")
+    _write_json(folder / "legibility.json", legibility_evidence())
     _write_json(folder / "model-dump.json", model_dump())
     shutil.copyfile(SCHEMA, folder / "schema.json")
     regressions = json.loads(REGRESSIONS.read_text(encoding="utf-8")) if REGRESSIONS.exists() else []

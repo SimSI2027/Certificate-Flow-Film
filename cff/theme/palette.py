@@ -48,6 +48,7 @@ TEXT_HEX = "#FFFFFF"  # caption and label text
 PLATE_HEX = "#0B1220"  # label plate and caption backing
 SKIN_HEX = "#8A93A6"  # stylized figure (no realistic human)
 SCREEN_HEX = "#7FB4E8"  # laptop session window
+BACKDROP_HEX = "#18263C"  # far rack silhouettes: a step above the floor, far below any role colour
 PLATE_OPACITY = 0.92  # label and caption plates: even over a white background, white text keeps >= 4.5:1 (L-02)
 
 # Trust links are light, not cable (AR-01, C-01): a gradient from the issuer's colour to the subject CA's colour along
@@ -68,14 +69,14 @@ GLOW_OFF = 0.0
 GLOW_SOFT = 0.35
 GLOW_ACTIVE = 1.0
 GLOW_PEAK = 1.6
-EMISSION_STRENGTH = 3.0  # emission strength at glow level 1.0
+EMISSION_STRENGTH = 2.4  # emission strength at glow level 1.0 (lowered from 3.0: less emissive wash, CIN-S1R1-12)
 FLASHBACK_SATURATION = 0.3  # compositor saturation inside the S5 flashback
 FLASHBACK_VIGNETTE = 0.55
 
 # World ambient stays far below the key light (C-05: <= 20% of key illuminance at the subject).
 WORLD_STRENGTH = 0.02
 KEY_LIGHT_POWER_W = 900.0
-RIM_LIGHT_POWER_W = 650.0
+RIM_LIGHT_POWER_W = 1050.0  # a visible rim on every focal subject (CIN-S1R1-12)
 KEY_LIGHT_HEX = "#FFE9D2"
 RIM_LIGHT_HEX = "#9CC4FF"
 AMBIENT_TO_KEY_MAX = 0.20

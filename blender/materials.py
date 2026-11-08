@@ -50,6 +50,17 @@ def stage_material(role: ColourRole, glow_only: bool = False) -> bpy.types.Mater
     return mat
 
 
+def backdrop_material() -> bpy.types.Material:
+    """Far set dressing: a dark, rough neutral that the key and rim lights pick out as silhouettes, never a role colour."""
+    if "MAT-backdrop" in bpy.data.materials:
+        return bpy.data.materials["MAT-backdrop"]
+    mat = bpy.data.materials.new("MAT-backdrop")
+    _, bsdf = _principled(mat.node_tree)
+    bsdf.inputs["Base Color"].default_value = linear4(palette.BACKDROP_HEX)
+    bsdf.inputs["Roughness"].default_value = 0.85
+    return mat
+
+
 def trust_link_material(variant: str) -> bpy.types.Material:
     """Gradient light along the link's local X (0 = issuer end, 1 = subject end); intensity from the glow channel's value."""
     name = f"MAT-trust-{variant}"

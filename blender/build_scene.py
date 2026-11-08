@@ -44,6 +44,9 @@ def build(out_path: str, tier_name: str, timeline_hook: TimelineHook | None = No
 
     world.build_world(scene)
     world.build_floor(stage)
+    backdrop = bpy.data.collections.new("BACKDROP")
+    scene.collection.children.link(backdrop)
+    world.build_backdrop(backdrop)
     objects = world.build_actors(stage)
 
     timeline = choreography.build_timeline()

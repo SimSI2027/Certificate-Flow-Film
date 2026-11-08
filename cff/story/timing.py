@@ -54,8 +54,8 @@ BEAT_DURATIONS_S: dict[str, float] = {
     "B-06.2": 4.0,
     "B-06.3": 2.0,
     "B-06.4": 5.0,
-    "B-06.5": 3.0,
-    "B-06.6": 3.0,
+    "B-06.5": 2.4,  # retimed (PKI-S1R1-12): the channel turns green early in B-06.6 so its caption follows the green
+    "B-06.6": 3.6,
     "B-07.1": 3.0,
     "B-07.2": 3.0,
     "B-07.3": 3.5,
@@ -132,8 +132,8 @@ EVENT_WINDOWS_S: dict[str, tuple[float, float]] = {
     "E-06.5a": (0.1, 1.0),
     "E-06.5b": (0.6, 1.0),
     "E-06.5c": (0.4, 1.6),
-    "E-06.5d": (1.8, 0.8),
-    "E-06.6a": (0.2, 1.6),
+    "E-06.5d": (1.6, 0.8),  # after both CRL fetches have docked
+    "E-06.6a": (0.0, 0.7),
     # S7
     "E-07.1a": (1.0, 1.4),
     "E-07.2a": (0.0, 0.8),
@@ -168,8 +168,8 @@ EVENT_WINDOWS_S: dict[str, tuple[float, float]] = {
     "E-09.1j": (2.8, 0.2),
     "E-09.1k": (2.9, 0.2),
     "E-09.1l": (3.0, 0.2),
-    "E-09.1m": (2.7, 0.2),
-    "E-09.1n": (2.8, 0.2),
+    "E-09.1m": (2.3, 0.5),  # long enough to read as two fetches before the revocation tick (PKI-S1R1-11)
+    "E-09.1n": (2.4, 0.5),
     "E-09.1o": (3.0, 0.3),
     "E-09.1p": (3.6, 0.5),
     "E-09.2a": (0.5, 3.0),
@@ -195,7 +195,7 @@ CAPTION_WINDOWS_S: dict[str, tuple[str, float, float]] = {
     "CAP-S5a": ("B-05.2", 0.4, 4.0),
     "CAP-S5b": ("B-05.3", 0.6, 2.6),
     "CAP-S6a": ("B-06.2", 0.5, 9.5),
-    "CAP-S6b": ("B-06.6", 0.2, 2.5),
+    "CAP-S6b": ("B-06.6", 0.8, 2.5),  # holds once the channel has turned green (E-06.6a ends at 0.7 s)
     "CAP-S7": ("B-07.3", 0.0, 4.5),
     "CAP-S8": ("B-08.2", 0.0, 3.6),  # gone before the TLS certificate drops through the bottom band (L-05)
     "CAP-S9a": ("B-09.2", 1.0, 4.0),

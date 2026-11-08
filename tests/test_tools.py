@@ -100,6 +100,17 @@ def test_packet_locator_is_measurement_only_with_no_pass_or_fail_claims() -> Non
         assert all(set(row) == {"id", "box", "in_frame", "depth_m"} for rows in data["frames"].values() for row in rows), path
 
 
+def test_LEG_S1R1_13_packet_carries_palette_cvd_and_text_bounds_as_measurements_only() -> None:  # noqa: N802
+    """legibility.json gives the legibility reviewer the L-07 numbers and measured text bounds, with no pass/fail claims."""
+    data = json.loads(json.dumps(packet.legibility_evidence()))
+    assert set(data) == {"reference", "title_safe_px_1080", "palette", "captions", "signs_by_frame"}
+    assert len({row["condition"] for row in data["palette"]}) == 3
+    assert all(set(row) == {"condition", "a", "b", "delta_e00", "minimum"} for row in data["palette"])
+    assert all(set(row) == {"label", "text", "opacity", "cap_height_px_1080", "plate_px_1080"} for rows in data["signs_by_frame"].values() for row in rows)
+    assert not CLAIM_WORDS.search(data["reference"])  # the film's own words (e.g. "Revocation OK") are content, not claims
+    assert "legibility.json" in packet.STAGE1_README
+
+
 def test_progress_and_output_locations_are_untracked_build_products() -> None:
     gitignore = (toolchain.ROOT / ".gitignore").read_text(encoding="utf-8")
     assert "renders" in gitignore

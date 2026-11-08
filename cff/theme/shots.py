@@ -100,7 +100,7 @@ SHOTS: tuple[Shot, ...] = (
     Shot("pulse-chase", "B-01.2", ("PULSE-RDP-1",), -128, 8, 7.0, 35, 4.0, follow=0.4, bulge=3.0),
     # S2
     Shot("listener-low", "B-02.1", (LISTENER,), -94, 13, 6.2, 35, 2.8, follow=0.8, bulge=0.1),
-    Shot("card-slide", "B-02.2", ("CERT-RDP-SELF",), -111, 14, 22.0, 35, 2.8, follow=0.25, bulge=6.5, rack_to=("CLIENT",)),
+    Shot("card-slide", "B-02.2", ("CERT-RDP-SELF",), -111, 14, 18.0, 42, 2.8, follow=0.25, bulge=6.0, rack_to=("CLIENT",)),  # card large (CIN-S1R1-06)
     Shot("badge-drop", "B-02.3", ("TPL-RDPAUTH",), -46, 28, 6.8, 35, 4.0, follow=0.6, bulge=0.6),
     # S3
     Shot("keys-push", "B-03.1", ("KEY-RDP-PRIV", "KEY-RDP-PUB"), -90, 4, 2.6, 50, 2.8),
@@ -108,7 +108,7 @@ SHOTS: tuple[Shot, ...] = (
     Shot("capsule-rack", "B-03.3", ("KC-RDP", "REQ-RDP"), -82, 9, 2.7, 50, 2.8, follow=0.25, bulge=2.4, focus=("KC-RDP",), rack_to=("REQ-RDP",)),
     Shot("proof-pullback", "B-03.4", ("KC-RDP", "REQ-RDP"), -93, 5, 3.7, 50, 2.8, follow=0.25, bulge=1.5),
     # S4
-    Shot("ad-shoulder", "B-04.1", ("AD",), -124, 8, 11.5, 35, 4.0, bulge=1.5),
+    Shot("ad-shoulder", "B-04.1", ("PORT-RDP-OUT", "AD", "AD"), -108, 10, 10.5, 35, 4.0, bulge=1.5, focus=("AD",)),  # capsule at its port, AD apart (PKI-S1R1-02)
     Shot("capsule-chase", "B-04.2", ("REQ-RDP",), -95, 8, 4.6, 35, 4.0, follow=0.35, bulge=6.0),
     Shot("checks-orbit", "B-04.3", ("EVAL-CA1",), -69, 15, 3.5, 35, 2.8, follow=0.25),
     Shot("press-stamp", "B-04.4", (PRESS1_OUT,), -98, 9, 7.4, 50, 2.8, follow=0.25, bulge=2.7),
@@ -120,11 +120,11 @@ SHOTS: tuple[Shot, ...] = (
     Shot("issuer-link", "B-05.3", ("CERT-CA1", "ROOT_CA"), -106, 24, 46.4, 28, 4.0, follow=0.8, bulge=0.1, focus=("CERT-CA1",),
          start=Pose(("CERT-CA1", "ROOT_CA"), -100, 30, 16.0, 28, 4.0)),
     # S6
-    Shot("present-follow", "B-06.1", ("CERT-RDP",), -10, 8, 8.0, 35, 4.0, follow=0.5, bulge=8.0),
+    Shot("present-follow", "B-06.1", ("CERT-RDP",), -10, 8, 6.0, 40, 4.0, follow=0.5, bulge=2.5),  # proof readable at film scale (PKI-S1R1-06)
     Shot("chain-boom", "B-06.2", (STACK_MID,), 79, 24, 11.2, 35, 2.8, follow=0.4, bulge=1.4),
     Shot("aia-push", "B-06.3", ("AIA-RDP",), 53, 4, 4.4, 50, 2.8, follow=0.8, rack_to=((-9.8, -7.4, 1.7),)),
     Shot("checks-crane", "B-06.4", (STACK_MID,), 45, 25, 8.5, 35, 2.8, follow=0.6, bulge=0.4),
-    Shot("revocation-pan", "B-06.5", ("CRL-CA1", "CRL-ROOT"), -44, 12, 15.1, 28, 4.0, follow=0.25, bulge=12.5),
+    Shot("revocation-pan", "B-06.5", ("CRL-CA1", "CRL-ROOT"), -44, 12, 13.5, 32, 4.0, follow=0.25, bulge=11.0),  # kiosk and fetches larger (CIN-S1R1-06)
     Shot("green-glide", "B-06.6", ("SCREEN-RDP",), -20, 14, 9.0, 35, 2.8),
     # S7
     Shot("web-glide", "B-07.1", ("WEB_SERVER",), -73, 8, 11.0, 35, 4.0, follow=0.15, bulge=12.0),

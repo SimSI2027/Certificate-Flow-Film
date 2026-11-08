@@ -823,6 +823,7 @@ def _labels(chains: tuple[Chain, ...]) -> tuple[Label, ...]:
         Label("LBL-TPL-WEB", LabelKind.TEMPLATE_BADGE, n.WEB_TEMPLATE, "TPL-WEBTLS", ("B-07.1", "B-07.3")),
         Label("LBL-SELF", LabelKind.CARD_FIELD, "Self-signed", "CERT-RDP-SELF", ("B-02.2",)),
         Label("LBL-UNVERIFIED", LabelKind.TAG, "Unverified", CLIENT, ("B-02.2",)),
+        Label("LBL-CONNECT", LabelKind.TAG, f"Connect to {n.RDP_SERVER_FQDN}", CLIENT, ("B-01.1",)),  # the name later matched to the SAN
         Label("LBL-CERT-RDP-SAN", LabelKind.CARD_FIELD, n.RDP_SERVER_FQDN, "CERT-RDP", ("B-04.4",)),
         Label("LBL-CERT-RDP-EKU", LabelKind.CARD_FIELD, n.EKU_REMOTE_DESKTOP_AUTH_NAME, "CERT-RDP", ("B-04.4",)),
         Label("LBL-CERT-WEB-SAN", LabelKind.CARD_FIELD, n.WEB_SITE_DNS_NAME, "CERT-WEB", ("B-08.2",)),

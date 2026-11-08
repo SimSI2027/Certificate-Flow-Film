@@ -112,12 +112,13 @@ def _build() -> tuple[Placement, ...]:
         Placement("LBL-CERT-WEB-EKU", "CERT-WEB", (0.0, -0.12, -0.52), CAP_FIELD * 1.3),
         Placement("LBL-REQ-CA1", "REQ-CA1", (0.0, 0.0, 0.34), CAP_TAG * 0.9),
         # --- windowed tags ---------------------------------------------------------------------------
-        Placement("LBL-UNVERIFIED", m.CLIENT, (0.0, 0.0, 1.0), CAP_TAG * 1.2, window=Window("B-02.2", 0.9, 2.9)),
+        Placement("LBL-CONNECT", "SCREEN-IDLE", (0.0, 0.0, 0.35), CAP_TAG, window=Window("B-01.1", 0.3)),  # on the client's screen (PKI-S1R1-07)
+        Placement("LBL-UNVERIFIED", m.CLIENT, (0.0, 0.0, 1.0), CAP_TAG * 1.2, window=Window("B-02.2", 0.7)),
         Placement("LBL-FLASHBACK", "CARTRIDGE", (0.0, 0.0, 0.7), CAP_TAG * 1.4, window=Window("B-05.2", 0.1, 4.9)),
         Placement("LBL-ROOT-STORE", "TS-CLIENT-ROOT", (0.0, 0.0, 0.55), CAP_TAG, window=Window("B-06.2", 1.6)),
         Placement("LBL-AIA-1", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.45)), CAP_TAG, window=Window("B-06.3", 0.1)),
         Placement("LBL-AIA-2", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.12)), CAP_TAG, window=Window("B-06.3", 0.2)),
-        Placement("LBL-OCSP", "TICK-RDP-f", (0.2, 0.0, -0.3), CAP_TAG, "LEFT", Window("B-06.5", 0.3, 2.5)),
+        Placement("LBL-OCSP", "TICK-RDP-f", (0.2, 0.0, -0.3), CAP_TAG, "LEFT", Window("B-06.5", 0.3, 2.4)),
         Placement("LBL-CA1-INELIGIBLE", "EVAL-CA1", (0.0, -0.15, 0.95), CAP_WIDE_TAG, window=Window("B-07.3", 0.6)),  # under CA 1's nameplate
         Placement("LBL-CA2-NOTE", "TICK-CA2-c", (0.2, 0.0, -0.32), CAP_CHECK, "LEFT", Window("B-08.1", 1.4)),
     ]

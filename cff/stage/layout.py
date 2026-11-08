@@ -68,6 +68,14 @@ AD: Vec3 = (4.0, 6.0, 0.0)
 CA1: Vec3 = (-3.0, 14.0, 0.0)
 CA2: Vec3 = (11.0, 14.0, 0.0)
 ROOT: Vec3 = (4.0, 22.0, 0.0)  # plinth centre; the dais is at z = ROOT_DAIS_Z
+
+# Backdrop (C-04, CIN-S1R1-13): a far ring of rack silhouettes, so wide shots have a background layer instead of a void.
+# Set dressing only: no story role, no labels, never lit by a glow channel. Heights come from random.Random(BACKDROP_SEED).
+BACKDROP_CENTRE: Vec3 = (2.0, 10.0, 0.0)
+BACKDROP_RADIUS_M = 62.0
+BACKDROP_COUNT = 56
+BACKDROP_SEED = 20261107
+BACKDROP_RACK_SIZE: Vec3 = (2.4, 1.2, 5.0)  # width, depth, base height (each rack is 0.7-1.6 x this tall)
 KIOSK: Vec3 = (-8.0, 4.0, 0.0)
 
 # --- sizes -----------------------------------------------------------------------------------

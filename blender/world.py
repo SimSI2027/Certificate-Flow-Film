@@ -3,15 +3,19 @@
 from __future__ import annotations
 
 import math
+import random
 
+import bmesh
 import bpy
+from mathutils import Matrix
 
 from blender import actors, materials
 from blender.common import PROP_ID, PROP_KIND, PROP_OWNER, PROP_ROLE, linear4, tag
+from cff.stage import layout as lo
 from cff.stage.objects import CATALOGUE, Kind, StageObject
 from cff.theme import motion, palette
 
-FLOOR_HALF_EXTENT_M = 120.0
+FLOOR_HALF_EXTENT_M = 200.0  # past the backdrop ring, so no floor edge shows in a wide shot
 FLOOR_CENTRE_Y_M = 20.0
 
 
@@ -34,6 +38,29 @@ def build_floor(collection: bpy.types.Collection) -> bpy.types.Object:
     collection.objects.link(floor)
     tag(floor, **{PROP_ID: "FLOOR", PROP_KIND: "floor"})
     return floor
+
+
+def build_backdrop(collection: bpy.types.Collection) -> int:
+    """A far ring of dark rack silhouettes (seeded), the background layer of every wide shot (C-04)."""
+    rng = random.Random(lo.BACKDROP_SEED)
+    mat = materials.backdrop_material()
+    w, d, h = lo.BACKDROP_RACK_SIZE
+    for i in range(lo.BACKDROP_COUNT):
+        angle = 2 * math.pi * (i + rng.uniform(-0.3, 0.3)) / lo.BACKDROP_COUNT
+        radius = lo.BACKDROP_RADIUS_M * rng.uniform(0.92, 1.12)
+        height = h * rng.uniform(0.7, 1.6)
+        mesh = bpy.data.meshes.new(f"MESH-BACKDROP-{i:02d}")
+        bm = bmesh.new()
+        bmesh.ops.create_cube(bm, size=1.0, matrix=Matrix.Diagonal((w, d, height, 1.0)) @ Matrix.Translation((0.0, 0.0, 0.5)))
+        bm.to_mesh(mesh)
+        bm.free()
+        mesh.materials.append(mat)
+        ob = bpy.data.objects.new(f"BACKDROP-{i:02d}", mesh)
+        collection.objects.link(ob)
+        ob.location = (lo.BACKDROP_CENTRE[0] + radius * math.cos(angle), lo.BACKDROP_CENTRE[1] + radius * math.sin(angle), 0.0)
+        ob.rotation_euler = (0.0, 0.0, angle + math.pi / 2)
+        tag(ob, **{PROP_ID: ob.name, PROP_KIND: "backdrop"})
+    return lo.BACKDROP_COUNT
 
 
 def build_actor(o: StageObject, collection: bpy.types.Collection) -> bpy.types.Object:
