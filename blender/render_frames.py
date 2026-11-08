@@ -23,9 +23,12 @@ from cff.theme import render
 FRAME_PATTERN = "f_"
 
 
+OVERLAY_SCENES = ("CAPTIONS", "SIGNS")  # transparent film, Standard view transform
+
+
 def render_range(scene_name: str, first: int, last: int, out_dir: Path, tier_name: str) -> dict[str, object]:
     scene = bpy.data.scenes[scene_name]
-    apply_tier(scene, render.tier(tier_name), transparent=scene_name == "CAPTIONS")
+    apply_tier(scene, render.tier(tier_name), transparent=scene_name in OVERLAY_SCENES)
     scene.frame_start, scene.frame_end = first, last
     out_dir.mkdir(parents=True, exist_ok=True)
     scene.render.filepath = str(out_dir / FRAME_PATTERN)
@@ -41,7 +44,7 @@ def render_list(scene_name: str, wanted: list[int], out_dir: Path, tier_name: st
     so every frame is rendered through the animation path, exactly like ``render_range``.
     """
     scene = bpy.data.scenes[scene_name]
-    apply_tier(scene, render.tier(tier_name), transparent=scene_name == "CAPTIONS")
+    apply_tier(scene, render.tier(tier_name), transparent=scene_name in OVERLAY_SCENES)
     out_dir.mkdir(parents=True, exist_ok=True)
     scene.render.filepath = str(out_dir / FRAME_PATTERN)
     started = time.perf_counter()

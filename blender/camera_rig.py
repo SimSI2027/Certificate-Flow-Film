@@ -18,16 +18,17 @@ LOOK_NAME = "CAM_LOOK"
 FOCUS_NAME = "CAM_FOCUS"
 
 
-def build_rig(scene: bpy.types.Scene, collection: bpy.types.Collection, plan: CameraPlan, use_dof: bool) -> bpy.types.Object:
-    cam_data = bpy.data.cameras.new(CAMERA_NAME)
+def build_rig(scene: bpy.types.Scene, collection: bpy.types.Collection, plan: CameraPlan, use_dof: bool, prefix: str = "") -> bpy.types.Object:
+    """The rig keyed from the plan. ``prefix`` names a twin rig (the SIGNS pass uses one without depth of field)."""
+    cam_data = bpy.data.cameras.new(prefix + CAMERA_NAME)
     cam_data.sensor_fit = "HORIZONTAL"
     cam_data.sensor_width = shots.SENSOR_WIDTH_MM
     cam_data.clip_start = shots.CLIP_START_M
     cam_data.clip_end = shots.CLIP_END_M
     cam_data.type = "PERSP"
-    camera = bpy.data.objects.new(CAMERA_NAME, cam_data)
-    look = bpy.data.objects.new(LOOK_NAME, None)
-    focus = bpy.data.objects.new(FOCUS_NAME, None)
+    camera = bpy.data.objects.new(prefix + CAMERA_NAME, cam_data)
+    look = bpy.data.objects.new(prefix + LOOK_NAME, None)
+    focus = bpy.data.objects.new(prefix + FOCUS_NAME, None)
     for ob in (camera, look, focus):
         collection.objects.link(ob)
         tag(ob, **{PROP_ID: ob.name, PROP_KIND: "camera_rig"})

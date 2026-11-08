@@ -37,8 +37,10 @@ SMOOTH = "SMOOTH"  # auto-clamped Bezier handles on analytically eased, densely 
 # --- durations (seconds, all on frame boundaries) ------------------------------------------
 ENTRANCE_S = 0.6
 EXIT_S = 0.4  # 0.67 x the entrance (C-06: exits are 0.6-0.9 x)
-LABEL_ENTRANCE_S = 0.4  # in-world tags: quicker than a stage object, so short beats still hold them for 1.5 s
-LABEL_EXIT_S = 0.27  # 0.67 x the entrance (C-06)
+LABEL_ENTRANCE_S = 0.3  # signs: quicker than a stage object, so short beats still hold them fully for 1.5 s
+LABEL_EXIT_S = 0.2  # 0.67 x the entrance (C-06)
+LABEL_LINGER_S = 0.3  # a windowed sign stays this long past its window, so its exit does not eat the hold
+LABEL_ENTRANCE_SCALE = 0.85  # signs grow from this fraction of their size while they fade in (never opacity-only: C-06)
 STAGGER_S = 0.1
 IDLE_PERIOD_S = 2.0
 IDLE_AMPLITUDE_FRACTION = 0.015  # <= 2% of object size (C-06)

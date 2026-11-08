@@ -12,31 +12,29 @@ from blender import materials
 from blender.animation import FCurveWriter
 from blender.common import CAPTION_FONT, PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, bundled_font, tag
 from blender.render_settings import apply_tier
+from cff.stage import caption_layout
 from cff.story import captions, timing
 from cff.story.captions import Caption, CaptionKind
 from cff.theme import render
+from cff.theme import typography as ty
 from cff.theme.render import Tier
 
 CAPTION_SCENE = "CAPTIONS"
 UNIT_PX = render.CAPTION_PIXELS_PER_UNIT
 ORTHO_WIDTH_UNITS = render.CAPTION_REFERENCE_WIDTH_PX / UNIT_PX
-CAP_HEIGHT_PX = 38.0  # >= 30 px at 1080p (L-01)
-TITLE_CAP_HEIGHT_PX = 52.0
-CAPTION_CENTRE_Y_PX = 958.0  # distance from the top of the frame; inside the 90% title-safe area
 RISE_UNITS = 0.16
-PLATE_MARGIN_UNITS = 0.34
-TEXT_TO_EM = 1.0 / 0.72
+PLATE_MARGIN_UNITS = ty.CAPTION_PLATE_MARGIN_PX / UNIT_PX
+TEXT_TO_EM = ty.em_per_cap(ty.CAPTION_FONT)  # measured glyph ratio (cff.theme.typography), re-measured by check_fonts
 CAMERA_Z_UNITS = 10.0
 
 
 def caption_cap_units(caption: Caption) -> float:
-    return (TITLE_CAP_HEIGHT_PX if caption.kind is CaptionKind.TITLE else CAP_HEIGHT_PX) / UNIT_PX
+    return (ty.TITLE_CAP_PX if caption.kind is CaptionKind.TITLE else ty.CAPTION_CAP_PX) / UNIT_PX
 
 
 def caption_centre_y_units(caption: Caption) -> float:
-    if caption.kind is CaptionKind.TITLE:
-        return 0.0
-    return (render.CAPTION_REFERENCE_HEIGHT_PX / 2 - CAPTION_CENTRE_Y_PX) / UNIT_PX
+    """Top or bottom band, whichever keeps the plate clear of the focal subject (cff.stage.caption_layout, L-05)."""
+    return (render.CAPTION_REFERENCE_HEIGHT_PX / 2 - caption_layout.centre_y_px(caption.id)) / UNIT_PX
 
 
 def _plate(scene: bpy.types.Scene, width: float, height: float, name: str) -> bpy.types.Object:
@@ -82,7 +80,8 @@ def _build_caption(scene: bpy.types.Scene, caption: Caption) -> None:
     scene.collection.objects.link(text)
     scene.view_layers[0].update()
     width, height = text.dimensions.x, text.dimensions.y
-    plate = _plate(scene, width + 2 * PLATE_MARGIN_UNITS, max(height, cap_units * TEXT_TO_EM) + 1.4 * PLATE_MARGIN_UNITS, f"PLATE-{caption.id}")
+    del height  # the plate height is fixed per size, so every plate in a band lines up
+    plate = _plate(scene, width + 2 * PLATE_MARGIN_UNITS, cap_units * TEXT_TO_EM + 1.4 * PLATE_MARGIN_UNITS, f"PLATE-{caption.id}")
     root = bpy.data.objects.new(f"CAP-{caption.id}", None)
     scene.collection.objects.link(root)
     for child, depth in ((plate, 0.0), (text, 0.01)):

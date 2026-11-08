@@ -49,12 +49,16 @@ def private_key(bm: bmesh.types.BMesh, o: StageObject) -> None:
 
 
 def public_key(bm: bmesh.types.BMesh, o: StageObject) -> None:
-    """An open ring head with a notched shaft."""
+    """An open, notched token: a flat hexagonal plate with three notches on its rim. No bow, no shaft, no teeth.
+
+    Stage 1 round 1 (LEG-S1R1-02) showed that a key-shaped public key is read as the private key, so this shape shares
+    nothing with a key's silhouette (C-11: private vs public IoU <= 0.6).
+    """
     s = o.size[0]
-    p.torus(bm, s * 0.26, s * 0.06, (-s * 0.3, 0.0, 0.0), "Y", 20, 6)
-    p.box(bm, s * 0.64, s * 0.07, s * 0.07, (s * 0.2, 0.0, 0.0))
-    for x in (0.3, 0.42):
-        p.box(bm, s * 0.06, s * 0.07, s * 0.16, (s * x, 0.0, s * 0.09))
+    p.cylinder(bm, s * 0.42, s * 0.08, 6, (0.0, 0.0, 0.0), "Y")
+    for angle in (90.0, 210.0, 330.0):  # notches stand proud of three alternate faces
+        a = math.radians(angle)
+        p.box(bm, s * 0.12, s * 0.08, s * 0.12, (math.cos(a) * s * 0.42, 0.0, math.sin(a) * s * 0.42))
 
 
 def badge(bm: bmesh.types.BMesh, o: StageObject) -> None:

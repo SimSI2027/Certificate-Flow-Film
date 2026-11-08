@@ -14,11 +14,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # the repository r
 
 import bpy
 
-from blender import camera_rig, captions_scene, compositor, lighting, signage, world
+from blender import camera_rig, captions_scene, compositor, lighting, signs_scene, world
 from blender.animation import write_timeline
 from blender.common import ROOT, option, reset_scene, script_args
 from blender.render_settings import apply_tier
-from cff.stage import choreography, labels
+from cff.stage import choreography
 from cff.stage.camera import CameraPlan
 from cff.stage.tracks import Timeline
 from cff.theme import render
@@ -39,8 +39,7 @@ def build(out_path: str, tier_name: str, timeline_hook: TimelineHook | None = No
     apply_tier(scene, tier)
     stage = bpy.data.collections.new("STAGE")
     rig = bpy.data.collections.new("RIG")
-    signs = bpy.data.collections.new("LABELS")
-    for collection in (stage, rig, signs):
+    for collection in (stage, rig):
         scene.collection.children.link(collection)
 
     world.build_world(scene)
@@ -48,25 +47,24 @@ def build(out_path: str, tier_name: str, timeline_hook: TimelineHook | None = No
     objects = world.build_actors(stage)
 
     timeline = choreography.build_timeline()
-    labels.add_label_tracks(timeline)
     if timeline_hook is not None:
         timeline_hook(timeline)
     plan = CameraPlan(timeline)
 
-    camera = camera_rig.build_rig(scene, rig, plan, use_dof=True)
+    camera_rig.build_rig(scene, rig, plan, use_dof=True)
     lighting.build_lights(rig, bpy.data.objects[camera_rig.LOOK_NAME], plan)
-    label_objects = signage.build_labels(signs, objects, camera)
-    keys = write_timeline(timeline, {**objects, **label_objects})
+    keys = write_timeline(timeline, objects)
     compositor.build_compositor(scene, tier)
     captions_scene.build_caption_scene(tier)
+    sign_scene = signs_scene.build_signs_scene(tier, plan)
     if scene_hook is not None:
-        scene_hook(scene, {**objects, **label_objects})
+        scene_hook(scene, objects)
 
     bpy.context.window_manager  # noqa: B018  (touch: keeps the background context alive for saving)
     bpy.ops.wm.save_as_mainfile(filepath=out_path, compress=True)
     return {
         "objects": len(objects),
-        "labels": len(label_objects),
+        "signs": len([o for o in sign_scene.objects if o.get("cff_kind") == "sign"]),
         "animated_objects": len(timeline.objects()),
         "keyframes": keys,
         "seconds": round(time.perf_counter() - started, 1),

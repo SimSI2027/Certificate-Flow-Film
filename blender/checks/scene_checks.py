@@ -22,15 +22,15 @@ import bpy
 from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Matrix, Vector
 
-from blender.captions_scene import TEXT_TO_EM
-from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL
+from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, bundled_font, glyph_cap_ratio
 from cff.stage import camera as stage_camera
 from cff.stage import labels as stage_labels
+from cff.stage import signs as stage_signs
 from cff.stage.objects import CATALOGUE, Kind
 from cff.story import captions as story_captions
 from cff.story import model as m
 from cff.story import timing
-from cff.theme import motion, render, shots
+from cff.theme import motion, render, shots, typography
 
 VISIBLE_SCALE = 0.05
 CONTAINMENT_TOLERANCE_M = 0.08
@@ -43,17 +43,14 @@ RISE_POP_MAX_M = 0.8  # the Root CA complex rises 7 m into place during B-05.1
 RISE_KINDS = frozenset({Kind.DAIS, Kind.PLINTH, Kind.ROOT_VAULT, Kind.READER, Kind.PRESS, Kind.PRESS_HEAD, Kind.MODULE})
 POP_SIZE_FRACTION = 0.25  # a big object may also move a quarter of its own size per frame (the rising Root CA complex)
 FAST_KINDS = frozenset({Kind.PULSE, Kind.QUERY, Kind.SCROLL, Kind.PROOF, Kind.CAPSULE, Kind.CARD, Kind.CARTRIDGE, Kind.KEY_PRIVATE, Kind.KEY_PUBLIC,
-                        Kind.BADGE, Kind.TILE, Kind.BAND})
+                        Kind.BADGE, Kind.TILE, Kind.BAND, Kind.SEAL_RING})  # a closed seal ring rides with its capsule (PKI-S1R1-01)
 MAX_CAMERA_JERK_FRACTION = 0.004
 FILM_OPEN_SETTLE_FRAMES = 6  # the first keys carry flat end handles, so jerk is judged once the opening move has started
 TITLE_SAFE = (96.0, 54.0, 1824.0, 1026.0)  # x0, y0, x1, y1 at 1920x1080 (L-03)
 CAPTION_MIN_CAP_PX = 30.0
 LABEL_MIN_CAP_PX = 18.0
-LABEL_MAX_FACING_DEG = 35.0
 CAPTION_CLEAR_S = timing.CAPTION_MIN_GAP_S
 ALPHA_VISIBLE = 0.01
-LABEL_SCALE_SHOWN = 0.7  # a label counts as on screen once its entrance has reached 70% of full size
-LABEL_FRACTION_REQUIRED = 0.9
 SAMPLE_STEP = 1
 FAULT_TAG = "cff_fault"  # set on every scene of a deliberately broken variant (Charter 2.8)
 
@@ -426,7 +423,7 @@ def check_captions() -> Result:
             break
         mid = timing.FRAME_START + round((caption.hold_start_s + caption.hold_end_s) / 2 * timing.FPS)
         glyph = glyphs[caption.id]
-        cap_px = glyph.data.size / TEXT_TO_EM * _caption_matrix(glyph, mid).to_scale().y * px_per_unit
+        cap_px = glyph.data.size * _cap_ratio(glyph.data.font) * _caption_matrix(glyph, mid).to_scale().y * px_per_unit  # LEG-S1R1-03
         if cap_px < CAPTION_MIN_CAP_PX:
             r.failures.append(f"{caption.id}: cap height {cap_px:.1f} px < {CAPTION_MIN_CAP_PX} (measured from the glyphs)")
         if abs(cap_px - float(ob[PROP_CAP]) * px_per_unit) > 0.5:
@@ -438,67 +435,117 @@ def check_captions() -> Result:
     return r
 
 
-def check_labels(scene: bpy.types.Scene) -> Result:
-    """L-01 / L-03 / L-06 for must-read labels: on screen, large enough, inside the title-safe area, facing the camera."""
-    r = Result("labels")
+_CAP_RATIOS: dict[str, float] = {}
+
+
+def _cap_ratio(font: bpy.types.VectorFont) -> float:
+    key = font.filepath or font.name
+    if key not in _CAP_RATIOS:
+        _CAP_RATIOS[key] = glyph_cap_ratio(font)
+    return _CAP_RATIOS[key]
+
+
+def check_fonts() -> Result:
+    """The cap ratios the layout plans with (cff.theme.typography) match the glyphs this Blender build draws (LEG-S1R1-03)."""
+    r = Result("fonts")
+    measured: dict[str, float] = {}
+    for name, planned in typography.CAP_RATIO.items():
+        ratio = _cap_ratio(bundled_font(name))
+        measured[name] = round(ratio, 4)
+        if abs(ratio - planned) > typography.CAP_RATIO_TOLERANCE:
+            r.failures.append(f"{name}: measured cap ratio {ratio:.4f} differs from the planned {planned:.4f}")
+    r.metrics = {"cap_ratio": measured}
+    return r
+
+
+def check_text_materials() -> Result:
+    """Text-pass materials (captions, signs) never use dithered transparency, which stipples glyphs (LEG-S1R1-01)."""
+    r = Result("text_materials")
+    for scene_name in ("CAPTIONS", "SIGNS"):
+        scene = bpy.data.scenes.get(scene_name)
+        if scene is None:
+            r.failures.append(f"no {scene_name} scene")
+            continue
+        for ob in scene.objects:
+            for slot in getattr(ob.data, "materials", []) or []:
+                if slot is not None and slot.surface_render_method == "DITHERED":
+                    r.failures.append(f"{scene_name}/{ob.name}: material {slot.name} is DITHERED")
+    beauty_text = [ob.name for ob in bpy.data.scenes["BEAUTY"].objects if ob.type == "FONT"]
+    if beauty_text:
+        r.failures.append(f"text objects in the BEAUTY pass (signs belong to the SIGNS pass): {beauty_text[:5]}")
+    return r
+
+
+SIGN_POSITION_TOLERANCE = 0.002  # metres per metre of depth
+SIGN_CHECK_STEP = 3
+
+
+def check_signs(scene: bpy.types.Scene) -> Result:
+    """L-01 / L-03 / L-06 for every sign, measured in Blender against the beauty camera.
+
+    The SIGNS scene is not the context scene, so sign transforms are read from their F-curves (as for captions); the
+    beauty camera is evaluated with ``frame_set``. On every ``SIGN_CHECK_STEP``-th fully shown frame each sign must:
+    sit where the sign plan put it; have a glyph cap height (font size x measured cap ratio x scale, projected) of at least
+    18 px at 1080p; and have its plate inside title-safe. Every must-read label must be fully shown for >= 1.5 s (or its
+    whole window) inside its must-read beats, measured on the keyed opacity.
+    """
+    r = Result("signs")
+    board = bpy.data.scenes.get("SIGNS")
+    if board is None:
+        r.failures.append("no SIGNS scene")
+        return r
+    roots = {ob[PROP_ID]: ob for ob in board.objects if ob.get(PROP_KIND) == "sign"}
+    missing = sorted({p.label_id for p in stage_labels.PLACEMENTS} - set(roots))
+    if missing:
+        r.failures.append(f"labels without a sign: {missing}")
+    planned = stage_signs.plan_signs()
     camera = scene.camera
-    objs = objects_by_id(scene)
-    per_label: dict[str, dict[str, int]] = {}
-    must: dict[str, set[int]] = {}
-    for label in m.MODEL.labels:
-        frames_needed: set[int] = set()
-        for beat in label.must_read_beats:
-            first, last = timing.frame_range(*timing.beat_window(beat))
-            frames_needed.update(range(first, last + 1))
-        if frames_needed:
-            must[label.id] = frames_needed
-            per_label[label.id] = {"visible": 0, "ok": 0, "frames": len(frames_needed), "behind": 0, "small": 0, "off": 0, "turned": 0, "cap_px_sum": 0}
-    for frame in frames(scene):
+    worst_cap = math.inf
+    checked = 0
+    for frame in range(timing.FRAME_START, timing.frame_end() + 1, SIGN_CHECK_STEP):
+        live = [(k, planned[k].frames[frame]) for k in roots if frame in planned[k].frames and planned[k].frames[frame].alpha >= 1.0 - 1e-6]
+        if not live:
+            continue
         scene.frame_set(frame)
         lens = camera.data.lens
-        for label_id, needed in must.items():
-            if frame not in needed:
-                continue
-            root = objs[label_id]
-            if min(abs(s) for s in root.scale) < LABEL_SCALE_SHOWN or not parent_chain_visible(root):
-                continue
-            cap_m = float(root[PROP_CAP])
-            centre = root.matrix_world.translation
-            view = world_to_camera_view(scene, camera, centre)
-            stats = per_label[label_id]
-            stats["visible"] += 1
+        for label_id, plan_frame in live:
+            root = roots[label_id]
+            text = next(c for c in root.children if c.name.startswith("TXT-"))
+            loc = Vector([_animated(root, "location", i, frame, root.location[i]) for i in range(3)])
+            scale = _animated(root, "scale", 0, frame, root.scale[0])
+            alpha = _animated(text, "color", 3, frame, float(text.color[3]))
+            view = world_to_camera_view(scene, camera, loc)
             if view.z <= 0:
-                stats["behind"] += 1
+                r.failures.append(f"{label_id}: frame {frame}: behind the camera")
                 continue
-            depth = view.z
-            cap_px_1080 = cap_m / depth * (lens / shots.SENSOR_WIDTH_MM) * render.CAPTION_REFERENCE_WIDTH_PX
-            x_px, y_px = view.x * render.CAPTION_REFERENCE_WIDTH_PX, (1 - view.y) * render.CAPTION_REFERENCE_HEIGHT_PX
-            safe = TITLE_SAFE[0] <= x_px <= TITLE_SAFE[2] and TITLE_SAFE[1] <= y_px <= TITLE_SAFE[3]
-            facing = math.degrees((camera.matrix_world.translation - centre).normalized().angle(root.matrix_world.to_quaternion() @ Vector((0.0, 0.0, 1.0))))
-            stats["small"] += cap_px_1080 < LABEL_MIN_CAP_PX
-            stats["off"] += not safe
-            stats["turned"] += facing > LABEL_MAX_FACING_DEG
-            stats["cap_px_sum"] += int(cap_px_1080)
-            if cap_px_1080 >= LABEL_MIN_CAP_PX and safe and facing <= LABEL_MAX_FACING_DEG:
-                stats["ok"] += 1
-    failing = {}
-    for label_id, stats in per_label.items():
-        needed = min(stats["frames"], round(1.5 * timing.FPS))  # on screen >= 1.5 s (or the whole beat, if shorter)
-        if stats["ok"] < needed:
-            failing[label_id] = stats
-    advisory: list[str] = []
-    for label_id, stats in sorted(failing.items()):
-        mean_cap = stats["cap_px_sum"] // max(1, stats["visible"] - stats["behind"])
-        text = (f"{label_id}: legible on {stats['ok']} of {stats['frames']} must-read frames (visible {stats['visible']}, mean cap {mean_cap} px; "
-                f"too small {stats['small']}, outside title-safe {stats['off']}, turned {stats['turned']}, behind {stats['behind']}; "
-                f"needs {min(stats['frames'], round(1.5 * timing.FPS))})")
-        if label_id in stage_labels.LABELS_OPEN:
-            advisory.append(text)  # open work for the Stage 1 rounds (ratcheted)
-        else:
-            r.failures.append(text)
-    for label_id in sorted(stage_labels.LABELS_OPEN - set(failing)):
-        r.failures.append(f"{label_id} now passes: remove it from cff.stage.labels.LABELS_OPEN")
-    r.metrics = {"must_read_labels": len(per_label), "failing": len(failing), "open_advisory": advisory}
+            if (loc - Vector(plan_frame.origin)).length > SIGN_POSITION_TOLERANCE * view.z + 1e-4 or alpha < 0.99:
+                r.failures.append(f"{label_id}: frame {frame}: keyed sign differs from the plan (offset {(loc - Vector(plan_frame.origin)).length:.4f} m, alpha {alpha:.2f})")
+                continue
+            cap_m = text.data.size * _cap_ratio(text.data.font) * scale
+            cap_px = cap_m / view.z * (lens / shots.SENSOR_WIDTH_MM) * render.CAPTION_REFERENCE_WIDTH_PX
+            worst_cap = min(worst_cap, cap_px)
+            x0, y0, x1, y1 = plan_frame.rect
+            centre = (view.x * render.CAPTION_REFERENCE_WIDTH_PX, (1 - view.y) * render.CAPTION_REFERENCE_HEIGHT_PX)
+            anchor_x = centre[0] - (typography.SIGN_CAP_PX * typography.SIGN_PLATE_MARGIN_CAPS if stage_labels.BY_ID[label_id].align == "LEFT" else (x1 - x0) / 2)
+            if abs(anchor_x - x0) > 2.0 or abs(centre[1] - (y0 + y1) / 2) > 2.0:
+                r.failures.append(f"{label_id}: frame {frame}: projected at ({centre[0]:.0f},{centre[1]:.0f}), planned plate ({x0:.0f},{y0:.0f})-({x1:.0f},{y1:.0f})")
+            if cap_px < LABEL_MIN_CAP_PX:
+                r.failures.append(f"{label_id}: frame {frame}: cap height {cap_px:.1f} px < {LABEL_MIN_CAP_PX}")
+            if x0 < TITLE_SAFE[0] or y0 < TITLE_SAFE[1] or x1 > TITLE_SAFE[2] or y1 > TITLE_SAFE[3]:
+                r.failures.append(f"{label_id}: frame {frame}: plate leaves title-safe")
+            checked += 1
+    for placement in stage_labels.PLACEMENTS:
+        must = stage_labels.must_read_frames(placement.label_id)
+        if not must or placement.label_id not in roots:
+            continue
+        text = next(c for c in roots[placement.label_id].children if c.name.startswith("TXT-"))
+        shown = sum(1 for f in must if _animated(text, "color", 3, f, float(text.color[3])) >= 0.99)
+        needed = min(len(must), round(1.5 * timing.FPS))
+        if shown < needed:
+            r.failures.append(f"{placement.label_id}: fully shown on {shown} must-read frames, needs {needed} (L-06)")
+    if len(r.failures) > 40:
+        r.failures = [*r.failures[:40], f"... and {len(r.failures) - 40} more"]
+    r.metrics = {"signs": len(roots), "checked_sign_frames": checked, "smallest_cap_px": round(worst_cap, 1) if checked else None}
     return r
 
 
@@ -525,5 +572,5 @@ def run_all(scene: bpy.types.Scene) -> list[Result]:
     results += check_dynamic(scene)
     results.append(check_camera_motion(scene))
     results.append(check_captions())
-    results.append(check_labels(scene))
+    results += [check_fonts(), check_text_materials(), check_signs(scene)]
     return results

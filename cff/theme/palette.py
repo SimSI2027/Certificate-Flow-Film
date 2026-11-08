@@ -49,7 +49,19 @@ PLATE_HEX = "#0B1220"  # label plate and caption backing
 SKIN_HEX = "#8A93A6"  # stylized figure (no realistic human)
 SCREEN_HEX = "#7FB4E8"  # laptop session window
 PLATE_OPACITY = 0.92  # label and caption plates: even over a white background, white text keeps >= 4.5:1 (L-02)
-LABEL_TEXT_EMISSION = 2.2  # emission strength of in-world label text
+
+# Trust links are light, not cable (AR-01, C-01): a gradient from the issuer's colour to the subject CA's colour along
+# the link, whose glow channel carries only intensity. Emission stays low enough that AgX keeps the hue (PKI-S1R1-05).
+TRUST_LINK_STOPS: dict[str, tuple[ColourRole, ColourRole]] = {
+    "gold_to_cyan": (ColourRole.ROOT, ColourRole.ISSUING_CA1),
+    "gold_to_violet": (ColourRole.ROOT, ColourRole.ISSUING_CA2),
+    "cyan": (ColourRole.ISSUING_CA1, ColourRole.ISSUING_CA1),
+    "violet": (ColourRole.ISSUING_CA2, ColourRole.ISSUING_CA2),
+}
+TRUST_LINK_EMISSION = 1.8
+TRUST_LINK_REST = 0.4  # glow level a link settles to once introduced (it stays readable without dominating later shots)
+TRUST_LINK_ARC_FRACTION = 0.12  # a link bows upward by this fraction of its length (a path of light, not a taut wire)
+TRUST_LINK_SEGMENTS = 24
 
 # --- glow and light levels ---------------------------------------------------------------
 GLOW_OFF = 0.0

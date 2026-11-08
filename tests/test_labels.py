@@ -8,7 +8,7 @@ from cff.stage import labels
 from cff.stage.objects import BY_ID
 from cff.story import model, timing
 from cff.story.model import LabelKind
-from cff.theme import motion
+from cff.theme import motion, typography
 
 
 @pytest.mark.covers("L-06")
@@ -34,19 +34,16 @@ def test_windowed_labels_have_room_for_entrance_and_exit_and_sit_in_their_beat()
             continue
         first, last = labels.window_frames(p.window)
         beat_first = timing.seconds_to_frame(timing.beat_window(p.window.beat)[0])
-        beat_after = timing.seconds_to_frame(timing.beat_window(p.window.beat)[1])
+        beat_after = timing.seconds_to_frame(timing.beat_window(p.window.until or p.window.beat)[1])
         assert beat_first <= first and last <= beat_after, p.label_id
         assert last - first > enter + leave, p.label_id
         assert p.window.beat in labels.LABELS[p.label_id].must_read_beats or labels.LABELS[p.label_id].kind is not LabelKind.TAG, p.label_id
 
 
 @pytest.mark.covers("L-01")
-def test_label_sizes_reach_the_l01_pixel_target_on_the_camera_plan() -> None:
-    caps = labels.effective_caps()
-    assert set(caps) == {p.label_id for p in labels.PLACEMENTS}
-    for p in labels.PLACEMENTS:
-        assert p.cap_m <= caps[p.label_id] <= labels.MAX_CAP_M + 1e-9
-    assert labels.TARGET_CAP_PX >= 18.0
+def test_signs_are_held_at_a_cap_height_above_the_l01_minimum() -> None:
+    assert typography.SIGN_CAP_PX >= 18.0 + 2.0  # margin over L-01's 18 px at 1080p
+    assert typography.CAPTION_CAP_PX >= 30.0 + 2.0
 
 
 @pytest.mark.covers("L-06")
@@ -62,6 +59,3 @@ def test_check_labels_hang_from_their_tick_in_the_model_order() -> None:
         assert labels.BY_ID[f"LBL-CHAIN-WEB-{check.name}"].parent == f"TICK-WEB-{'abcd'[i]}"
 
 
-@pytest.mark.covers("L-06")
-def test_open_label_list_is_empty_or_names_real_labels() -> None:
-    assert set(labels.LABELS) >= labels.LABELS_OPEN

@@ -36,6 +36,8 @@ TRAVEL_LIFT = 1.1  # cards travelling along a channel float this high
 TRAVEL_BEHIND_S = 0.1  # a second object leaves this long after the first
 SETTLE_BOUNCE = 0.04
 HOLD_EASE = "EASE_IN_OUT"
+SEAL_CLOSED_SCALE = 0.7  # the proof-of-possession ring tightens round its capsule and stays on it
+CHECKS_CLEAR_S = 0.3  # a CA's check slots leave this long into the next beat, with their written list
 
 
 def role_rgb(role: ColourRole) -> tuple[float, float, float]:
@@ -62,6 +64,7 @@ class Choreographer:
         self.handled: set[str] = set()
         self._events = {e.id: e for e in m.MODEL.events}
         self._last: dict[tuple[str, str], tuple[int, Value]] = {}
+        self.seal_binds: list[tuple[str, str, int]] = []  # (seal ring, capsule, frame the seal has closed)
 
     # ------------------------------------------------------------------ frame helpers
     def beat(self, beat_id: str, offset_s: float = 0.0) -> int:
@@ -156,6 +159,12 @@ class Choreographer:
             self._set(obj_id, GLOW, f0, cur, "EASE_IN")
             self._set(obj_id, GLOW, f0 + dur, self._dark(cur), HOLD_EASE)
 
+    def trust_link(self, obj_id: str, f0: int, f1: int) -> None:
+        """An issuer link grows from the root, flares, then settles to a resting glow (light that stays, not a lit wire)."""
+        self.grow(obj_id, f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_PEAK))
+        settle = round(motion.SLIDE_S * timing.FPS)
+        self.glow_to(obj_id, f1 + settle, f1 + 3 * settle, hex_glow(palette.TEXT_HEX, palette.TRUST_LINK_REST), "EASE_IN_OUT")
+
     def grow(self, obj_id: str, f0: int, f1: int, glow: Value) -> None:
         """A beam or trust link extends along its own axis while it lights up."""
         full = BY_ID[obj_id].full
@@ -247,9 +256,22 @@ class Choreographer:
 
     # ------------------------------------------------------------------ build
     def build(self) -> Timeline:
-        for step in (self.initial, self.s1, self.s2, self.s3, self.s4, self.s5, self.s6, self.s7, self.s8, self.s9, self.idle):
+        for step in (self.initial, self.s1, self.s2, self.s3, self.s4, self.s5, self.s6, self.s7, self.s8, self.s9, self.idle, self.bind_seals):
             step()
         return self.tl
+
+    def bind_seals(self) -> None:
+        """Once closed, a seal ring belongs to its capsule: it rides with it and is consumed with it (PKI-S1R1-01).
+
+        The signature is part of the request, so nothing ring-shaped stays behind at the server when the capsule leaves.
+        """
+        for ring, req, closed in self.seal_binds:
+            for key in self.tl.keys(req, LOCATION):
+                if key.frame > closed:
+                    self.tl.key(ring, LOCATION, key.frame, key.value, key.ease)
+            for key in self.tl.keys(req, SCALE):
+                if key.frame > closed:
+                    self.tl.key(ring, SCALE, key.frame, tuple(v * SEAL_CLOSED_SCALE for v in key.value), key.ease)
 
     def initial(self) -> None:
         """Resting glow of objects that are lit from the first frame."""
@@ -367,7 +389,8 @@ class Choreographer:
         ring = f"SEAL-{tag}"
         ring_end = f0 + beam_d + ring_d
         self.show(ring, f0 + beam_d, ring_d, rise=(0.0, 0.0, 0.0), glow=white, at=capsule_at)
-        self.key_to(ring, SCALE, ring_end, ring_end + close_d, (0.7, 0.7, 0.7), "EASE_IN_OUT")
+        self.key_to(ring, SCALE, ring_end, ring_end + close_d, (SEAL_CLOSED_SCALE,) * 3, "EASE_IN_OUT")
+        self.seal_binds.append((ring, req, ring_end + close_d))
         self.glow_to(req, ring_end, ring_end + close_d, white)
         self.hide(f"BEAM-{tag}", ring_end, sink=(0.0, 0.0, 0.0))
 
@@ -409,6 +432,8 @@ class Choreographer:
         self.glow_to("EVAL-CA1", self.beat("B-04.3"), self.beat("B-04.3", 0.7), glow_value(R.ISSUING_CA1, 0.3), "EASE_OUT")
         for letter, ev_id in zip("abcd", ("E-04.3a", "E-04.3b", "E-04.3c", "E-04.3d"), strict=True):
             self.tick(f"TICK-CA1-{letter}", self.event(ev_id), cyan)
+        for letter in "abcd":  # the check slots leave with their list: nothing present-tense survives into the flashback (PKI-S1R1-04)
+            self.hide(f"TICK-CA1-{letter}", self.beat("B-04.4", CHECKS_CLEAR_S), 9)
         # B-04.4: the request is consumed at the press; CA 1's sealed key drives the press, which stamps the RDP certificate.
         f0, f1 = self.event("E-04.4a")
         press = lo.add(lo.CA1, lo.CA_PRESS)
@@ -523,7 +548,7 @@ class Choreographer:
             self.hide(f"FOOT-{i + 1:02d}", f0 + (i % 4), 9, sink=(0.0, 0.0, 0.0))
         # B-05.3: back in the present, a gold-to-cyan trust link grows from the root down to CA 1's certificate.
         f0, f1 = self.event("E-05.3a")
-        self.grow("TL-CA1", f0, f1, hex_glow(palette.TEXT_HEX, 1.0))
+        self.trust_link("TL-CA1", f0, f1)
 
     # ------------------------------------------------------------------ S6
     def s6(self) -> None:
@@ -655,6 +680,8 @@ class Choreographer:
         # B-08.1: the same four checks, faster, in violet.
         for letter, ev_id in zip("abcd", ("E-08.1a", "E-08.1b", "E-08.1c", "E-08.1d"), strict=True):
             self.tick(f"TICK-CA2-{letter}", self.event(ev_id), violet)
+        for letter in "abcd":
+            self.hide(f"TICK-CA2-{letter}", self.beat("B-08.2", CHECKS_CLEAR_S), 9)
         # B-08.2: consumed at the press; CA 2's sealed key drives it; the TLS certificate is stamped and returns.
         f0, f1 = self.event("E-08.2a")
         press = lo.add(lo.CA2, lo.CA_PRESS)
@@ -691,7 +718,7 @@ class Choreographer:
         # B-08.3: CA 2's existing certificate brightens and a gold-to-violet link joins it to the same root.
         f0, f1 = self.event("E-08.3a")
         self.glow_to("CERT-CA2", f0, f1, glow_value(R.ISSUING_CA2, 1.0))
-        self.grow("TL-CA2", f0, f1, hex_glow(palette.TEXT_HEX, 1.0))
+        self.trust_link("TL-CA2", f0, f1)
 
     # ------------------------------------------------------------------ S9
     def s9(self) -> None:
@@ -752,9 +779,11 @@ class Choreographer:
         self.travel("CERT-CA2-COPY-WEB", b0 + 6, b0 + 66, (self.current("CERT-CA2-COPY-WEB", LOCATION), *tuple(lo.at_z(p, TRAVEL_LIFT + 0.4) for p in lo.CHANNEL_WEB), lo.add(front, (0.0, 0.0, -0.3)), copy_slot), "EASE_IN_OUT")
         self.hide("SCREEN-WEB", b0 + 60)
         f0, f1 = self.event("E-09.2a")
-        self.grow("TP-RDP", f0, f1, glow_value(R.ISSUING_CA1, palette.GLOW_ACTIVE))
+        self.grow("TP-RDP", f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_ACTIVE))  # hue from the link's gradient material
+        self.glow_to("TL-CA1", f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_ACTIVE), "EASE_OUT")  # the path lights up to the root
         f0, f1 = self.event("E-09.2b")
-        self.grow("TP-WEB", f0, f1, glow_value(R.ISSUING_CA2, palette.GLOW_ACTIVE))
+        self.grow("TP-WEB", f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_ACTIVE))
+        self.glow_to("TL-CA2", f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_ACTIVE), "EASE_OUT")
         # B-09.3: the world settles; the compositor fade-to-black is keyed from the same event (see compositor).
         self.event("E-09.3a")
 

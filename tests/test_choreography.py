@@ -29,9 +29,7 @@ def _chor() -> choreography.Choreographer:
 
 @cache
 def _timeline() -> Timeline:
-    timeline = _chor().tl
-    labels.add_label_tracks(timeline)
-    return timeline
+    return _chor().tl
 
 
 @pytest.mark.covers("B-*")

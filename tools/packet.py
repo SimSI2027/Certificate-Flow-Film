@@ -13,7 +13,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from cff.stage import camera, choreography, labels
+from cff.stage import camera, choreography
 from cff.story import timing
 from cff.story.export import model_dump
 from cff.story.model import MODEL
@@ -177,7 +177,6 @@ def build_stage1(round_number: int | None = None, tier: str = "animatic", folder
         strip_entries.append({**_frame_entry(strip, folder, beat.id, None), "frames": picks})
     shutil.rmtree(folder / "strips" / "tmp")
     timeline = choreography.build_timeline()
-    labels.add_label_tracks(timeline)
     plan = camera.CameraPlan(timeline)
     shots_data = []
     for beat in MODEL.beats:

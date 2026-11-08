@@ -188,8 +188,8 @@ CAPTION_SECONDS_PER_WORD = 0.35  # L-04
 
 CAPTION_WINDOWS_S: dict[str, tuple[str, float, float]] = {
     "CAP-S1": ("B-01.1", 1.0, 4.0),
-    "CAP-S2": ("B-02.1", 1.0, 4.5),
-    "CAP-S3a": ("B-03.1", 1.0, 4.5),
+    "CAP-S2": ("B-02.1", 1.2, 4.3),  # fades in once the camera has settled below the listener (L-05)
+    "CAP-S3a": ("B-03.1", 1.0, 3.2),  # gone before the capsule rises into the top band in B-03.3 (L-05, LEG-S1R1-12)
     "CAP-S3b": ("B-03.3", 2.2, 3.0),
     "CAP-S4": ("B-04.3", 0.0, 6.0),
     "CAP-S5a": ("B-05.2", 0.4, 4.0),
@@ -197,7 +197,7 @@ CAPTION_WINDOWS_S: dict[str, tuple[str, float, float]] = {
     "CAP-S6a": ("B-06.2", 0.5, 9.5),
     "CAP-S6b": ("B-06.6", 0.2, 2.5),
     "CAP-S7": ("B-07.3", 0.0, 4.5),
-    "CAP-S8": ("B-08.2", 0.0, 4.0),
+    "CAP-S8": ("B-08.2", 0.0, 3.6),  # gone before the TLS certificate drops through the bottom band (L-05)
     "CAP-S9a": ("B-09.2", 1.0, 4.0),
     "TITLE-S9": ("B-09.3", 0.5, 3.7),
 }

@@ -111,6 +111,12 @@ def _cmd_motion(_: argparse.Namespace) -> int:
     return 1 if bad else 0
 
 
+def _cmd_legibility(_: argparse.Namespace) -> int:
+    from tools import legibility_audit  # noqa: PLC0415  (builds the sign plan: only this command pays for it)
+
+    return legibility_audit.main()
+
+
 def _cmd_calibrate(args: argparse.Namespace) -> int:
     from tools import calibrate  # noqa: PLC0415  (imported only by this command, so no other command can reach a fault)
 
@@ -146,24 +152,23 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("render", help="render frames in resumable 300-frame chunks (skips frames already on disk)")
     p.add_argument("--tier", default="animatic", choices=["animatic", "preview", "final"])
-    p.add_argument("--scene", default="all", choices=["all", "BEAUTY", "CAPTIONS"])
+    p.add_argument("--scene", default="all", choices=["all", "BEAUTY", "SIGNS", "CAPTIONS"])
     p.add_argument("--first", type=int)
     p.add_argument("--last", type=int)
     p.add_argument("--rebuild", action="store_true", help="rebuild the .blend first")
     p.set_defaults(func=_cmd_render)
 
-    p = sub.add_parser("captions", help="write output/captions.vtt and output/transcript.md from cff/story/captions.py")
-    p.set_defaults(func=_cmd_captions)
-
     p = sub.add_parser("contact", help="contact sheet with one tile per beat")
     p.add_argument("--tier", default="animatic")
     p.set_defaults(func=_cmd_contact)
 
-    p = sub.add_parser("palette", help="L-07 palette check (CIEDE2000, with colour-vision simulation)")
-    p.set_defaults(func=_cmd_palette)
-
-    p = sub.add_parser("motion", help="planned-film audits: camera, focal subject, keys, easing, glow")
-    p.set_defaults(func=_cmd_motion)
+    for name, func, text in (
+        ("captions", _cmd_captions, "write output/captions.vtt and output/transcript.md from cff/story/captions.py"),
+        ("palette", _cmd_palette, "L-07 palette check (CIEDE2000, with colour-vision simulation)"),
+        ("motion", _cmd_motion, "planned-film audits: camera, focal subject, keys, easing, glow"),
+        ("legibility", _cmd_legibility, "planned-film legibility audit: must-read sign holds (L-06), captions clear of the focal subject (L-05)"),
+    ):
+        sub.add_parser(name, help=text).set_defaults(func=func)
 
     p = sub.add_parser("traceability", help="generate docs/TRACEABILITY.md")
     p.add_argument("--check", action="store_true", help="fail if stale or any ID is uncovered")

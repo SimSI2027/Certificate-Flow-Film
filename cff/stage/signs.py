@@ -1,0 +1,332 @@
+"""Sign layout: where each in-world label sits on every frame, how large it is, and when it is shown.
+
+Every label is a sign anchored at a 3D point (its parent object plus an offset, or a fixed world point). Signs are
+real text objects in the 3D world, turned to the camera, but they are held at one on-screen cap height
+(``typography.SIGN_CAP_PX``) by scaling with depth, and they live in their own render pass (the SIGNS scene) so
+geometry never hides them and depth of field never softens them (L-01, L-06; LEG-S1R1-03..11, CIN-S1R1-01).
+
+On every frame a sign is shown only if all of these hold, otherwise it fades out:
+- it exists (its window is open, or its parent is on stage);
+- its anchor is in front of the lens by at least ``SIGN_NEAR_M`` (no sign ever fills the frame: CIN-S1R1-01);
+- its plate lies inside the title-safe area (L-03);
+- its plate clears a visible caption plate (L-05);
+- its plate does not overlap a sign of higher priority (signs that must be read in the current beat come first).
+
+Labels of one family (a check list, a tag stack, a card's fields) keep a minimum line pitch, in order, so a list never
+prints one line on top of another (PKI-S1R1-03, LEG-S1R1-04).
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+from functools import cache
+
+from cff.stage import camera, caption_layout, choreography, labels
+from cff.stage import layout as lo
+from cff.stage.audit import beat_of_frame, is_visible
+from cff.stage.labels import Placement
+from cff.stage.layout import Vec3
+from cff.stage.objects import BY_ID as BY_OBJECT
+from cff.stage.tracks import LOCATION, Timeline
+from cff.story import captions, timing
+from cff.theme import motion, shots
+from cff.theme import typography as ty
+
+Rect = tuple[float, float, float, float]  # x0, y0, x1, y1 in 1080p pixels
+
+
+@dataclass(frozen=True)
+class SignFrame:
+    frame: int
+    alpha: float  # 0..1 after the eased fades
+    origin: Vec3  # world position of the text origin (centre, or the left edge for left-aligned text)
+    cap_m: float  # cap height in metres that gives SIGN_CAP_PX on screen at this depth
+    rect: Rect  # the plate on screen at 1080p
+
+
+@dataclass(frozen=True)
+class SignPlan:
+    label_id: str
+    frames: dict[int, SignFrame]  # only frames on which the sign has any opacity
+
+    def shown(self, frame: int) -> bool:
+        f = self.frames.get(frame)
+        return f is not None and f.alpha >= 1.0 - 1e-9
+
+
+def _intersects(a: Rect, b: Rect, gap: float = 0.0) -> bool:
+    return a[0] < b[2] + gap and b[0] < a[2] + gap and a[1] < b[3] + gap and b[1] < a[3] + gap
+
+
+def _inside_safe(r: Rect) -> bool:
+    x0, y0, x1, y1 = ty.TITLE_SAFE_PX
+    m = ty.SIGN_SAFE_MARGIN_PX - 1e-6  # nudged blocks land exactly on the margin
+    return r[0] >= x0 + m and r[1] >= y0 + m and r[2] <= x1 - m and r[3] <= y1 - m
+
+
+def anchor(timeline: Timeline, placement: Placement, frame: int) -> Vec3:
+    if placement.parent is None:
+        return placement.offset
+    loc = timeline.value_at(placement.parent, LOCATION, frame)
+    base = (loc[0], loc[1], loc[2]) if loc is not None else BY_OBJECT[placement.parent].home
+    return lo.add(base, placement.offset)
+
+
+def exists(timeline: Timeline, placement: Placement, frame: int) -> bool:
+    if placement.window is not None:
+        first, last = labels.window_frames(placement.window)
+        return first <= frame < last + round(motion.LABEL_LINGER_S * timing.FPS)
+    return placement.parent is None or is_visible(timeline, placement.parent, frame)
+
+
+def caption_rects(frame: int) -> list[Rect]:
+    """Plates of the captions that have any opacity on ``frame``."""
+    return [caption_layout.plate_rect(c.id) for c in captions.CAPTIONS if frame in caption_layout.caption_frames(c.id)]
+
+
+def _unproject(state: camera.CamState, x_px: float, y_px: float, depth: float) -> Vec3:
+    forward, right, up = camera._basis(state.position, state.look)
+    half_w = shots.SENSOR_WIDTH_MM / 2
+    nx = (x_px / ty.FRAME_W_PX - 0.5) * 2 * half_w / state.lens * depth
+    ny = (0.5 - y_px / ty.FRAME_H_PX) * 2 * half_w / state.lens / (ty.FRAME_W_PX / ty.FRAME_H_PX) * depth
+    return lo.add(state.position, lo.add(lo.mul(forward, depth), lo.add(lo.mul(right, nx), lo.mul(up, ny))))
+
+
+def cap_m_at(state: camera.CamState, depth: float, cap_px: float = ty.SIGN_CAP_PX) -> float:
+    return cap_px / ty.FRAME_W_PX * shots.SENSOR_WIDTH_MM / state.lens * depth
+
+
+# Signs that are read together form a list: shown members keep this order, one line below the other, and the list
+# moves as one block when it has to be nudged inside title-safe or above a caption. A member ending in "-" is a prefix.
+LISTS: tuple[tuple[str, ...], ...] = (
+    ("LBL-CA1", "LBL-CA1-INELIGIBLE", "LBL-ISSUING_CA1-"),
+    ("LBL-CA2", "LBL-ELIG-", "LBL-ISSUING_CA2-", "LBL-CA2-NOTE"),
+    ("LBL-CHAIN-RDP-", "LBL-OCSP"),
+    ("LBL-CHAIN-WEB-",),
+    ("LBL-HOST-WEB", "LBL-SITE-WEB", "LBL-TPL-WEB"),
+    ("LBL-HOST-RDP", "LBL-TPL-RDP"),
+    ("LBL-SELF", "LBL-UNVERIFIED"),
+    ("LBL-CERT-RDP-",),
+    ("LBL-CERT-WEB-",),
+    ("LBL-AIA-",),
+    ("LBL-AD", "LBL-DC"),
+)
+
+
+def _matches(label_id: str, member: str) -> bool:
+    return label_id.startswith(member) if member.endswith("-") else label_id == member
+
+
+def _list_key(label_id: str) -> tuple[int, int]:
+    """(list number, position in the list); a label in no list is its own list."""
+    for number, members in enumerate(LISTS):
+        for position, member in enumerate(members):
+            if _matches(label_id, member):
+                return number, position
+    return 1000 + labels.PLACEMENTS.index(labels.BY_ID[label_id]), 0
+
+
+def family(label_id: str) -> int:
+    return _list_key(label_id)[0]
+
+
+@dataclass
+class _Candidate:
+    placement: Placement
+    index: int
+    origin_px: tuple[float, float]
+    depth: float
+    rect: Rect
+    must: bool
+
+
+def _rect_for(placement: Placement, x: float, y: float) -> tuple[Rect, tuple[float, float]]:
+    w, h = ty.sign_plate_size_px(placement.text)
+    margin = ty.SIGN_CAP_PX * ty.SIGN_PLATE_MARGIN_CAPS
+    if placement.align == "LEFT":
+        return (x, y - h / 2, x + w, y + h / 2), (x + margin, y)
+    return (x - w / 2, y - h / 2, x + w / 2, y + h / 2), (x, y)
+
+
+def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, beat: str) -> tuple[list[_Candidate], set[str]]:
+    state = plan.state(frame)
+    out: list[_Candidate] = []
+    hidden: set[str] = set()
+    for index, placement in enumerate(labels.PLACEMENTS):
+        if not exists(timeline, placement, frame):
+            hidden.add(placement.label_id)
+            continue
+        px, py, depth = camera.project(state, anchor(timeline, placement, frame))
+        if depth < ty.SIGN_NEAR_M or not math.isfinite(px):
+            hidden.add(placement.label_id)
+            continue
+        relevant = placement.window is not None or beat in labels.LABELS[placement.label_id].must_read_beats
+        if not relevant and depth > ty.SIGN_DEPTH_FACTOR * state.focus_distance:
+            hidden.add(placement.label_id)  # a name far behind the subject of a close shot: it would show through walls
+            continue
+        x, y = px * ty.FRAME_W_PX, py * ty.FRAME_H_PX
+        if not (0.0 <= x <= ty.FRAME_W_PX and 0.0 <= y <= ty.FRAME_H_PX):
+            hidden.add(placement.label_id)  # the thing it names is off screen
+            continue
+        rect, origin = _rect_for(placement, x, y)
+        must = beat in labels.LABELS[placement.label_id].must_read_beats
+        out.append(_Candidate(placement, index, origin, depth, rect, must))
+    # lists keep their order and a minimum pitch: each member sits at least one line below the previous one
+    by_list: dict[int, list[_Candidate]] = {}
+    for c in out:
+        by_list.setdefault(family(c.placement.label_id), []).append(c)
+    blocked = caption_rects(frame)
+    focal = caption_layout.focal_rect(timeline, plan, beat, frame) if beat else None
+    kept: list[_Candidate] = []
+    for members in by_list.values():
+        members.sort(key=lambda c: (_list_key(c.placement.label_id)[1], c.index))
+        for prev, cur in zip(members, members[1:], strict=False):
+            min_top = prev.rect[3] + ty.SIGN_GAP_PX
+            if cur.rect[1] < min_top:
+                _shift(cur, 0.0, min_top - cur.rect[1])
+        if focal is not None and any(c.placement.window is not None for c in members):
+            _beside(members, focal)  # tags and check lists stand beside the focal subject, never across it (CIN-S1R1-04)
+        if _nudge_block(members, blocked):
+            kept.extend(members)
+        else:
+            hidden.update(c.placement.label_id for c in members)
+    return kept, hidden
+
+
+def _beside(members: list[_Candidate], focal: Rect) -> None:
+    """Slide a list sideways off the focal subject's bounds, to whichever side is nearer and fits inside title-safe."""
+    x0, y0 = min(c.rect[0] for c in members), min(c.rect[1] for c in members)
+    x1, y1 = max(c.rect[2] for c in members), max(c.rect[3] for c in members)
+    if not _intersects((x0, y0, x1, y1), focal):
+        return
+    m = ty.SIGN_SAFE_MARGIN_PX
+    options = [focal[2] + ty.SIGN_GAP_PX * 2 - x0, focal[0] - ty.SIGN_GAP_PX * 2 - x1]
+    fits = [dx for dx in options if ty.TITLE_SAFE_PX[0] + m <= x0 + dx and x1 + dx <= ty.TITLE_SAFE_PX[2] - m]
+    if fits:
+        dx = min(fits, key=abs)
+        for c in members:
+            _shift(c, dx, 0.0)
+
+
+def _shift(c: _Candidate, dx: float, dy: float) -> None:
+    c.rect = (c.rect[0] + dx, c.rect[1] + dy, c.rect[2] + dx, c.rect[3] + dy)
+    c.origin_px = (c.origin_px[0] + dx, c.origin_px[1] + dy)
+
+
+def _nudge_block(members: list[_Candidate], blocked: list[Rect]) -> bool:
+    """Move a list as one block inside title-safe and clear of visible captions; False if it cannot fit near its anchor."""
+    m = ty.SIGN_SAFE_MARGIN_PX
+    sx0, sy0, sx1, sy1 = ty.TITLE_SAFE_PX[0] + m, ty.TITLE_SAFE_PX[1] + m, ty.TITLE_SAFE_PX[2] - m, ty.TITLE_SAFE_PX[3] - m
+    for b in blocked:  # keep out of the caption plate's band: above a bottom caption, below a top one
+        if b[1] > ty.FRAME_H_PX / 2:
+            sy1 = min(sy1, b[1] - ty.CAPTION_BAND_CLEARANCE_PX)
+        else:
+            sy0 = max(sy0, b[3] + ty.CAPTION_BAND_CLEARANCE_PX)
+    x0, y0 = min(c.rect[0] for c in members), min(c.rect[1] for c in members)
+    x1, y1 = max(c.rect[2] for c in members), max(c.rect[3] for c in members)
+    if x1 - x0 > sx1 - sx0 or y1 - y0 > sy1 - sy0:
+        return False
+    dx = (sx0 - x0) if x0 < sx0 else (sx1 - x1) if x1 > sx1 else 0.0
+    dy = (sy0 - y0) if y0 < sy0 else (sy1 - y1) if y1 > sy1 else 0.0
+    if math.hypot(dx, dy) > ty.SIGN_MAX_NUDGE_PX:
+        return False
+    for c in members:
+        _shift(c, dx, dy)
+    return True
+
+
+def _visible_set(timeline: Timeline, plan: camera.CameraPlan, frame: int, beat: str, why: dict[str, str] | None = None) -> dict[str, _Candidate]:
+    candidates, _ = _frame_candidates(timeline, plan, frame, beat)
+    blocked = caption_rects(frame)
+    accepted: dict[str, _Candidate] = {}
+    for c in sorted(candidates, key=lambda c: (not c.must, _list_key(c.placement.label_id), c.index)):
+        label_id = c.placement.label_id
+        if not _inside_safe(c.rect):
+            if why is not None:
+                why[label_id] = f"outside title-safe {tuple(round(v) for v in c.rect)}"
+            continue
+        if any(_intersects(c.rect, b, ty.CAPTION_BAND_CLEARANCE_PX) for b in blocked):
+            if why is not None:
+                why[label_id] = "caption"
+            continue
+        clash = next((a for a in accepted.values() if _intersects(c.rect, a.rect, ty.SIGN_GAP_PX)), None)
+        if clash is not None:
+            if why is not None:
+                why[label_id] = f"overlaps {clash.placement.label_id}"
+            continue
+        accepted[label_id] = c
+    return accepted
+
+
+def hidden_reasons(label_id: str, frames: list[int]) -> dict[str, int]:
+    """Why a sign is not fully shown on ``frames`` (diagnostics for the legibility audit)."""
+    timeline = choreography.build_timeline()
+    plan = camera.CameraPlan(timeline)
+    beats = beat_of_frame()
+    placement = labels.BY_ID[label_id]
+    sign = plan_signs()[label_id]
+    out: dict[str, int] = {}
+    for frame in frames:
+        if sign.shown(frame):
+            continue
+        why: dict[str, str] = {}
+        visible = _visible_set(timeline, plan, frame, beats.get(frame, ""), why)
+        if label_id in visible:
+            reason = "fading or too short a run"
+        elif label_id in why:
+            reason = why[label_id].split(" (")[0] if why[label_id].startswith("outside") else why[label_id]
+        elif not exists(timeline, placement, frame):
+            reason = "not on stage"
+        else:
+            reason = "behind or too near the lens"
+        out[reason] = out.get(reason, 0) + 1
+    return out
+
+
+def _runs(frames: list[int]) -> list[tuple[int, int]]:
+    out: list[tuple[int, int]] = []
+    for f in frames:
+        if out and f == out[-1][1] + 1:
+            out[-1] = (out[-1][0], f)
+        else:
+            out.append((f, f))
+    return out
+
+
+@cache
+def plan_signs() -> dict[str, SignPlan]:
+    """The sign plan for the whole film (deterministic: no randomness)."""
+    timeline = choreography.build_timeline()
+    plan = camera.CameraPlan(timeline)
+    beats = beat_of_frame()
+    per_label: dict[str, dict[int, _Candidate]] = {p.label_id: {} for p in labels.PLACEMENTS}
+    for frame in plan.frames():
+        for label_id, cand in _visible_set(timeline, plan, frame, beats.get(frame, "")).items():
+            per_label[label_id][frame] = cand
+    enter = motion.label_entrance_frames()
+    leave = motion.label_exit_frames()
+    out: dict[str, SignPlan] = {}
+    for label_id, by_frame in per_label.items():
+        frames: dict[int, SignFrame] = {}
+        for first, last in _runs(sorted(by_frame)):
+            if last - first + 1 < ty.SIGN_MIN_RUN_FRAMES:
+                continue  # too short to read: never flashed
+            for frame in range(first, last + 1):
+                c = by_frame[frame]
+                into, outof = frame - first, last - frame
+                alpha = 1.0
+                if into < enter:
+                    alpha = min(alpha, motion.evaluate(motion.EASE_OUT, into / enter))
+                if outof < leave:
+                    alpha = min(alpha, motion.evaluate(motion.EASE_IN, outof / leave))
+                state = plan.state(frame)
+                origin = _unproject(state, c.origin_px[0], c.origin_px[1], c.depth)
+                frames[frame] = SignFrame(frame, alpha, origin, cap_m_at(state, c.depth), c.rect)
+        out[label_id] = SignPlan(label_id, frames)
+    return out
+
+
+def shown_frames(label_id: str, frames: list[int]) -> int:
+    sign = plan_signs()[label_id]
+    return sum(1 for f in frames if sign.shown(f))

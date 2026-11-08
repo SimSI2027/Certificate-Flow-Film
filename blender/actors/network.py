@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import itertools
+import math
+
 import bmesh
 
 from blender.actors import primitives as p
+from cff.stage import layout as lo
 from cff.stage.objects import Kind, StageObject
+from cff.theme import palette
 
 
 def channel(bm: bmesh.types.BMesh, o: StageObject) -> None:
@@ -22,9 +27,26 @@ def route(bm: bmesh.types.BMesh, o: StageObject) -> None:
 
 
 def trust_link(bm: bmesh.types.BMesh, o: StageObject) -> None:
-    """A bar of light, unit length along +X from its start (stretched to the link length when fully grown)."""
+    """A bowed path of light: unit length along +X from its start (stretched to the link length when fully grown).
+
+    The bow is in absolute metres on local Z (the link scales only along X), so the grown link arcs upward by
+    ``TRUST_LINK_ARC_FRACTION`` of its length: a path of light, never a taut straight connector (C-01, CIN-S1R1-02).
+    """
     _, sy, sz = o.size
-    p.box_span(bm, 0.0, 1.0, -sy / 2, sy / 2, -sz / 2, sz / 2)
+    rise = palette.TRUST_LINK_ARC_FRACTION * (lo.dist(o.points[0], o.points[1]) if len(o.points) == 2 else 1.0)
+    n = palette.TRUST_LINK_SEGMENTS
+    rings = []
+    for i in range(n + 1):
+        x = i / n
+        z = rise * 4.0 * x * (1.0 - x)
+        taper = 0.55 + 0.45 * math.sin(math.pi * x) if 0.0 < x < 1.0 else 0.55
+        hy, hz = sy / 2 * taper, sz / 2 * taper
+        rings.append([bm.verts.new((x, y, z + dz)) for y, dz in ((-hy, -hz), (hy, -hz), (hy, hz), (-hy, hz))])
+    for a, b in itertools.pairwise(rings):
+        for k in range(4):
+            bm.faces.new((a[k], a[(k + 1) % 4], b[(k + 1) % 4], b[k]))
+    bm.faces.new(list(reversed(rings[0])))
+    bm.faces.new(rings[-1])
 
 
 def beam(bm: bmesh.types.BMesh, o: StageObject) -> None:

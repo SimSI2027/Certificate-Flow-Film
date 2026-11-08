@@ -7,7 +7,7 @@ import subprocess
 import time
 from pathlib import Path
 
-from cff.stage import audit, camera, choreography, labels
+from cff.stage import audit, camera, choreography
 from cff.story import captions as story_captions
 from cff.story import model, timing
 from cff.theme import palette_check, render
@@ -61,7 +61,7 @@ def render_layer(tier: str, layer: str, wanted: list[int], rebuild: bool = False
 
     ``frames_dir`` (default: the tier name) is the folder under ``renders/`` that holds the frames; ``blend`` is the file rendered.
     """
-    scene = "BEAUTY" if layer == "beauty" else "CAPTIONS"
+    scene = frames.LAYER_SCENES[layer]
     where = frames_dir or tier
     out_dir = frames.tier_dir(where) / layer
     have = frames.present_frames(where, layer)
@@ -88,7 +88,7 @@ def render_layer(tier: str, layer: str, wanted: list[int], rebuild: bool = False
 
 def render_frame_list(tier: str, layer: str, wanted: list[int], blend: Path, frames_dir: str) -> int:
     """Render scattered frames (a packet's samples) in batches of one Blender call per chunk; resumable."""
-    scene = "BEAUTY" if layer == "beauty" else "CAPTIONS"
+    scene = frames.LAYER_SCENES[layer]
     out_dir = frames.tier_dir(frames_dir) / layer
     have = frames.present_frames(frames_dir, layer)
     todo = sorted(f for f in set(wanted) if f not in have)
@@ -107,6 +107,10 @@ def render_all(tier: str, scene: str = "all", first: int | None = None, last: in
     wanted = list(range(first, last + 1))
     if scene in ("all", "BEAUTY"):
         code = render_layer(tier, "beauty", wanted, rebuild)
+        if code != 0:
+            return code
+    if scene in ("all", "SIGNS"):
+        code = render_layer(tier, "signs", [f for f in frames.sign_frames() if first <= f <= last])
         if code != 0:
             return code
     if scene in ("all", "CAPTIONS"):
@@ -176,7 +180,6 @@ def palette_report() -> tuple[list[str], int]:
 def motion_report() -> tuple[list[str], int]:
     """The planned-film audits: camera (C-02, C-03, C-09), keys and glow (C-06, C-08). Pops are reported, not failed."""
     timeline = choreography.build_timeline()
-    labels.add_label_tracks(timeline)
     plan = camera.CameraPlan(timeline)
     beat_focal = camera.subject_ids()
     findings: list[audit.Finding] = []

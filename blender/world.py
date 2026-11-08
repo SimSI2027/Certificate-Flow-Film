@@ -8,7 +8,7 @@ import bpy
 
 from blender import actors, materials
 from blender.common import PROP_ID, PROP_KIND, PROP_OWNER, PROP_ROLE, linear4, tag
-from cff.stage.objects import CATALOGUE, StageObject
+from cff.stage.objects import CATALOGUE, Kind, StageObject
 from cff.theme import motion, palette
 
 FLOOR_HALF_EXTENT_M = 120.0
@@ -38,7 +38,10 @@ def build_floor(collection: bpy.types.Collection) -> bpy.types.Object:
 
 def build_actor(o: StageObject, collection: bpy.types.Collection) -> bpy.types.Object:
     ob = bpy.data.objects.new(o.id, actors.mesh_for(o))
-    ob.data.materials.append(materials.stage_material(o.role, o.kind in materials.GLOW_ONLY_KINDS))
+    if o.kind is Kind.TRUST_LINK:
+        ob.data.materials.append(materials.trust_link_material(o.variant))
+    else:
+        ob.data.materials.append(materials.stage_material(o.role, o.kind in materials.GLOW_ONLY_KINDS))
     collection.objects.link(ob)
     ob.location = o.home
     ob.rotation_mode = "XYZ"

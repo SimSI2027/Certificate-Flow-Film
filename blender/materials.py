@@ -50,34 +50,51 @@ def stage_material(role: ColourRole, glow_only: bool = False) -> bpy.types.Mater
     return mat
 
 
-def label_material(kind: str) -> bpy.types.Material:
-    """``plate``: dark, mostly opaque backing (counts as the background for L-02). ``text``: white emission."""
-    name = f"MAT-label-{kind}"
+def trust_link_material(variant: str) -> bpy.types.Material:
+    """Gradient light along the link's local X (0 = issuer end, 1 = subject end); intensity from the glow channel's value."""
+    name = f"MAT-trust-{variant}"
     if name in bpy.data.materials:
         return bpy.data.materials[name]
+    start, end = palette.TRUST_LINK_STOPS[variant]
     mat = bpy.data.materials.new(name)
+    mat.surface_render_method = "DITHERED"
     nt = mat.node_tree
     _, bsdf = _principled(nt)
-    if kind == "plate":
-        mat.surface_render_method = "DITHERED"
-        bsdf.inputs["Base Color"].default_value = linear4(palette.PLATE_HEX)
-        bsdf.inputs["Alpha"].default_value = palette.PLATE_OPACITY
-        bsdf.inputs["Roughness"].default_value = 0.9
-    else:
-        bsdf.inputs["Base Color"].default_value = linear4(palette.TEXT_HEX)
-        bsdf.inputs["Emission Color"].default_value = linear4(palette.TEXT_HEX)
-        bsdf.inputs["Emission Strength"].default_value = palette.LABEL_TEXT_EMISSION
-        bsdf.inputs["Roughness"].default_value = 1.0
+    bsdf.inputs["Base Color"].default_value = linear4(palette.role_hex(ColourRole.NEUTRAL))
+    bsdf.inputs["Roughness"].default_value = SOLID_ROUGHNESS
+    bsdf.inputs["Emission Strength"].default_value = palette.TRUST_LINK_EMISSION
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    axis = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(coord.outputs["Object"], axis.inputs["Vector"])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = linear4(palette.role_hex(start))
+    ramp.color_ramp.elements[1].color = linear4(palette.role_hex(end))
+    nt.links.new(axis.outputs["X"], ramp.inputs["Fac"])
+    info = nt.nodes.new("ShaderNodeObjectInfo")
+    hsv = nt.nodes.new("ShaderNodeSeparateColor")
+    hsv.mode = "HSV"
+    nt.links.new(info.outputs["Color"], hsv.inputs["Color"])
+    tint = nt.nodes.new("ShaderNodeMix")
+    tint.data_type = "RGBA"
+    tint.blend_type = "MULTIPLY"
+    tint.inputs["Factor"].default_value = 1.0
+    nt.links.new(ramp.outputs["Color"], tint.inputs["A"])
+    nt.links.new(hsv.outputs["Blue"], tint.inputs["B"])  # HSV value: the glow level
+    nt.links.new(tint.outputs["Result"], bsdf.inputs["Emission Color"])
+    nt.links.new(info.outputs["Alpha"], bsdf.inputs["Alpha"])
     return mat
 
 
+TEXT_RENDER_METHOD = "BLENDED"  # never DITHERED: dithered alpha stipples glyphs at any sample count (LEG-S1R1-01)
+
+
 def caption_material(kind: str) -> bpy.types.Material:
-    """Caption-layer materials: exact colours under the Standard view transform, faded by ``Object Info > Alpha``."""
+    """Text-pass materials (captions and signs): exact colours under the Standard view transform, faded by ``Object Info > Alpha``."""
     name = f"MAT-caption-{kind}"
     if name in bpy.data.materials:
         return bpy.data.materials[name]
     mat = bpy.data.materials.new(name)
-    mat.surface_render_method = "DITHERED"
+    mat.surface_render_method = TEXT_RENDER_METHOD
     nt = mat.node_tree
     nt.nodes.clear()
     out = nt.nodes.new("ShaderNodeOutputMaterial")

@@ -45,6 +45,20 @@ def missing_frames(tier: str, first: int = timing.FRAME_START, last: int | None 
     return [f for f in range(first, last + 1) if f not in have]
 
 
+LAYER_SCENES = {"beauty": "BEAUTY", "signs": "SIGNS", "captions": "CAPTIONS"}
+OVERLAY_LAYERS = ("signs", "captions")  # composited over the beauty pass in this order (captions on top)
+
+
+def sign_frames() -> list[int]:
+    """Frames on which some sign has any opacity (from the pure-Python sign plan)."""
+    from cff.stage import signs  # noqa: PLC0415  (the sign plan is only built when a command needs it)
+
+    shown: set[int] = set()
+    for plan in signs.plan_signs().values():
+        shown.update(f for f, s in plan.frames.items() if s.alpha > 0.0)
+    return sorted(shown)
+
+
 def caption_frames() -> list[int]:
     """Frames on which some caption has any opacity (the only caption frames that need rendering)."""
     frames: set[int] = set()
@@ -117,14 +131,21 @@ def blank_frames(tier: str, first: int, last: int) -> list[int]:
 
 
 def composite(tier: str, frame: int, out: Path) -> Path:
-    """Beauty frame with its caption layer overlaid (straight alpha), as a PNG."""
+    """Beauty frame with its sign and caption layers overlaid in that order (straight alpha), as a PNG."""
     out.parent.mkdir(parents=True, exist_ok=True)
     beauty = frame_path(tier, "beauty", frame)
-    caption = frame_path(tier, "captions", frame)
-    if not caption.exists():
+    overlays = [p for p in (frame_path(tier, layer, frame) for layer in OVERLAY_LAYERS) if p.exists() and p.stat().st_size > 0]
+    if not overlays:
         shutil.copyfile(beauty, out)
         return out
-    result = toolchain.run_ffmpeg(["-i", str(beauty), "-i", str(caption), "-filter_complex", "[0:v][1:v]overlay=format=auto,format=rgb24", "-frames:v", "1", str(out)])
+    inputs: list[str] = ["-i", str(beauty)]
+    graph, last = "", "0:v"
+    for index, path in enumerate(overlays, start=1):
+        inputs += ["-i", str(path)]
+        graph += f"[{last}][{index}:v]overlay=format=auto[o{index}];"
+        last = f"o{index}"
+    graph += f"[{last}]format=rgb24"
+    result = toolchain.run_ffmpeg([*inputs, "-filter_complex", graph, "-frames:v", "1", str(out)])
     if result.returncode != 0:
         raise RuntimeError(f"composite failed for frame {frame}: {result.stderr}")
     return out

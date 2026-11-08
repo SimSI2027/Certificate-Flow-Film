@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 
 import bpy  # noqa: E402  (after the path bootstrap)
 
-from cff.theme import colour  # noqa: E402
+from cff.theme import colour, typography  # noqa: E402
 
 PROP_ID = "cff_id"
 PROP_KIND = "cff_kind"
@@ -63,8 +63,29 @@ def engine_id() -> str:
     raise RuntimeError(f"no EEVEE engine in {items}")
 
 
-LABEL_FONT = "DejaVuSansMono.woff2"  # in-world names: monospace with a distinct 1, I and 0
-CAPTION_FONT = "Inter.woff2"  # captions: proportional, narrow enough for the longest line
+LABEL_FONT = typography.LABEL_FONT
+CAPTION_FONT = typography.CAPTION_FONT
+
+
+def glyph_cap_ratio(font: bpy.types.VectorFont) -> float:
+    """Measured cap height per unit font size: the height of an evaluated 'H' glyph mesh (never an assumed constant)."""
+    curve = bpy.data.curves.new("CAP-PROBE", "FONT")
+    curve.body = "H"
+    curve.size = 1.0
+    curve.font = font
+    probe = bpy.data.objects.new("CAP-PROBE", curve)
+    scene = bpy.context.scene
+    scene.collection.objects.link(probe)
+    try:
+        evaluated = probe.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        mesh = evaluated.to_mesh()
+        heights = [v.co.y for v in mesh.vertices]
+        ratio = max(heights) - min(heights)
+        evaluated.to_mesh_clear()
+    finally:
+        bpy.data.objects.remove(probe)
+        bpy.data.curves.remove(curve)
+    return ratio
 
 
 def bundled_font(file_name: str) -> bpy.types.VectorFont:

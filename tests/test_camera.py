@@ -6,7 +6,7 @@ from functools import cache
 
 import pytest
 
-from cff.stage import audit, camera, choreography, labels
+from cff.stage import audit, camera, choreography
 from cff.stage.objects import BY_ID
 from cff.stage.tracks import Timeline
 from cff.story import model, timing
@@ -15,9 +15,7 @@ from cff.theme import motion, shots
 
 @cache
 def _timeline() -> Timeline:
-    timeline = choreography.build_timeline()
-    labels.add_label_tracks(timeline)
-    return timeline
+    return choreography.build_timeline()
 
 
 @cache
