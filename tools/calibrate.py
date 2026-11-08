@@ -106,7 +106,7 @@ def next_packet_name() -> str:
 def build_packet(fault: str) -> Path:
     """A fresh blind packet. The first run used K1..K4 in FAULTS order; re-calibrations take the next free number."""
     name = next_packet_name()
-    folder = packet.build_stage1(tier=frames_dir(fault), folder=PACKETS / name, round_name=name)
+    folder = packet.build_stage1(tier=frames_dir(fault), folder=PACKETS / name, round_name=name, blend=blend_path(fault))
     data: dict[str, object] = json.loads(RESULTS.read_text(encoding="utf-8")) if RESULTS.exists() else {}
     mapping = data.setdefault("packets", {})
     assert isinstance(mapping, dict)

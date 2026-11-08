@@ -17,9 +17,10 @@ from cff.stage import camera, choreography, labels
 from cff.story import timing
 from cff.story.export import model_dump
 from cff.story.model import MODEL
-from tools import frames
+from tools import frames, toolchain
 
 ROOT = Path(__file__).resolve().parents[1]
+FILM_BLEND = ROOT / "renders" / "film.blend"
 ROUNDS = ROOT / "qa" / "rounds"
 SCHEMA = ROOT / "qa" / "schema.json"
 REGRESSIONS = ROOT / "qa" / "regressions.json"
@@ -81,6 +82,9 @@ Contents:
   entry, middle, just before exit) and the frames on both sides of each cut (`T-cut-*`).
 - `strips/`: one motion strip per beat (6 frames from first to last, left to right, top to bottom).
 - `shots.json`: per beat, the model's focal subject and the camera lens, f-stop and focus distance at the middle frame.
+- `locator.json`: Measured object positions. For every frame shown in `frames/` and `strips/` (by frame number), the
+  screen bounds of each visible private key, request capsule, certificate card, key container and key module, projected
+  from the 3D scene. These are measurements, not verdicts; occlusion is not measured, so check each box against the image.
 - `model-dump.json`: the story data (events, certificates, labels, captions with timings).
 - `docs/`: the frozen spec, glossary, PKI notes and the storyboard.
 - `schema.json`: the required report format. `regressions.json`: previously accepted findings to re-check.
@@ -121,11 +125,21 @@ def stage1_frames() -> list[int]:
     return sorted(wanted)
 
 
-def build_stage1(round_number: int | None = None, tier: str = "animatic", folder: Path | None = None, round_name: str | None = None) -> Path:
-    """A Stage 1 packet: composited frames, motion strips, shots.json, manifest, regressions and schema. No source, no claims.
+def write_locator(blend: Path, out: Path) -> None:
+    """``locator.json``: measured screen bounds of the tracked artefacts in every packet frame, from ``blend`` (blender/locate.py)."""
+    log = ROOT / "renders" / "locator.log"
+    code = toolchain.run_blender(ROOT / "blender" / "locate.py", blend, ["--frames", ",".join(str(f) for f in stage1_frames()), "--out", str(out)], log)
+    if code != 0 or not out.exists():
+        raise RuntimeError(f"locate.py failed (exit {code}); see {log}")
+
+
+def build_stage1(round_number: int | None = None, tier: str = "animatic", folder: Path | None = None, round_name: str | None = None,
+                 blend: Path = FILM_BLEND) -> Path:
+    """A Stage 1 packet: composited frames, motion strips, shots.json, locator.json, manifest, regressions and schema. No source, no claims.
 
     A real round needs every frame of ``tier`` rendered. A calibration packet (``folder`` and ``round_name`` given, ``tier`` naming
     its frames folder under ``renders/``) needs only the frames the packet shows. Both look the same to a discriminator.
+    ``blend`` is the built scene the frames came from (the fault blend for a calibration packet); the locator is measured on it.
     """
     if folder is None:
         missing = frames.missing_frames(tier)
@@ -172,6 +186,7 @@ def build_stage1(round_number: int | None = None, tier: str = "animatic", folder
         shots_data.append({"beat": beat.id, "focal_subject": beat.focal, "frame": mid, "lens_mm": round(state.lens, 1), "f_stop": round(state.fstop, 2),
                            "focus_distance_m": round(state.focus_distance, 2)})
     _write_json(folder / "shots.json", shots_data)
+    write_locator(blend, folder / "locator.json")
     _write_json(folder / "model-dump.json", model_dump())
     shutil.copyfile(SCHEMA, folder / "schema.json")
     regressions = json.loads(REGRESSIONS.read_text(encoding="utf-8")) if REGRESSIONS.exists() else []

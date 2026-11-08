@@ -460,7 +460,7 @@ def check_labels(scene: bpy.types.Scene) -> Result:
             if frame not in needed:
                 continue
             root = objs[label_id]
-            if min(abs(s) for s in root.scale) < LABEL_SCALE_SHOWN or not _parent_chain_visible(root):
+            if min(abs(s) for s in root.scale) < LABEL_SCALE_SHOWN or not parent_chain_visible(root):
                 continue
             cap_m = float(root[PROP_CAP])
             centre = root.matrix_world.translation
@@ -502,7 +502,7 @@ def check_labels(scene: bpy.types.Scene) -> Result:
     return r
 
 
-def _parent_chain_visible(ob: bpy.types.Object) -> bool:
+def parent_chain_visible(ob: bpy.types.Object) -> bool:
     parent = ob.parent
     while parent is not None:
         if min(abs(s) for s in parent.scale) < VISIBLE_SCALE:

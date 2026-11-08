@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import ast
+import json
+import re
 from itertools import pairwise
 from pathlib import Path
 
@@ -69,6 +72,32 @@ def test_sample_frames_are_three_per_beat_inside_the_beat() -> None:
 def test_stage1_packet_refuses_to_build_without_rendered_frames(tmp_path: Path) -> None:
     with pytest.raises(RuntimeError, match="not rendered"):
         packet.build_stage1(9999, tier="no-such-tier")
+
+
+CLAIM_WORDS = re.compile(r"\b(pass|passes|passed|fail|fails|failed|failure|ok|okay|violation|violates|leak|leaks|leaked|correct|wrong|accurate|"
+                         r"misleading|blocker|major|minor|caught|missed|contained|escapes|legal|illegal)\b", re.IGNORECASE)
+LOCATOR_KEYS = {"description", "frame_size_px", "objects", "frames", "kind", "owner", "id", "box", "in_frame", "depth_m"}
+
+
+def _locator_strings() -> list[str]:
+    tree = ast.parse((toolchain.ROOT / "blender" / "locate.py").read_text(encoding="utf-8"))
+    docstring = ast.get_docstring(tree, clean=False)
+    return [n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str) and n.value != docstring]
+
+
+def test_packet_locator_is_measurement_only_with_no_pass_or_fail_claims() -> None:
+    """locator.json (packet evidence for the PKI judge, Session 4) holds measured positions only: no verdicts, no claims of success."""
+    strings = _locator_strings()
+    assert not [s for s in strings if CLAIM_WORDS.search(s)]
+    tree = ast.parse((toolchain.ROOT / "blender" / "locate.py").read_text(encoding="utf-8"))
+    keys = {k.value for n in ast.walk(tree) if isinstance(n, ast.Dict) for k in n.keys if isinstance(k, ast.Constant)}
+    assert keys == LOCATOR_KEYS
+    assert "Measured object positions" in packet.STAGE1_README and "locator.json" in packet.STAGE1_README
+    for path in (toolchain.ROOT / "qa").rglob("locator.json"):  # every locator already shipped in a packet
+        data = json.loads(path.read_text(encoding="utf-8"))
+        assert not CLAIM_WORDS.search(str(data["description"])), path
+        assert set(data) == {"description", "frame_size_px", "objects", "frames"}, path
+        assert all(set(row) == {"id", "box", "in_frame", "depth_m"} for rows in data["frames"].values() for row in rows), path
 
 
 def test_progress_and_output_locations_are_untracked_build_products() -> None:
