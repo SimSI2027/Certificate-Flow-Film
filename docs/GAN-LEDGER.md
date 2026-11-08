@@ -176,6 +176,7 @@ The same unevaluated-scene problem was found in the packet still renderer, which
 | stage1-K1 | private_key_leak | pki (opus) | **MISSED.** B-03.3 to B-04.2 judged ACCURATE ("the private key stays in its closed container"). |
 | stage1-K5 | private_key_leak | pki (opus), after strengthening 1 | **MISSED.** The leaked key at Issuing CA 1's press was flagged only as MAJOR (PKI-K5-01: "if it is key material, BLOCKER"); B-03.x judged ACCURATE. |
 | stage1-K6 | private_key_leak | pki (opus), after strengthening 2 | **MISSED.** Its per-beat key log says the RDP key stays locked. It saw the leaked key at the capsule and at the press and explained both away as port and press fixtures. |
+| stage1-K7 | private_key_leak | pki (opus), after strengthening 3 (locator evidence) | **CAUGHT.** Six BLOCKERs, PKI-K7-01..06 (F-03, F-09, F-10): the key on the capsule from B-03.3, carried into Issuing CA 1, left at its press, an emptied container in B-04.5, and the key never back home. B-03.3 to B-09.3 judged WRONG, each citing locator boxes checked against the image. It also read all 103 frames and 33 strips. |
 
 Strengthening applied so far:
 1. After K1 (commit `cf3ed52`):
@@ -190,4 +191,12 @@ Strengthening applied so far:
 
 The next strengthening is evidence, not wording: a per-frame locator file in every packet, giving the measured screen bounds of each private key, request capsule and certificate card. These are measurements with no pass or fail claim, like the legibility manifest's text bounds, and the judge can verify each box against the frame.
 
-**Calibration status: NOT PASSED.** Three of four subagent faults and three of three hard-check faults are caught. pki-discriminator has not yet flagged `private_key_leak` as BLOCKER. No real Stage 1 round has been judged; `stage1-R1` was built and then withdrawn unjudged, so that it could carry the strengthened README. Clean-round counter: 0.
+Strengthening 3 (commit `f7a93a6`): `blender/locate.py` writes `locator.json` into every packet: the projected screen bounds of each visible private key, request capsule, certificate card, key container and key module for every packet frame, measured on the built `.blend` (the fault blend for calibration, `renders/film.blend` for rounds). It carries no verdict and no occlusion claim; `tests/test_tools.py::test_packet_locator_is_measurement_only_with_no_pass_or_fail_claims` keeps it that way. No discriminator wording was changed for K7.
+
+**Calibration status after K6 (historical): NOT PASSED.**
+
+**Calibration status after K7: PASSED** (Session 4, after strengthening 3).
+- All four subagent faults are caught as BLOCKER by their relevant discriminator: flowchart (K3, cinema), root_issues_leaf (K2, pki), caption_clip (K4, legibility) and private_key_leak (K7, pki).
+- All three hard-check faults are caught: private_key_leak, root_issues_leaf and caption_clip.
+
+K7 side findings (PKI-K7-07..10: no visible handshake proof or B-09.1 CRL fetches, white trust links, occluded check 1, early S6 caption) concern content that the calibration variant shares with the real film. They are not accepted here, because calibration findings are not round findings; stage1-R1 judges the real film. The K7 reply also reports PKI-S0R1-04 and PKI-S0R2-03 as REGRESSED, for the same shared reason (proof not visible), and R1 re-checks both. Clean-round counter: 0.
