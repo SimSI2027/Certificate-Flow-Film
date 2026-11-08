@@ -1,38 +1,49 @@
 # PROJECT STATE
 
-Updated: 2026-11-07 (Session 4, part 1 closed because the context grew long; Session 4 continues)
+Updated: 2026-11-07 (Session 4, part 2 closed because the context grew long; Session 4 continues)
 
 ## Next session
-- **Next session = 4 (resume)**: finish the Phase 4 gate (calibration, then Stage 1 GAN rounds). **Model: Opus 5.5. Effort: Medium.** Start a NEW Claude Code session and paste the **Resume** prompt from `docs\SESSION-PROMPTS.md`.
-- After the Phase 4 gate is APPROVED, **Session 5 (vertical slice) runs on Opus 5.5, effort High**, as the Session 4 prompt specified.
+- **Next session = 4 (resume, part 3)**: Stage 1 GAN rounds to the Phase 4 gate. **Model: Opus 5.5. Effort: Medium.** Start a NEW Claude Code session and paste the **Resume** prompt from `docs\SESSION-PROMPTS.md`.
+- After the Phase 4 gate is APPROVED, **Session 5 (vertical slice) runs on Opus 5.5, effort High**.
+- **Calibration: PASSED** (ledger: K7 caught `private_key_leak` as BLOCKER with locator evidence).
+- **stage1-R1 is judged; triage is PENDING.** Replies are in `qa\rounds\stage1-R1\{pki,cinema,legibility}-discriminator.json`; the counts and triage notes are in the ledger under "stage1-R1".
 - **Exact next action:**
-  1. Pre-flight as usual: spec hash `7cf45afa…6d23`, SYNC OK. "Phase 4 gate" is recorded REJECTED (gate not reached; carried over), and "Phase 4 build" is APPROVED.
-  2. **Packet locator evidence** (the strengthening chosen after three pki misses, see the ledger):
-     - Add a Blender entry script (for example `blender/locate.py`) that opens a built .blend and, for every packet frame (`tools.packet.stage1_frames()`), writes the projected 960x540 screen bounds of every private key, request capsule and certificate card, with visibility (scale > `VISIBLE_SCALE`, parent chain visible) and no occlusion claim.
-     - `packet.build_stage1` writes it as `locator.json` and the README describes it as "measured object positions".
-     - Calibration packets use the fault blend; real rounds use `renders/film.blend` built from the candidate.
-     - Add a test that the file has no pass or fail claims.
-  3. Commit, then `python -m tools calibrate private_key_leak --packet` (it builds the next free K packet, stage1-K7) and judge it with a fresh `pki-discriminator`. Save the reply verbatim. If it is caught as BLOCKER, calibration passes; record it in the ledger. If not, escalate per Charter 2.7: the cap is 5 rounds per stage, and calibration is pre-round.
-  4. Then run rounds: `python -m tools packet stage1` (stage1-R1) and three fresh discriminators in parallel. The animatic frames in `renders\animatic` are valid for HEAD: only check, render-list and hook code changed since `91ec326`. Triage, fix, re-render, and repeat per Charter 2.4.
-- **Expected R1 findings** (seen as side-findings in the calibration packets, which share the real film's content):
-  - CA name plates cover check 1 in B-04.3 and B-08.1, and the B-08.1 note overprints check 4;
-  - trust links render white, not gold-to-cyan or violet;
-  - amber pulse leftovers after the channel turns green;
-  - the flashback shows present-day RDP check labels;
-  - handshake proof and intermediate copy too small to see;
-  - CA 1 not grey in B-07.3;
-  - a dark cube appears on the root plinth in B-05.1;
-  - captions show grain through the plate, and an earlier caption's plate seems to linger (LEG-K4-05);
-  - label occlusion, size and title-safe problems (RDPAuth and WebServer-TLS badges, Root CA plate, AIA tags, check lists);
-  - caption over the title area in B-09.3.
-
-  These are hypotheses until a real round reports them.
+  1. Pre-flight: spec hash `7cf45afa…6d23`, SYNC OK.
+  2. Triage every R1 finding (3 BLOCKER, 30 MAJOR, 10 MINOR) as ACCEPTED or REJECTED-INVALID, with a citation from the frozen spec.
+     - LEG-S1R1-02 (key outside its container in B-03.2) conflicts with the locator and the pki reply. Rejecting it needs a written citation plus a second fresh `pki-discriminator` concurring (Charter 2.4 step 5).
+     - Append the triage table to the ledger round entry, and add the accepted findings to `qa\regressions.json`.
+  3. Fix the accepted findings. The themes are listed in the ledger. Do not delete or merge beats, shrink captions, move content out of frame or dim the scene (Charter 2.7).
+  4. Each accepted automatable BLOCKER/MAJOR becomes a test named after its finding ID in `tests\test_gan_findings.py` or `blender\checks\scene_checks.py`. Candidates:
+     - label-plane-near-camera (CIN-01);
+     - seal ring travels with the capsule (PKI-01);
+     - capsule clear of the AD pillar bounds during B-04.1 (PKI-02);
+     - check list hidden during the flashback (PKI-04);
+     - trust-link colour roles (PKI-05);
+     - caption composited after grain (LEG-01);
+     - caption cap height of at least 30 px at 1080p measured on frames (LEG-03);
+     - labels and checks inside title-safe and not overlapping (LEG-04/09).
+  5. Add the palette and CVD results to the Stage 1 packet (LEG-13), rebuild, re-render the animatic. `render` skips frames already on disk, so first delete `renders\animatic\beauty` and `renders\animatic\captions` (gitignored build output), then run `python -m tools render animatic --rebuild` in the background (about 13 min in total), `tools verify`, then `tools packet stage1` (R2) and three fresh discriminators. The cap is 5 rounds; 1 is used.
 - **Do not edit `docs\REFERENCE-SPEC.md`.** The spec is FROZEN; changes need a Chief of Staff amendment in the ledger.
 
 ## Phase / stage
 - Phase 1 (Environment): APPROVED. Phase 2 (Repository): APPROVED. Phase 3 (Stage 0 spec freeze): APPROVED.
 - Phase 4 build (Session 3): **APPROVED**. Phase 4 gate (Session 4 part 1): **REJECTED, gate not reached; carried over** (see `docs\CHIEF-OF-STAFF-APPROVALS.md`).
-- Stage 1: calibration in progress (3 of 4 subagent faults caught; all 3 hard-check faults caught). No GAN round judged yet. Clean-round counter 0. Rounds used 0 of 5.
+- Stage 1: calibration PASSED (4 of 4 subagent faults, 3 of 3 hard-check faults). stage1-R1 judged; gate not passed (3 BLOCKER, 30 MAJOR); triage pending. Clean-round counter 0. Rounds used 1 of 5.
+
+## Session 4 (part 2) record
+- Model Opus 5.5, effort Medium.
+- **Commits:**
+  - f7a93a6: `blender\locate.py`, which writes `locator.json` into the packets, and its test;
+  - 7c1553c: the K7 packet;
+  - 00b1f74: the K7 reply and the ledger entry, which is the R1 candidate;
+  - 77a851d: the R1 packet;
+  - ff6fc08: the cinema and legibility replies;
+  - plus this close-out, which adds the pki reply, the ledger entry and this state file.
+- `renders\film.blend` was rebuilt from HEAD (normal build); `tools verify` is VERIFY GREEN on 00b1f74, with pytest 142.
+- **Process notes:**
+  - The first save of the K7 reply paraphrased it; it was overwritten verbatim before the commit.
+  - The cinema R1 reply had one non-JSON field, normalised as recorded in the ledger.
+  - One `Add-Content` appended a blank line to the ledger (a doc, not source).
 - Spec frozen at SHA-256 `7cf45afa01572b7e9d30a6fb376807fb10a4f6a693af41ffed1d96bce2686d23`. Untouched in Session 4.
 
 ## Session 4 (part 1) record

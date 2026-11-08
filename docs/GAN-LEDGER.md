@@ -200,3 +200,33 @@ Strengthening 3 (commit `f7a93a6`): `blender/locate.py` writes `locator.json` in
 - All three hard-check faults are caught: private_key_leak, root_issues_leaf and caption_clip.
 
 K7 side findings (PKI-K7-07..10: no visible handshake proof or B-09.1 CRL fetches, white trust links, occluded check 1, early S6 caption) concern content that the calibration variant shares with the real film. They are not accepted here, because calibration findings are not round findings; stage1-R1 judges the real film. The K7 reply also reports PKI-S0R1-04 and PKI-S0R2-03 as REGRESSED, for the same shared reason (proof not visible), and R1 re-checks both. Clean-round counter: 0.
+
+## Stage 1 — Animatic rounds
+
+### stage1-R1 (round 1 of 5)
+
+- **Candidate:** `00b1f74504fe00d15da94c0d408e36feece9fbd1`. The animatic frames are from commit 91ec326; later commits changed only checks, calibration hooks, packet tooling and docs, none of which affect frames.
+- **Spec SHA-256:** `7cf45afa…6d23` (frozen, unchanged).
+- **Packet:** `qa/rounds/stage1-R1/`, the first round packet with `locator.json`.
+- **Discriminators:** three fresh instances, run in parallel: pki (opus), cinema (sonnet) and legibility (sonnet). Each read only packet files and listed every frame and strip in `files_read`.
+- **Replies** are saved verbatim in the packet folder, with one exception: the cinema reply's B-06.3 `frames` field held a non-JSON expression, `["B-06.3_a_f1714","B-06.3_b_f1740","B-06.3_c_f1767"].map ? [ ...the three .png names... ] : []`. It was saved as its evident value, the three `.png` names, so the file parses.
+- **Hard discriminators** (`tools verify` on the candidate): VERIFY GREEN. ruff and mypy clean; pytest 142 passed; traceability current; palette 87 pairs, 0 failing; planned-film audits 0 hard; in-Blender 12 of 12 checks passed; 3270 of 3270 frames, 0 blank.
+
+| Discriminator | BLOCKER | MAJOR | MINOR | Verdicts |
+|---|---|---|---|---|
+| pki | 0 | 6 | 6 | 21 ACCURATE, 12 MISLEADING, 0 WRONG |
+| cinema | 1 | 13 | 2 | 25 FILM, 8 DIAGRAM (B-05.3, B-06.3, B-06.4, B-06.5, B-07.3, B-08.2, B-08.3, B-09.2) |
+| legibility | 2 | 11 | 2 | 26 MISLEADING, 4 FILM, 3 WRONG (B-03.2, B-03.3, B-07.2) |
+
+- **Scores, cinema:** C-01 5, C-02 6, C-03 4, C-04 5, C-05 5, C-06 6, C-07 6, C-08 5, C-09 4, C-10 5, C-11 6.
+- **Scores, legibility:** L-01 3, L-02 3, L-03 3, L-04 9, L-05 4, L-06 2, L-07 4, L-08 8.
+- **Scores, pki (advisory):** C-07 6, C-10 5, C-11 7, L-06 6, L-08 9.
+- **Regressions reported:** PKI-S0R1-06 and PKI-S0R2-03 REGRESSED (pki); PKI-S0R1-02 and PKI-S0R1-04 REGRESSED (legibility); everything else FIXED.
+
+**Triage: PENDING** (Session 4 resume). Notes for the triage, not decisions:
+- LEG-S1R1-02 (BLOCKER, F-03) says the RDP key never enters its container in B-03.2. The pki reply, which cites locator boxes, reports the key inside the locked KC-RDP from B-03.2 tile 3 onward, so LEG-S1R1-02 may misread the image. Rejecting a BLOCKER that concerns a private key needs the written citation and a second fresh pki concurrence (Charter 2.4 step 5). The ring and pill that stay on the server plate (PKI-S1R1-01, CIN-S1R1-11) are the seal ring left behind, which is a real defect.
+- Overlapping themes: the white trust links (PKI-05, CIN-02, CIN-03); label, plate and check occlusion and sizes (PKI-03, LEG-04 to LEG-10, CIN-07, CIN-08); the screen-space check HUD (CIN-04, LEG-06); caption speckle and grain (CIN-05, LEG-01, LEG-15); the camera on the WEB01 label plane in B-08.2/B-08.3 (CIN-01, CIN-10, LEG-08); proof of possession not visible (PKI-06); the seal ring left behind (PKI-01); the capsule overlapping AD (PKI-02); the check list inside the flashback (PKI-04, CIN-15).
+- LEG-S1R1-13 (L-07) asks for palette results in the packet. The packet does not carry `tools palette` output, so adding it is likely accepted as a packet change.
+
+**Gate decision: NOT PASSED** (3 BLOCKER, 30 MAJOR). Rounds used: 1 of 5. Clean-round counter: 0.
+
