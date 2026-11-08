@@ -32,7 +32,7 @@ def _plate(name: str, width: float, height: float, centre_x: float, collection: 
     mesh = bpy.data.meshes.new(f"MESH-{name}")
     hx, hy = width / 2, height / 2
     mesh.from_pydata([(centre_x - hx, -hy, 0.0), (centre_x + hx, -hy, 0.0), (centre_x + hx, hy, 0.0), (centre_x - hx, hy, 0.0)], [], [(0, 1, 2, 3)])
-    mesh.materials.append(materials.caption_material("plate"))
+    mesh.materials.append(materials.sign_plate_material())
     ob = bpy.data.objects.new(name, mesh)
     collection.objects.link(ob)
     return ob

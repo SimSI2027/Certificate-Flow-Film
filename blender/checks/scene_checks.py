@@ -22,6 +22,7 @@ import bpy
 from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Matrix, Vector
 
+from blender import materials
 from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, bundled_font, glyph_cap_ratio
 from cff.stage import camera as stage_camera
 from cff.stage import labels as stage_labels
@@ -30,7 +31,7 @@ from cff.stage.objects import CATALOGUE, Kind
 from cff.story import captions as story_captions
 from cff.story import model as m
 from cff.story import timing
-from cff.theme import motion, render, shots, typography
+from cff.theme import motion, palette, render, shots, typography
 
 VISIBLE_SCALE = 0.05
 CONTAINMENT_TOLERANCE_M = 0.08
@@ -468,7 +469,10 @@ def check_text_materials() -> Result:
             continue
         for ob in scene.objects:
             for slot in getattr(ob.data, "materials", []) or []:
-                if slot is not None and slot.surface_render_method == "DITHERED":
+                if slot is None or slot.surface_render_method != "DITHERED":
+                    continue
+                solid = slot.name == materials.SIGN_PLATE and palette.SIGN_PLATE_OPACITY == 1.0 and ob.type == "MESH"
+                if not solid:  # only a fully opaque sign plate may dither (during its fade); glyphs never
                     r.failures.append(f"{scene_name}/{ob.name}: material {slot.name} is DITHERED")
     beauty_text = [ob.name for ob in bpy.data.scenes["BEAUTY"].objects if ob.type == "FONT"]
     if beauty_text:

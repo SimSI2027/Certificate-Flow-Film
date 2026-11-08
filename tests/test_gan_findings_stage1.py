@@ -43,6 +43,9 @@ def test_LEG_S1R1_01_text_passes_never_use_dithered_transparency() -> None:  # n
     assert 'TEXT_RENDER_METHOD = "BLENDED"' in source
     for module in ("captions_scene.py", "signs_scene.py"):
         assert "DITHERED" not in (ROOT / "blender" / module).read_text(encoding="utf-8"), module
+    # the only dithered text-pass material is the sign plate, and only because it is fully opaque while held
+    plate = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "sign_plate_material")
+    assert "SIGN_PLATE_OPACITY" in ast.unparse(plate) and palette.SIGN_PLATE_OPACITY == 1.0
 
 
 @pytest.mark.covers("L-01")

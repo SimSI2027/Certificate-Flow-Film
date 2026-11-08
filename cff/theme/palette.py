@@ -49,7 +49,8 @@ PLATE_HEX = "#0B1220"  # label plate and caption backing
 SKIN_HEX = "#8A93A6"  # stylized figure (no realistic human)
 SCREEN_HEX = "#7FB4E8"  # laptop session window
 BACKDROP_HEX = "#18263C"  # far rack silhouettes: a step above the floor, far below any role colour
-PLATE_OPACITY = 0.92  # label and caption plates: even over a white background, white text keeps >= 4.5:1 (L-02)
+PLATE_OPACITY = 0.92  # caption plates: even over a white background, white text keeps >= 4.5:1 (L-02)
+SIGN_PLATE_OPACITY = 1.0  # sign plates are solid while held (they must draw under their blended glyphs)
 
 # Trust links are light, not cable (AR-01, C-01): a gradient from the issuer's colour to the subject CA's colour along
 # the link, whose glow channel carries only intensity. Emission stays low enough that AgX keeps the hue (PKI-S1R1-05).
