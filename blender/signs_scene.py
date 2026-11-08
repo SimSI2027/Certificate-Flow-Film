@@ -27,13 +27,14 @@ TEXT_LIFT_CAPS = 0.03  # text sits this far in front of its plate (in cap height
 
 
 def _plate(name: str, width: float, height: float, centre_x: float, collection: bpy.types.Collection) -> bpy.types.Object:
+    """The plate's origin stays at the sign's origin (the offset is in the mesh), so blended sorting always puts the text,
+    lifted towards the camera, in front of its plate; an offset origin let the plate sort over left-aligned text."""
     mesh = bpy.data.meshes.new(f"MESH-{name}")
     hx, hy = width / 2, height / 2
-    mesh.from_pydata([(-hx, -hy, 0.0), (hx, -hy, 0.0), (hx, hy, 0.0), (-hx, hy, 0.0)], [], [(0, 1, 2, 3)])
+    mesh.from_pydata([(centre_x - hx, -hy, 0.0), (centre_x + hx, -hy, 0.0), (centre_x + hx, hy, 0.0), (centre_x - hx, hy, 0.0)], [], [(0, 1, 2, 3)])
     mesh.materials.append(materials.caption_material("plate"))
     ob = bpy.data.objects.new(name, mesh)
     collection.objects.link(ob)
-    ob.location = (centre_x, 0.0, 0.0)
     return ob
 
 

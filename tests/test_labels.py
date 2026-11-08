@@ -40,6 +40,15 @@ def test_windowed_labels_have_room_for_entrance_and_exit_and_sit_in_their_beat()
         assert p.window.beat in labels.LABELS[p.label_id].must_read_beats or labels.LABELS[p.label_id].kind is not LabelKind.TAG, p.label_id
 
 
+@pytest.mark.covers("B-09.3")
+def test_signs_leave_before_the_world_fades_under_the_title_card() -> None:
+    from cff.stage import signs  # noqa: PLC0415  (builds the sign plan)
+
+    fade = signs.world_fade_frame()
+    for label_id, plan in signs.plan_signs().items():
+        assert all(frame < fade for frame in plan.frames), label_id
+
+
 @pytest.mark.covers("L-01")
 def test_signs_are_held_at_a_cap_height_above_the_l01_minimum() -> None:
     assert typography.SIGN_CAP_PX >= 18.0 + 2.0  # margin over L-01's 18 px at 1080p

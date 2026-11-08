@@ -30,6 +30,7 @@ from cff.stage.layout import Vec3
 from cff.stage.objects import BY_ID as BY_OBJECT
 from cff.stage.tracks import LOCATION, Timeline
 from cff.story import captions, timing
+from cff.story import model as m
 from cff.theme import motion, shots
 from cff.theme import typography as ty
 
@@ -73,7 +74,15 @@ def anchor(timeline: Timeline, placement: Placement, frame: int) -> Vec3:
     return lo.add(base, placement.offset)
 
 
+def world_fade_frame() -> int:
+    """First frame of the closing fade to black (E-09.3a): signs belong to the world and leave before it."""
+    fade = next(e for e in m.MODEL.events if e.id == "E-09.3a")
+    return timing.seconds_to_frame(fade.start_s)
+
+
 def exists(timeline: Timeline, placement: Placement, frame: int) -> bool:
+    if frame >= world_fade_frame() - round(motion.LABEL_EXIT_S * timing.FPS):
+        return False
     if placement.window is not None:
         first, last = labels.window_frames(placement.window)
         return first <= frame < last + round(motion.LABEL_LINGER_S * timing.FPS)
