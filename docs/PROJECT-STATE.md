@@ -1,13 +1,17 @@
 # PROJECT STATE
 
-Updated: 2026-11-07 (Session 4, part 2 closed because the context grew long; Session 4 continues)
+Updated: 2026-11-07 (Session 4 part 3, in progress: R1 triaged and fixed, R2 candidate rendering)
 
-## Next session
-- **Next session = 4 (resume, part 3)**: Stage 1 GAN rounds to the Phase 4 gate. **Model: Opus 5.5. Effort: Medium.** Start a NEW Claude Code session and paste the **Resume** prompt from `docs\SESSION-PROMPTS.md`.
-- After the Phase 4 gate is APPROVED, **Session 5 (vertical slice) runs on Opus 5.5, effort High**.
-- **Calibration: PASSED** (ledger: K7 caught `private_key_leak` as BLOCKER with locator evidence).
-- **stage1-R1 is judged; triage is PENDING.** Replies are in `qa\rounds\stage1-R1\{pki,cinema,legibility}-discriminator.json`; the counts and triage notes are in the ledger under "stage1-R1".
-- **Exact next action:**
+## Session 4 part 3 (current)
+- Model Opus 5.5, **effort High** (the user started Session 5 and approved finishing the Phase 4 gate first in the same session; recorded deviation from the planned Medium).
+- **Triage done** (ledger, stage1-R1): all 43 findings ACCEPTED, root causes verified. Commits 2c2f7c5 (triage), e902b0d (fixes part 1), ad5890b (fixes part 2), 08e69fe (regressions.json, 63 entries).
+- **What changed:** captions and signs use `BLENDED` materials (dithered alpha stippled text); type sizes from measured glyph ratios (`cff\theme\typography.py`); in-world labels are 3D signs in a separate **SIGNS** scene planned per frame by `cff\stage\signs.py` (fixed 22 px cap, title-safe nudging, list stacking, beside the focal subject, clear of captions, never near the lens); captions take a top or bottom band (`cff\stage\caption_layout.py`, L-05); seal ring rides with its capsule; public key is a notched hexagonal token; CA check slots leave before the flashback; issuer links are bowed gold-to-CA gradients; packet carries `legibility.json`; reframed B-02.2/B-04.1/B-06.1/B-06.5; backdrop ring; rim 1050 W; emission 2.4; MINORs fixed (B-06.5/B-06.6 retimed within S6).
+- **New tools:** `python -m tools legibility` (L-06 holds, L-05 caption vs focal); `render --scene SIGNS`; composite = beauty, then signs, then captions. New in-Blender checks: `fonts`, `text_materials`, `signs` (15 checks).
+- **Exact next action (resume here):** if `renders\animatic\progress.json` is not `complete` for all three layers, re-run `python -m tools render --tier animatic` (resumes). Then `python -m tools verify`, inspect a contact sheet, `python -m tools packet stage1` (R2), three fresh discriminators in parallel, save replies verbatim, triage, ledger. Gate: 0 BLOCKER, 0 MAJOR, scores >= 8, PKI beats ACCURATE. Rounds used 1 of 5.
+- After the Phase 4 gate is APPROVED, Session 5 (vertical slice, Opus 5.5, High) follows.
+
+## Session 4 part 2 handoff (historical)
+- **Exact next action (done in part 3):**
   1. Pre-flight: spec hash `7cf45afa…6d23`, SYNC OK.
   2. Triage every R1 finding (3 BLOCKER, 30 MAJOR, 10 MINOR) as ACCEPTED or REJECTED-INVALID, with a citation from the frozen spec.
      - LEG-S1R1-02 (key outside its container in B-03.2) conflicts with the locator and the pki reply. Rejecting it needs a written citation plus a second fresh `pki-discriminator` concurring (Charter 2.4 step 5).
