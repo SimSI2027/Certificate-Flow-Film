@@ -507,6 +507,21 @@ You are the Chief of Staff for Certificate-Flow-Film, session V4 audit: a full a
 
 ---
 
+## Session V5b — realistic world: final-tier look gate and the full final render
+**Model: Opus 5.5 · Effort: High** (lean mode: no subagents). Draft scope handed over by V5a; the owner may replace it.
+
+```
+You are the Chief of Staff for Certificate-Flow-Film, session V5b: the realistic hardware and world from V5a (amendment V5-A1) at the final tier, then the full final render. No subagents, at most 10 images.
+
+1. Read docs\PROJECT-STATE.md, CLAUDE.md and the "Session V5a" entry of docs\GAN-LEDGER.md (amendment V5-A1, the open items). Verify green and sync OK before any change.
+2. Final-tier look gate on stills and strips before any full render (`python -m tools build --tier final`, `python -m tools look-test`): the realistic world changed every beauty frame and the camera where the AD rack is focal. Measure B-09.2 mean luma (>= 50), the L2-CIN-01 frames (f746, f1376, f1534/1535), the V3-CIN-01 frames (f477, f595, f600, f671, f705, f719), the cut frames, and the flashback. Watch for shadow-pool overflow (V3-CIN-01): every new light stays shadowless. Fix until the gate passes; never by dimming the scene or moving content out of frame.
+3. Full final render: beauty and signs for the whole film (the AD labels moved with the 2.2 m rack, and the camera changed where the AD is focal); captions and audio only if their inputs changed. Background chunks of about 300 frames, resumable; record progress in PROJECT-STATE.
+4. Encode, `python -m tools verify` (all in-Blender checks incl. shell_bounds and root_no_cables; MP4 luma gate), one final contact sheet. No release: the next session audits.
+5. Ledger and approvals entries, PROJECT-STATE (next: the V5 audit), commit, push, `python -m tools sync-check`. Report in at most 8 lines.
+```
+
+---
+
 ## Resume prompt (any session, after a usage limit or a long context)
 **Model and effort: the same as the session being resumed**
 
