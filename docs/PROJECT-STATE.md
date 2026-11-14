@@ -1,8 +1,18 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-14 (Session F2, Opus 5.5, High effort, no subagents, 8 images)
+Updated: 2026-11-14 (Session F3 third run, `claude-fable-5-2`, no subagents, 10 of 12 images)
 
-## NEXT SESSION: F3 (Opus 5.5, High). Session F3 is defined in `docs\AUDIT-v1.md` Section 7 (`docs\SESSION-PROMPTS.md` has no separate F3 prompt): targeted re-audit of the re-rendered film, then (if the gate passes) release v1.1.0 as a pre-release.
+## NEXT SESSION: L1 (Sonnet 5.5, High). Prompt: `docs\SESSION-PROMPTS.md` "Session L1". Plan: `docs\LOOK-PLAN-v1.2.md`. Then L2 (Opus 5.5, Medium): re-audit and release v1.2.0.
+- Exact next action: L1 starts with Item A of the plan (new `cff\theme\look.py`, six palette tokens, then `blender\world.py`, `render_settings.py`, `lighting.py`, `materials.py`, `compositor.py`, `tests\test_look_v12.py`).
+- Remaining steps: Items A, C, E, B (second change), D, F; stills-and-strips gate; one final render; encode; L2 re-audit; release v1.2.0.
+
+## Session F3, third run DONE (2026-11-14) — GATE PASSED, v1.1.0 released as a PRE-RELEASE
+- Gate: Final MP4 SHA-256 `2b56cee7…f78e` confirmed. `python -m tools verify` VERIFY GREEN twice (before and after the doc changes): pytest 189, 14 in-Blender checks, both tiers 3270/3270, final MP4 on spec, cut-frame steps 0.4 / 0.0. ffprobe: H.264 High 4.1, bt709, 3270 frames, 109.000 s; exactly two cuts.
+- Every FIXED finding passes on the rendered film (15 MAJOR, 10 MINOR); 56 frames viewed in 8 images. Per-item table: `docs\AUDIT-v1.md` "F3 targeted re-audit, third run". 33 of 33 PKI beats ACCURATE. Estimated scores: PKI 9, legibility 8, cinema 5.
+- Known limitations recorded (README, CHANGELOG, ledger "Session F3"): V1-CIN-03 (open MAJOR), the F2 residuals, and four new MINORs: F3-LEG-01 (flashback marker fades over f1396–1398), F3-AUD-01 (AAC true peak −0.6 dBFS), F3-PIPE-02 (metadata commit one behind), F3-PKI-01 (handshake proof unlabelled).
+- Release: tag `v1.1.0` on `a036067`; https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.1.0 (`isPrerelease=true`), 7 assets. All 7 downloaded back with matching SHA-256. v1.0.0 notes marked "superseded".
+- Pages: run 43578886004 succeeded; live page, preview, poster and captions are byte-identical to `site\`.
+- Part 2: `docs\LOOK-PLAN-v1.2.md` written. Its values come from a scratch prototype (final-tier stills, no project file changed): hero beat mean luma 37.8 → 53.1. Motion was not tested; the plan's stills-and-strips gate covers it.
 
 ## Session F2 DONE (2026-11-13/14, Opus 5.5 High) — no tag, no release
 - Code: 242c363 (camera), 107159a (signs), 60a60b3 (small fixes), 13a7cde (V1-CIN-06 bulge, loudnorm TP), close-out commit (V1-CIN-02 step 4 glow; `MP4_PENDING_RERENDER = False`). Per-finding status: `docs\AUDIT-v1.md` "F2 status" and "F2 final render"; residuals: `docs\GAN-LEDGER.md` "Session F2".
@@ -54,7 +64,7 @@ Updated: 2026-11-14 (Session F2, Opus 5.5, High effort, no subagents, 8 images)
 
 ## URLs
 - Repository (public): https://github.com/SimSI2027/Certificate-Flow-Film
-- Pages demo: https://simsi2027.github.io/Certificate-Flow-Film/. Release: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.0.0
+- Pages demo: https://simsi2027.github.io/Certificate-Flow-Film/. Latest pre-release: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.1.0 (v1.0.0 superseded)
 - Related (verified in Session 1): https://github.com/SimSI2027/Certificate-Flow-Lab (Pages: https://simsi2027.github.io/Certificate-Flow-Lab/). Approach A: HTTP 404, not linked.
 
 ## Toolchain (details in `docs\TOOLCHAIN.md`; commands in `docs\PIPELINE.md`)
