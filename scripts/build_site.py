@@ -51,14 +51,14 @@ li {{ margin:.2rem 0; }}
 <main>
 <header>
 <h1>Certificate Flow Film</h1>
-<p class="muted">One continuous shot through a stylised 3D world: how a certificate is requested, issued and trusted in an Active Directory Certificate Services PKI. 109 seconds, 1920&times;1080, 30 FPS, no narration.</p>
+<p class="muted">One continuous camera move, with a single flashback, through a stylised 3D world: how a certificate is requested, issued and trusted in an Active Directory Certificate Services PKI. 109 seconds, 1920&times;1080, 30 FPS, no narration.</p>
 </header>
 
 <section aria-labelledby="watch">
 <h2 id="watch">Watch</h2>
 <video controls preload="metadata" poster="poster.png" aria-describedby="watch-note">
 <source src="preview.mp4" type="video/mp4">
-<track kind="captions" src="captions.vtt" srclang="en" label="English captions" default>
+<track kind="captions" src="captions.vtt" srclang="en" label="English captions (same text as on screen)">
 Your browser cannot play this video. <a href="{release}">Download the full MP4</a>.
 </video>
 <p id="watch-note" class="muted">This is the 720p preview with captions. <a href="{release}">Full 1080p MP4 (release asset)</a>.</p>
@@ -67,15 +67,15 @@ Your browser cannot play this video. <a href="{release}">Download the full MP4</
 <section aria-labelledby="what">
 <h2 id="what">What the film shows</h2>
 <div class="card">
-<p><strong>RDP path.</strong> The RDP server is issued a certificate from the <span class="path">RDPAuth</span> template by <span class="path">1SN0S Issuing CA 1</span>, which was itself signed by the <span class="path">1SN0S Root CA</span>. The client validates the whole chain up to the root it already trusts.</p>
+<p><strong>RDP path.</strong> The RDP server is issued a certificate from the <span class="path">RDPAuth</span> template by <span class="path">1SN0S Issuing CA 1</span>, whose CA certificate was signed offline by the <span class="path">1SN0S Root CA</span>. The client validates the whole chain up to the root it already trusts.</p>
 <p><strong>TLS path.</strong> The web server is issued a certificate from the <span class="path">WebServer-TLS</span> template by <span class="path">1SN0S Issuing CA 2</span>, signed by the same root.</p>
-<p><strong>One trusted root.</strong> Different templates can use different issuing CAs, but trust always anchors at the single Root CA. The private key never leaves the machine that generated it: the request is signed with it, and only the public key travels.</p>
+<p><strong>One trusted root.</strong> Different templates can use different issuing CAs, but trust always anchors at the single Root CA. The private key never leaves the machine that generated it: the request is signed with it, and the request carries only the public key.</p>
 </div>
 </section>
 
 <section aria-labelledby="how">
 <h2 id="how">How it was made</h2>
-<p>Everything is generated from one story model in Python: scripted Blender (<span class="path">bpy</span>) builds the scene and animation, EEVEE renders PNG sequences, and FFmpeg composites captions and sound-effect audio and encodes the film. A suite of automated checks (story consistency, PKI facts, motion limits, legibility, text contrast, frame sanity) acts as the discriminator against the generator; an earlier adversarial review loop drove the design, and the final release is gated on those automated checks.</p>
+<p>Everything is generated from one story model in Python: scripted Blender (<span class="path">bpy</span>) builds the scene and animation, EEVEE renders PNG sequences, and FFmpeg composites captions and sound-effect audio and encodes the film. A suite of automated checks (story consistency, PKI facts, motion limits, legibility, text contrast, frame sanity) acts as the discriminator against the generator; an adversarial review loop judged the story spec and the first animatic round only, and the film is gated on those automated checks.</p>
 </section>
 
 <section aria-labelledby="tr">
@@ -92,7 +92,7 @@ Your browser cannot play this video. <a href="{release}">Download the full MP4</
 <li><a href="{repo}">Repository</a></li>
 <li><a href="{repo}/blob/main/docs/PKI-TECHNICAL-NOTES.md">PKI technical notes</a></li>
 <li><a href="{repo}/blob/main/docs/STORYBOARD.md">Storyboard</a></li>
-<li><a href="{release}">Release v1.0.0 (Final MP4)</a></li>
+<li><a href="{release}">v1.0.0 pre-release, under audit (Final MP4)</a></li>
 <li>Related: <a href="{lab}">Certificate-Flow-Lab</a> (<a href="{lab_pages}">demo</a>)</li>
 </ul>
 </section>

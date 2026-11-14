@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased (toward v1.1.0; audit fixes, session F1, no re-render yet)
+
+- v1.0.0 is a pre-release under audit (`docs\AUDIT-v1.md`: 0 BLOCKER, 16 MAJOR, 10 MINOR).
+- Fixed in code (takes effect at the next render): signs no longer motion-blurred in the final tier (V1-LEG-01); shutter opens at the frame so the two cuts are not blends (V1-CIN-04); client trust store gold from frame 1 (V1-PKI-01); "Earlier" marker on screen for the whole flashback (V1-PKI-02); "Private key" / "Public key" tags (V1-PKI-03); persistent name plates limited to the beats where they are read (V1-LEG-04); encode tags BT.709 transfer, level 4.1 (V1-ENC-01).
+- `python -m tools verify` now checks every rendered tier, the Final MP4 and the two cut frames (V1-PIPE-01). The MP4 steps report, but do not fail on, the known v1.0.0 problems until the F2 re-render.
+- Pages: captions track is opt-in (no doubled captions); wording corrected (V1-DOC-01, V1-DOC-02).
+- Known limits (open): the grey-box look (V1-CIN-03), camera framing, check-list timing and sign jumps (F2).
+
 ## v1.0.0 (2026-11-13)
 
 - First release: 109 s, 1920x1080, 30 FPS film of the ADCS certificate flow (RDP and TLS paths, one trusted root).

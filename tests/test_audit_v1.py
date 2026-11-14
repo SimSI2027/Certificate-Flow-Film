@@ -1,0 +1,163 @@
+"""Regression tests for the v1 audit (docs/AUDIT-v1.md), session F1. Each test is named after its finding ID."""
+
+from __future__ import annotations
+
+import re
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from cff.stage import camera, caption_layout, choreography, labels, signs
+from cff.stage.audit import beat_of_frame
+from cff.stage.tracks import GLOW
+from cff.story import timing
+from cff.theme import typography as ty
+from tools import film, verify
+
+ROOT = Path(__file__).resolve().parents[1]
+FPS = timing.FPS
+
+
+def _text(rel: str) -> str:
+    return (ROOT / rel).read_text(encoding="utf-8")
+
+
+def _event_start_s(event_id: str) -> float:
+    from cff.story import model  # noqa: PLC0415
+
+    return next(e for e in model.MODEL.events if e.id == event_id).start_s
+
+
+@pytest.mark.covers("L-06")
+def test_V1_LEG_01_overlay_scenes_never_use_motion_blur() -> None:  # noqa: N802
+    source = _text("blender/render_settings.py")
+    line = next(ln for ln in source.splitlines() if "render.use_motion_blur" in ln)
+    assert "and not transparent" in line
+
+
+@pytest.mark.covers("C-02")
+def test_V1_CIN_04_shutter_opens_at_the_frame() -> None:  # noqa: N802
+    assert 'motion_blur_position = "START"' in _text("blender/render_settings.py")
+
+
+@pytest.mark.covers("C-02")
+def test_V1_PIPE_01_verify_inspects_the_final_tier_and_the_mp4() -> None:  # noqa: N802
+    run_source = _text("tools/verify.py").split("def run(", 1)[1]
+    for step in ("step_frame_tiers", "step_final_mp4", "step_cut_frames"):
+        assert step in run_source, step
+    good: dict[str, Any] = {
+        "streams": [
+            {"codec_type": "video", "codec_name": "h264", "width": 1920, "height": 1080, "r_frame_rate": "30/1", "nb_frames": str(timing.frame_end()),
+             "color_transfer": "bt709", "level": 41},
+            {"codec_type": "audio", "codec_name": "aac", "sample_rate": "48000", "channels": 2},
+        ],
+        "format": {"duration": f"{timing.total_duration_s():.3f}"},
+    }
+    assert verify.mp4_problems(good) == []
+    bad: dict[str, Any] = {**good, "streams": [{**good["streams"][0], "width": 1280, "color_transfer": "iec61966-2-1"}, good["streams"][1]]}
+    assert len(verify.mp4_problems(bad)) == 2
+    assert verify.cut_luma_steps("lavfi.signalstats.YAVG=43.6\nlavfi.signalstats.YAVG=97.3") == {0: 43.6, 1: 97.3}
+
+
+@pytest.mark.covers("C-02")
+def test_V1_ENC_01_stream_tags_and_level() -> None:  # noqa: N802
+    source = _text("tools/film.py")
+    assert "setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv" in source
+    assert film.H264_LEVEL == ["-refs", "4", "-level:v", "4.1"]
+    assert source.count("*H264_LEVEL") == 2  # both the Final and the Preview encode
+
+
+@pytest.mark.covers("AR-05", "F-11")
+def test_V1_PKI_01_trust_store_is_gold_before_docking() -> None:  # noqa: N802
+    tl = choreography.build_timeline()
+    first_event_frame = timing.seconds_to_frame(_event_start_s("E-06.2a"))
+    last_beat_frame = timing.seconds_to_frame(timing.beat_window("B-06.6")[1])
+    start = tl.value_at("TS-CLIENT-ROOT", GLOW, 1)
+    assert start is not None
+    assert tl.value_at("TS-CLIENT-ROOT", GLOW, first_event_frame) == start
+    assert tl.value_at("TS-CLIENT-ROOT", GLOW, last_beat_frame) == start
+
+
+@pytest.mark.covers("AR-01", "B-05.2")
+def test_V1_PKI_02_flashback_marker_whole_flashback() -> None:  # noqa: N802
+    sign = signs.plan_signs()["LBL-FLASHBACK"]
+    first, last = timing.frame_range(*timing.beat_window("B-05.2"))
+    full = sum(1 for f in range(first, last + 1) if f in sign.frames and sign.frames[f].alpha >= 1.0)
+    assert full >= 125, f"marker fully shown on {full} frames"
+    assert any(sign.frames.get(f) is not None and sign.frames[f].alpha > 0 for f in range(first, first + 5))
+    assert any(s.rect[1] >= ty.TITLE_SAFE_PX[1] for s in sign.frames.values())
+
+
+@pytest.mark.covers("F-03", "F-04")
+def test_V1_PKI_03_private_key_tag_never_leaves_the_server() -> None:  # noqa: N802
+    keys = ("RDP-PRIV", "RDP-PUB", "WEB-PRIV", "WEB-PUB")
+    for label_id, parent in ((f"LBL-KEY-{k}", f"KEY-{k}") for k in keys):
+        assert labels.BY_ID[label_id].parent == parent
+        assert labels.LABELS[label_id].text in ("Private key", "Public key")
+        assert len(labels.must_read_frames(label_id)) >= 45
+    tl = choreography.build_timeline()
+    plan = camera.CameraPlan(tl)
+    from cff.story import model  # noqa: PLC0415
+
+    for f in signs.plan_signs()["LBL-KEY-RDP-PRIV"].frames:
+        server = caption_layout.objects_rect(tl, plan, (model.RDP_SERVER,), f)
+        anchor_px = camera.project(plan.state(f), signs.anchor(tl, labels.BY_ID["LBL-KEY-RDP-PRIV"], f))
+        if server is None or anchor_px[2] <= 0:
+            continue
+        x, y = anchor_px[0] * ty.FRAME_W_PX, anchor_px[1] * ty.FRAME_H_PX
+        assert server[0] - 100 <= x <= server[2] + 100 and server[1] - 100 <= y <= server[3] + 100, f
+    assert "Private key" in _text("docs/STORYBOARD.md")
+
+
+@pytest.mark.covers("L-06")
+def test_V1_LEG_04_plate_beats_cover_must_read() -> None:  # noqa: N802
+    for label_id, beats in labels.PLATE_BEATS.items():
+        must = labels.LABELS[label_id].must_read_beats
+        assert set(must) <= set(beats), (label_id, must, beats)
+
+
+@pytest.mark.covers("L-06")
+def test_V1_LEG_04_plates_only_in_their_beats() -> None:  # noqa: N802
+    beats = beat_of_frame()
+    for label_id, allowed in labels.PLATE_BEATS.items():
+        for f in signs.plan_signs()[label_id].frames:
+            assert beats.get(f) in allowed, (label_id, f)
+
+
+@pytest.mark.covers("L-06")
+def test_V1_LEG_04_at_most_10_signs() -> None:  # noqa: N802
+    count: dict[int, int] = {}
+    for sign in signs.plan_signs().values():
+        for f in sign.frames:
+            count[f] = count.get(f, 0) + 1
+    worst = max(count.values())
+    assert worst <= SIGN_COUNT_LIMIT, f"{worst} signs on one frame (v1.0.0 peaked at 15)"
+
+
+SIGN_COUNT_LIMIT = 10
+
+
+@pytest.mark.covers("L-05")
+def test_V1_DOC_01_caption_track_is_opt_in() -> None:  # noqa: N802
+    import importlib.util  # noqa: PLC0415
+
+    spec = importlib.util.spec_from_file_location("build_site", ROOT / "scripts" / "build_site.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    for page in (module.PAGE, _text("site/index.html")):
+        track = re.search(r"<track[^>]*>", page)
+        assert track is not None
+        assert " default" not in track.group(0)
+
+
+@pytest.mark.covers("L-05")
+def test_V1_DOC_02_wording_matches_the_film_and_its_status() -> None:  # noqa: N802
+    readme, site = _text("README.md"), _text("site/index.html")
+    assert "v1.0.0 pre-release" in readme and "released" not in readme.lower()
+    assert "one continuous camera move, with a single flashback" in readme
+    assert "continuous shot" not in readme and "continuous shot" not in site
+    assert "whose CA certificate was signed offline by the" in site
+    assert "the request carries only the public key" in site
+    assert "pre-release" in site and "Release v1.0.0" not in site

@@ -1,8 +1,8 @@
 # Certificate-Flow-Film
 
-A 100–120 s, 1920x1080, 30 FPS film (Approach B) that explains an Active Directory Certificate Services PKI flow as one continuous shot through a stylized 3D world. It is built with scripted Blender (`bpy`), rendered headless, and checked by a staged production pipeline and a GAN-style adversarial review loop.
+A 100–120 s, 1920x1080, 30 FPS film (Approach B) that explains an Active Directory Certificate Services PKI flow as one continuous camera move, with a single flashback, through a stylized 3D world. It is built with scripted Blender (`bpy`), rendered headless, and checked by automated hard checks; an adversarial review loop judged the story spec and the first animatic round only.
 
-> **Status: v1.0.0 released** (lean finish: the automated checks in `python -m tools verify` are the quality gate; the later adversarial review rounds were not run, see `CHANGELOG.md`).
+> **Status: v1.0.0 pre-release, under audit (`docs\AUDIT-v1.md`).** Fixes are being applied toward v1.1.0; see `CHANGELOG.md`. The automated checks in `python -m tools verify` are the quality gate.
 
 ## The film
 
