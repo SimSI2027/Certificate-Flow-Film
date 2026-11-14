@@ -1,8 +1,14 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-13 (v1 AUDIT session, read-only, model `claude-fable-5-2`; before it: LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
+Updated: 2026-11-13 22:20 (F3 second run, model `claude-fable-5-2`, High effort; before it: F3 first run, Opus 5.5)
 
-## Session F3 (2026-11-13, Opus 5.5) — GATE FAILED, no release. NEXT: session F2 (Opus 5.5, High), then F3 again
+## NEXT SESSION: F2 (Opus 5.5, High). Paste the "Session F2" prompt from `docs\SESSION-PROMPTS.md`. Do NOT run F3 before F2 is finished.
+- **F3 second run (2026-11-13 22:15): GATE FAILED AGAIN, same cause.** F2 has still not run. The five local outputs have the same SHA-256 as the v1.0.0 release assets (Final `5470c46c…f193a`), `MP4_PENDING_RERENDER` is still True, `CROSSING_LIMIT` is still 0.045. Verify is GREEN only through that waiver (pytest 170, 14 in-Blender checks, final tier 3270/3270; MP4 level 50, transfer sRGB; cut-frame steps 14.3 and 30.1). Per-item results are in `docs\AUDIT-v1.md` under "F3 targeted re-audit, second run": 7 fixed MAJORs FAIL in the film, V1-DOC-01 PASSES.
+- No tag, release, README, CHANGELOG or Pages change. v1.0.0 stays a pre-release. The only source change in this session: the F2 prompt was added to `docs\SESSION-PROMPTS.md` (it did not exist, which is why F3 was run twice).
+- **F2 is finished when all four are true:** the Final MP4 is newer than the last source commit; its SHA-256 is not `5470c46c…f193a`; `tools\verify.py` has `MP4_PENDING_RERENDER = False`; `python -m tools verify` prints no PENDING line. Only then run F3.
+- Render commands take `--tier`: `python -m tools render --tier animatic --rebuild`, `python -m tools render --tier final --rebuild`.
+
+## Session F3, first run (2026-11-13, Opus 5.5) — GATE FAILED, no release. NEXT: session F2 (Opus 5.5, High), then F3 again
 - F3 found that F2 never ran: the Final MP4 and the final passes predate the F1 fixes, so the shipped film is still v1.0.0. Per-item results and the exact fix list are in `docs\AUDIT-v1.md` under "F3 targeted re-audit". 7 fixed MAJORs FAIL in the film (LEG-01, CIN-04, PIPE-01 waived, PKI-01/02/03, LEG-04); only V1-DOC-01 PASSES (no default track on the live page). Verify is GREEN only because of `MP4_PENDING_RERENDER = True`.
 - No tag, release, README, CHANGELOG or Pages change was made. v1.0.0 stays a pre-release.
 - **Next action:** run session F2 exactly as described below and in AUDIT-v1 Section 7. After that, run F3 again (re-audit, then release v1.1.0 as a pre-release with Final, Preview, poster, contact sheet and captions.vtt; then check the SHA-256 round-trip).

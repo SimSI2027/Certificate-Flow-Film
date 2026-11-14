@@ -118,6 +118,42 @@ Also open and untouched, MAJOR: V1-LEG-02, -03, V1-PKI-04, -05, V1-CIN-01, -02, 
 4. Set `tools\verify.py` `MP4_PENDING_RERENDER = False`. `python -m tools verify` must be GREEN with no PENDING lines: the cut-frame steps must not be blends, ffprobe must show level ≤ 4.1 and transfer `bt709`.
 5. Then run session F3 again (this targeted re-audit) before any release.
 
+### F3 targeted re-audit, second run (2026-11-13 22:15, `claude-fable-5-2`, High; 1 image used) — RESULT: GATE FAILED AGAIN, v1.1.0 NOT released
+
+**Nothing has changed since the first F3 run. Session F2 still has not run.** HEAD at the start was 3a49773 (the first F3 record), the tree was clean, and there is no other branch, stash or worktree that could hold F2 work.
+
+Re-run evidence (nothing was taken from the first run):
+- **The film on disk is the v1.0.0 film, byte for byte.** SHA-256 of the five local outputs equals the digests of the v1.0.0 release assets: Final `5470c46c…f193a`, Preview `df5a1bbe…effbb`, poster `94611603…2fafc`, contact sheet `361b9ff8…86461`, `captions.vtt` `3ad631f2…38404`.
+- File times: final beauty 19:05–19:41, signs up to 20:01, captions up to 20:09, Final MP4 20:10. The F1 fixes were committed at 21:12.
+- `tools\verify.py` still has `MP4_PENDING_RERENDER = True`; `CROSSING_LIMIT` is still 0.045.
+- `python -m tools verify`: VERIFY GREEN (ruff, mypy --strict 61 files, pytest 170, traceability, palette 87 pairs, planned-film audits 0 hard / 3 advisory, 14 in-Blender checks, animatic and final tiers 3270/3270, 0 blank). It is green only through the waiver: "final MP4: PENDING F2 re-render: 2 known v1.0.0 problem(s)" (transfer `iec61966-2-1`, level 50) and "cut frames: PENDING F2 re-render: v1.0.0 cut frames are blends (14.3, 30.1)".
+- ffprobe Final MP4: H.264 High, **level 50**, 1920x1080, yuv420p, 30/1, 3270 frames (decoded), **color_transfer=iec61966-2-1**; AAC LC, 48 kHz, stereo; 109.000 s; 59 318 891 bytes.
+- One 3x3 strip cut from the Final MP4: f450, f600, f1246, f1290, f1396, f1560, f1620, f1700, f1964. A whole-film contact sheet was not made: the hashes prove that this is the v1.0.0 film, so it cannot contain a regression from the F1 fixes.
+- Live Pages: HTTP 200, byte-identical to `site\index.html`; Pages run 43545038707 succeeded.
+
+| ID | Sev | Checked at | Result | What the frame shows |
+|---|---|---|---|---|
+| V1-LEG-01 | MAJOR | 52.0, 54.0, 65.4 s | **FAIL** | f1560, f1620: `CLIENT01`, `rdp01.1sn0s.lab`, `Remote Desktop Authentication` smeared. f1964: all six check lines and "OCSP if deployed" are unreadable. |
+| V1-CIN-04 | MAJOR | f1246, f1396 | **FAIL** | f1396 is a heavy double exposure (gold root smeared over the cyan vault). Verify measures luma steps of 14.3 and 30.1 at the two cuts (limit 3). |
+| V1-PIPE-01 | MAJOR | gate | **FAIL (in effect)** | The checks exist and report the defects, but the waiver turns them into PASS. |
+| V1-PKI-01 | MAJOR | 54.0, 56.6 s | **FAIL** | f1620: the trust-store cradle is grey while the chain docks. f1700: it is gold. It still reads as "trust is created now". |
+| V1-PKI-02 | MAJOR | 41.5, 43.0 s | **FAIL** | f1246 and f1290 have no "Earlier: offline signing ceremony" marker. |
+| V1-PKI-03 | MAJOR | 15.0, 20.0 s | **FAIL** | f450 and f600 have no "Private key" or "Public key" tag; the caption "The private key stays on the server" sits over two unnamed shapes. |
+| V1-LEG-04 | MAJOR | 54.0, 56.6 s | **FAIL** | f1620 and f1700: `CLIENT01`, the SAN and the EKU plates still sit on the laptop and the user. Residual (`CROSSING_LIMIT` 0.045) still open. |
+| V1-DOC-01 | MAJOR | live Pages | **PASS** | The live `<track>` has no `default`. |
+| V1-ENC-01 | MINOR | file | FAIL | Level 50 and sRGB transfer tag. |
+| V1-DOC-02 | MINOR | README, Pages | PASS | Pre-release wording is live. |
+| V1-DOC-03 | MINOR | PROJECT-STATE | PASS | |
+| V1-LEG-05 | MINOR | plan | FAIL | NEEDS-F2, untouched. |
+
+Still open and untouched, MAJOR: V1-LEG-02, V1-LEG-03, V1-PKI-04, V1-PKI-05, V1-CIN-01, V1-CIN-02, V1-CIN-05 (and V1-CIN-03, deferred to v2.0).
+
+**Decision (Chief of Staff): stop. 7 fixed MAJORs fail in the film and 7 MAJORs are untouched.** Not done, on purpose: tag v1.1.0, release, README, CHANGELOG, Pages text, the V1-CIN-03 "known limitation" record, the asset hash round-trip. v1.0.0 stays the only release, as a pre-release.
+
+**Why F3 ran twice without F2:** the repository had no ready-to-paste F2 prompt (`docs\SESSION-PROMPTS.md` ended at Session 9). One has been added there as "Session F2". **Model needed: Opus 5.5, High effort.** The fix list is unchanged from the first run (steps 1–5 above), with one correction to the commands: the render CLI takes `--tier`, so use `python -m tools render --tier animatic --rebuild` and `python -m tools render --tier final --rebuild` (the form `tools render animatic` is not accepted).
+
+**Running F3 a third time before F2 has finished will give the same result.** F2 is finished when all four are true: the Final MP4 is newer than the last source commit; its SHA-256 is not `5470c46c…f193a`; `MP4_PENDING_RERENDER = False`; `python -m tools verify` prints no PENDING line.
+
 ## 4. Findings in detail
 
 ### V1-LEG-01 (MAJOR) Signs are motion-blurred in the final tier

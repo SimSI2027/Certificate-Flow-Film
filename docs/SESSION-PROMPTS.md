@@ -417,6 +417,29 @@ ESCALATION: you are the escalation level. Make the call and record it.
 
 ---
 
+## Session F2 — v1.1.0 fixes + the single final re-render (after the v1 audit)
+**Model: Opus 5.5 · Effort: High** (lean mode: no subagents, no GAN rounds)
+
+Added on 2026-11-13 because session F3 was run twice before F2 existed as a prompt. Run this once, then run F3 (the targeted re-audit and the v1.1.0 pre-release).
+
+```
+You are the Chief of Staff for Certificate-Flow-Film, session F2: the remaining audit fixes and the single final re-render for v1.1.0. No subagents, at most 8 images. Do NOT tag or release anything: session F3 does that after a re-audit.
+
+1. Read docs\PROJECT-STATE.md. In docs\AUDIT-v1.md read the "F1 status" table, both "F3 targeted re-audit" records, Section 7 and Appendix A. Read each finding's own section only when you fix it. Do not re-read the spec documents.
+2. Fix in this order. One commit per finding, pushed. Every testable fix gets a test named after its finding ID in tests\test_audit_v1.py. `python -m tools verify` must be green after each group.
+   a. Camera: V1-CIN-01, V1-CIN-02, V1-CIN-05, V1-PKI-04, V1-PKI-05, V1-CIN-06.
+   b. Signs: V1-LEG-03, then V1-LEG-05, then V1-LEG-02. Lower CROSSING_LIMIT to 0.02 in tests\test_gan_findings_stage1.py (the V1-LEG-04 residual).
+   c. Small: V1-PKI-06, V1-CIN-07, V1-COL-01, V1-AUD-01, V1-AUD-02, and V1-CIN-03 step 1 only.
+   If a target cannot be reached, do not relax a test silently: keep the best passing value and record the achieved number in docs\GAN-LEDGER.md as a residual.
+3. `python -m tools render --tier animatic --rebuild`. Review 1 contact sheet and 3 strips (54 s, 62 s, 100 s). Fix what the tests missed.
+4. Delete renders\final\beauty, renders\final\signs and renders\final\captions (gitignored build output). Run `python -m tools render --tier final --rebuild` in the background (300-frame chunks) and record progress in PROJECT-STATE. Then `python -m tools audio`, `python -m tools encode`, `python scripts\build_site.py`.
+5. Set MP4_PENDING_RERENDER = False in tools\verify.py. `python -m tools verify` must be GREEN with no PENDING line: f1246 and f1396 are not blends, ffprobe shows level <= 41 and color_transfer=bt709.
+6. Review 1 contact sheet, 2 strips (one cut, one sign-heavy move) and the poster.
+7. Commit, push, `python -m tools sync-check`. Set PROJECT-STATE "Next session" to F3. Report in at most 8 lines. If the final render or the encode cannot finish, record the exact state and stop.
+```
+
+---
+
 ## Resume prompt (any session, after a usage limit or a long context)
 **Model and effort: the same as the session being resumed**
 
