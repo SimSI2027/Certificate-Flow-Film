@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # the repository r
 
 import bpy
 
-from blender import camera_rig, captions_scene, compositor, lighting, signs_scene, world
+from blender import camera_rig, captions_scene, compositor, dressing, lighting, signs_scene, world
 from blender.animation import write_timeline
 from blender.common import ROOT, option, reset_scene, script_args
 from blender.render_settings import apply_tier
@@ -48,6 +48,9 @@ def build(out_path: str, tier_name: str, timeline_hook: TimelineHook | None = No
     scene.collection.children.link(backdrop)
     world.build_backdrop(backdrop)
     objects = world.build_actors(stage)
+    dressing_collection = bpy.data.collections.new("DRESSING")
+    scene.collection.children.link(dressing_collection)
+    dressing.build_dressing(dressing_collection, objects)
 
     timeline = choreography.build_timeline()
     if timeline_hook is not None:

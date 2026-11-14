@@ -121,6 +121,8 @@ def build_actor(o: StageObject, collection: bpy.types.Collection) -> bpy.types.O
         ob.data.materials.append(materials.trust_link_material(o.variant))
     elif o.kind is Kind.CA_VAULT and o.role in palette.VAULT_DIMMED_ROLES:
         ob.data.materials.append(materials.vault_material(o.role))
+    elif o.kind is Kind.CHASSIS:
+        ob.data.materials.append(materials.chassis_material())
     else:
         ob.data.materials.append(materials.stage_material(o.role, o.kind in materials.GLOW_ONLY_KINDS))
     collection.objects.link(ob)

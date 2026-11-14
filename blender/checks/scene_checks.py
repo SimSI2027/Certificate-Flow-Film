@@ -22,7 +22,7 @@ import bpy
 from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Matrix, Vector
 
-from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, bundled_font, glyph_cap_ratio
+from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, bundled_font, glyph_cap_ratio, linear
 from cff.stage import camera as stage_camera
 from cff.stage import labels as stage_labels
 from cff.stage import signs as stage_signs
@@ -30,7 +30,7 @@ from cff.stage.objects import CATALOGUE, Kind
 from cff.story import captions as story_captions
 from cff.story import model as m
 from cff.story import timing
-from cff.theme import look, motion, render, shots, typography
+from cff.theme import look, motion, palette, render, shots, typography
 
 VISIBLE_SCALE = 0.05
 CONTAINMENT_TOLERANCE_M = 0.08
@@ -606,10 +606,34 @@ def check_pool_lights() -> Result:
     return r
 
 
+def check_dressing() -> Result:
+    """v1.3 interiors: every server chassis and issuing-CA vault is dressed; dressing is static set dressing (no animation on the
+    object or its light), parented to a shell, and its light strips glow in a non-state token colour only (C-10)."""
+    r = Result("interior_dressing")
+    dressed = [o for o in bpy.data.objects if o.get(PROP_KIND) == "dressing"]
+    shells = {o.id for o in CATALOGUE if o.kind is Kind.CHASSIS or (o.kind is Kind.CA_VAULT and o.role in (m.ColourRole.ISSUING_CA1, m.ColourRole.ISSUING_CA2))}
+    parents = {o.parent.name for o in dressed if o.parent is not None}
+    if parents != shells:
+        r.failures.append(f"dressed shells {sorted(parents)}, expected {sorted(shells)}")
+    state_rgb = {tuple(round(c, 4) for c in linear(palette.role_hex(role))) for role in (m.ColourRole.VALIDATED, m.ColourRole.PENDING, m.ColourRole.REVOCATION)}
+    for ob in dressed:
+        if ob.parent is None:
+            r.failures.append(f"{ob.name} has no shell")
+        for owner in (ob, ob.data):
+            if owner is not None and owner.animation_data is not None and owner.animation_data.action is not None:
+                r.failures.append(f"{ob.name} is animated")
+        if ob.type == "LIGHT" and tuple(round(c, 4) for c in ob.data.color) in state_rgb:
+            r.failures.append(f"{ob.name} uses a state colour")
+        if ob.type == "MESH" and max(ob.color[:3]) > 0.0:
+            r.failures.append(f"{ob.name} glows through Object Info > Color (v1.3 preview: white ribs)")
+    r.metrics["dressing_objects"] = len(dressed)
+    return r
+
+
 def run_all(scene: bpy.types.Scene) -> list[Result]:
     results = [check_provenance(), check_frame_range(scene), check_camera_count(scene), check_shape_vocabulary(scene), check_keyframes()]
     results += check_dynamic(scene)
     results.append(check_camera_motion(scene))
     results.append(check_captions())
-    results += [check_fonts(), check_text_materials(), check_signs(scene), check_pool_lights()]
+    results += [check_fonts(), check_text_materials(), check_signs(scene), check_pool_lights(), check_dressing()]
     return results

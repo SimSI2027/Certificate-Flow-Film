@@ -68,6 +68,41 @@ def vault_material(role: ColourRole) -> bpy.types.Material:
     return mat
 
 
+def chassis_material() -> bpy.types.Material:
+    """A server chassis: the neutral stage material with noise-varied roughness (brushed metal), so its walls catch light
+    unevenly instead of reading as a flat grey box (v1.3 interiors). Glow and opacity still come from ``Object Info``."""
+    name = "MAT-chassis"
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+    mat = stage_material(ColourRole.NEUTRAL).copy()
+    mat.name = name
+    nt = mat.node_tree
+    bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    noise = nt.nodes.new("ShaderNodeTexNoise")
+    noise.inputs["Scale"].default_value = look.CHASSIS_NOISE_SCALE
+    nt.links.new(coord.outputs["Object"], noise.inputs["Vector"])
+    span = nt.nodes.new("ShaderNodeMapRange")
+    span.inputs["To Min"].default_value, span.inputs["To Max"].default_value = look.CHASSIS_ROUGHNESS_RANGE
+    nt.links.new(noise.outputs["Fac"], span.inputs["Value"])
+    nt.links.new(span.outputs["Result"], bsdf.inputs["Roughness"])
+    return mat
+
+
+def dressing_material(hex_colour: str, strength: float) -> bpy.types.Material:
+    """Static practical-light strips and status lights (v1.3 interiors): a pale token colour that glows at a fixed level."""
+    name = f"MAT-dress-{hex_colour.lstrip('#')}-{strength:g}"
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+    mat = bpy.data.materials.new(name)
+    _, bsdf = _principled(mat.node_tree)
+    bsdf.inputs["Base Color"].default_value = linear4(hex_colour)
+    bsdf.inputs["Roughness"].default_value = look.ROLE_ROUGHNESS
+    bsdf.inputs["Emission Color"].default_value = linear4(hex_colour)
+    bsdf.inputs["Emission Strength"].default_value = strength
+    return mat
+
+
 def backdrop_material() -> bpy.types.Material:
     """Far set dressing: a dark, rough neutral that the key and rim lights pick out as silhouettes, never a role colour."""
     if "MAT-backdrop" in bpy.data.materials:
