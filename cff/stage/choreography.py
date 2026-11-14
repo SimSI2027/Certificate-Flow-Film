@@ -593,7 +593,8 @@ class Choreographer:
         self.travel("HS-RDP", f0, f1, (proof_start, lo.add(front, (0.0, 0.0, 0.1)), *tuple(lo.at_z(p, TRAVEL_LIFT + 0.2) for p in reversed(lo.CHANNEL_RDP)), lo.add(staging_cert, (0.0, -0.1, 0.0))))
         f0, f1 = self.event("E-06.1f")  # pressed against the card's public-key emblem: matches, dissolves
         self.glow_pulse("HS-RDP", f0, f1 - 9, glow_value(R.VALIDATED, palette.GLOW_PEAK))
-        self.hide("HS-RDP", f1 - 9, 9, sink=(0.0, 0.0, 0.0))
+        # F3-PKI-01: the matched proof rests by the card until the beat ends, so its tag holds 1.5 s; then it dissolves
+        self.hide("HS-RDP", timing.frame_range(*timing.beat_window("B-06.1"))[1] + 1, 9, sink=(0.0, 0.0, 0.0))
         self.glow_pulse("CERT-RDP", f0, f1, glow_value(R.ISSUING_CA1, 1.5), rest=glow_value(R.ISSUING_CA1, 1.1))
         # B-06.2: the cards dock upward under the root card that is already in the Trusted Root cradle.
         f0, f1 = self.event("E-06.2a")

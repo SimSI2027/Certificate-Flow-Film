@@ -835,6 +835,7 @@ def _labels(chains: tuple[Chain, ...]) -> tuple[Label, ...]:
         Label("LBL-KEY-WEB-PUB", LabelKind.TAG, "Public key", "KEY-WEB-PUB", ("B-07.2",)),
         Label("LBL-REQ-CA1", LabelKind.TAG, f"{n.ISSUING_CA1_ROLE}'s own CA request", "REQ-CA1", ("B-05.2",)),
         Label("LBL-ROOT-STORE", LabelKind.TAG, "Installed earlier by policy", "TS-CLIENT-ROOT", ("B-06.2",)),
+        Label("LBL-HS-RDP", LabelKind.TAG, "Proof: private-key signature", "HS-RDP", ("B-06.1",)),  # F3-PKI-01 (F-10)
         Label("LBL-AIA-1", LabelKind.TAG, "Missing intermediate? AIA can fetch it", "SVC-AIA", ("B-06.3",)),
         Label("LBL-AIA-2", LabelKind.TAG, "Fetching never creates trust", "SVC-AIA", ("B-06.3",)),
         Label("LBL-OCSP", LabelKind.TAG, "OCSP if deployed", "CHAIN-RDP", ("B-06.5",)),

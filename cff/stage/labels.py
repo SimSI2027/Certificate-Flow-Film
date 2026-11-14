@@ -177,6 +177,8 @@ def _build() -> tuple[Placement, ...]:
         Placement("LBL-KEY-WEB-PRIV", "KEY-WEB-PRIV", (0.0, -0.12, -0.34), CAP_TAG, window=Window("B-07.2", 0.2)),
         Placement("LBL-KEY-WEB-PUB", "KEY-WEB-PUB", (0.0, -0.12, 0.34), CAP_TAG, window=Window("B-07.2", 0.2)),
         Placement("LBL-ROOT-STORE", "TS-CLIENT-ROOT", (0.0, 0.0, 0.55), CAP_TAG, window=Window("B-06.2", 1.6)),
+        # F3-PKI-01 (F-10): names the handshake proof from its birth at the server to the match at the client
+        Placement("LBL-HS-RDP", "HS-RDP", (0.0, -0.12, 0.34), CAP_TAG, window=Window("B-06.1", 0.9)),
         # held 1 s into B-06.4, while only its first check line is up (V1-LEG-05: 0.35 s per word)
         Placement("LBL-AIA-1", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.45)), CAP_TAG, window=Window("B-06.3", 0.1, AIA_TAG_END_S, until="B-06.4")),
         Placement("LBL-AIA-2", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.12)), CAP_TAG, window=Window("B-06.3", 0.2, AIA_TAG_END_S, until="B-06.4")),

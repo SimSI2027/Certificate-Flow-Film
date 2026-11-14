@@ -163,11 +163,12 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 ## S6 — Presentation and validation
 
 ### B-06.1 — Presentation (50–53 s, frames 1501–1590)
-- **Shot:** a new connection attempt. A fresh amber pulse runs from the laptop along the channel and arrives at `rdp01.1sn0s.lab`. The RDP certificate card and the server's translucent copy of Issuing CA 1's certificate lift from the chassis and set off back along the amber channel. Inside the closed key container, a key pulse glows, and a small handshake proof (a flat signature impression, unlike any key shape) follows the cards. At the laptop, the impression presses against the server card's public-key emblem, matches, and dissolves.
+- **Shot:** a new connection attempt. A fresh amber pulse runs from the laptop along the channel and arrives at `rdp01.1sn0s.lab`. The RDP certificate card and the server's translucent copy of Issuing CA 1's certificate lift from the chassis and set off back along the amber channel. Inside the closed key container, a key pulse glows, and a small handshake proof (a flat signature impression, unlike any key shape) follows the cards. At the laptop, the impression presses against the server card's public-key emblem, matches, rests by the card until the beat ends, and dissolves. The tag "Proof: private-key signature" rides with the impression from the server to the match (v1.3, F3-PKI-01).
 - **Lens:** 35 mm, f/4
 - **Camera move:** a long eased crane down from the hierarchy to the server, then a turn to follow the cards
 - **Focal subject:** the RDP certificate (`CERT-RDP`)
 - **Caption:** none
+- **Must-read text:** "Proof: private-key signature"
 
 ### B-06.2 — Chain builds (53–57 s, frames 1591–1710)
 - **Shot:** at the laptop, the cards dock upward in a short vertical stack: the server certificate, then Issuing CA 1 above it, then the gold root card, which was already sitting in the Trusted Root cradle above the laptop. A brief shimmer and the tag "Installed earlier by policy" mark the root card. The shimmer plays on the card in place; nothing travels from AD.
