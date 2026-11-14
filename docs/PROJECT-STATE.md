@@ -10,8 +10,8 @@ Updated: 2026-11-13 (LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 - Step 2 DONE: contact-sheet review 1 of 2 at the `final` tier (`scripts\render_sheet.py final` -> `output\final\contact-sheet.png`): lit, captions/signs in place, no blank frames; accepted.
 - Audio DONE: `cff\audio\{cues,synth}.py` (88 cues from the story events, stdlib synth, seeds 5101-5103) + `python -m tools audio` -> `output\audio\mix.wav` (-16.0 LUFS, true peak -3.7 dBFS; `loudness.json`). Tests in `tests\test_audio.py`.
 - Encode tooling DONE: `python -m tools encode` (Final MP4, 720p Preview, poster, contact sheet, `render-metadata.json`); site builder `scripts\build_site.py`; Pages workflow `.github\workflows\pages.yml`.
-- **Final render RUNNING** in the background: `python -m tools render --tier final` (beauty, then signs, then captions; ~0.7 s/frame; resumable: just re-run it). Progress: `renders\final\progress.json`.
-- **Next action:** when the render is complete (3270 beauty frames, sign and caption frames), run `python -m tools verify` (frames check on `animatic` only), `python -m tools encode`, review `output\Certificate-Flow-Film-Contact-Sheet.png` once (review 2 of 2), then `scripts\build_site.py`, push, enable Pages, `gh release create v1.0.0`.
+- Final render DONE (3270 beauty, 2788 sign, 1933 caption frames; 0 blank); encoded (Final 59 MB, Preview 11 MB, 109 s, 1080p30 H.264/AAC); contact-sheet review 2 of 2 accepted. Pages live: https://simsi2027.github.io/Certificate-Flow-Film/ (verified 200 for page, preview, poster, captions). Release v1.0.0 created with the Final MP4.
+- **Next action:** none; project complete (lean finish). Optional later: re-run the adversarial rounds, polish the look.
 
 
 ## Session 4 part 2 handoff (historical)
@@ -78,7 +78,7 @@ Updated: 2026-11-13 (LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 
 ## URLs
 - Repository (public): https://github.com/SimSI2027/Certificate-Flow-Film
-- Pages demo: not yet published. Release: not yet published.
+- Pages demo: https://simsi2027.github.io/Certificate-Flow-Film/. Release: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.0.0
 - Related (verified in Session 1): https://github.com/SimSI2027/Certificate-Flow-Lab (Pages: https://simsi2027.github.io/Certificate-Flow-Lab/). Approach A: HTTP 404, not linked.
 
 ## Toolchain (details in `docs\TOOLCHAIN.md`; commands in `docs\PIPELINE.md`)
