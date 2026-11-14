@@ -41,7 +41,9 @@ def apply_tier(scene: bpy.types.Scene, tier: Tier, transparent: bool = False) ->
     render.image_settings.color_depth = "8"
     render.use_overwrite = False  # long renders resume by skipping finished frames (Charter 3.7)
     render.use_placeholder = True
-    render.use_motion_blur = tier.motion_blur
+    render.use_motion_blur = tier.motion_blur and not transparent
+    if hasattr(render, "motion_blur_position"):
+        render.motion_blur_position = "START"  # shutter opens at the frame: no blend across the two cuts (V1-CIN-04)
     eevee = scene.eevee
     eevee.taa_render_samples = tier.taa_samples
     eevee.use_shadows = tier.shadows

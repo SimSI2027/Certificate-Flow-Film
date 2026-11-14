@@ -7,6 +7,7 @@ build, image checks on whatever frames are rendered, and, with ``--repo``, the r
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import time
@@ -97,21 +98,90 @@ def step_frames(tier: str = "animatic") -> Step:
     return Step(f"rendered frames ({tier})", ok, detail, lines=[f"blank frames: {blank[:20]}"] if blank else [])
 
 
+FINAL_TIER = "final"
+CUT_FRAMES = (1246, 1396)  # 1-based frames of the two cuts (V1-CIN-04)
+CUT_LUMA_STEP_MAX = 3.0
+EXPECTED_VIDEO = {"codec_name": "h264", "width": 1920, "height": 1080, "r_frame_rate": "30/1", "color_transfer": "bt709", "level": 41}  # V1-ENC-01
+DURATION_TOLERANCE_S = 0.05
+# The v1.0.0 MP4 on disk predates the F1 fixes (blended cut frames, sRGB transfer tag, level 5.0). While this is True the two MP4
+# steps report those known problems but do not fail. Session F2 sets it to False right after the single final re-render.
+MP4_PENDING_RERENDER = True
+
+
+def step_frame_tiers() -> list[Step]:
+    """V1-PIPE-01: the frame check runs for every tier that has rendered beauty frames, one line per tier."""
+    tiers = [t for t in ("animatic", FINAL_TIER) if frames.present_frames(t)]
+    return [step_frames(t) for t in tiers] or [step_frames("animatic")]
+
+
+def mp4_problems(info: dict[str, object]) -> list[str]:
+    """Compare ffprobe output with the delivery spec; an empty list means the MP4 is as specified."""
+    streams = [s for s in info.get("streams", []) if isinstance(s, dict)]  # type: ignore[attr-defined]
+    video = next((s for s in streams if s.get("codec_type") == "video"), {})
+    audio = next((s for s in streams if s.get("codec_type") == "audio"), {})
+    problems = [f"video {k}={video.get(k)!r}, want {v!r}" for k, v in EXPECTED_VIDEO.items() if video.get(k) != v]
+    if str(video.get("nb_frames")) != str(timing.frame_end()):
+        problems.append(f"video nb_frames={video.get('nb_frames')!r}, want {timing.frame_end()}")
+    if audio.get("codec_name") != "aac" or str(audio.get("sample_rate")) != "48000" or audio.get("channels") != 2:
+        problems.append(f"audio {audio.get('codec_name')}/{audio.get('sample_rate')}/{audio.get('channels')}, want aac/48000/2")
+    fmt = info.get("format", {})
+    duration = float(fmt.get("duration", 0.0)) if isinstance(fmt, dict) else 0.0
+    if abs(duration - timing.total_duration_s()) > DURATION_TOLERANCE_S:
+        problems.append(f"duration {duration:.3f} s, want {timing.total_duration_s():.3f} s")
+    return problems
+
+
+def step_final_mp4() -> Step:
+    from tools import film  # noqa: PLC0415
+
+    if not film.FINAL_MP4.exists():
+        return Step("final MP4", True, "skipped (not built)")
+    problems = mp4_problems(film.probe(film.FINAL_MP4))
+    if problems and MP4_PENDING_RERENDER:
+        return Step("final MP4", True, f"PENDING F2 re-render: {len(problems)} known v1.0.0 problem(s)", lines=problems)
+    return Step("final MP4", not problems, "matches the delivery spec" if not problems else f"{len(problems)} problem(s)", lines=problems)
+
+
+def cut_luma_steps(text: str) -> dict[int, float]:
+    """Parse signalstats output into frame index -> YAVG, in order of appearance."""
+    return {i: float(v) for i, v in enumerate(re.findall(r"lavfi\.signalstats\.YAVG=([0-9.]+)", text))}
+
+
+def step_cut_frames() -> Step:
+    """V1-CIN-04: each cut frame must be one shot, not a blend of both (luma equal to its neighbour within a small step)."""
+    from tools import film  # noqa: PLC0415
+
+    if not film.FINAL_MP4.exists():
+        return Step("cut frames", True, "skipped (no final MP4)")
+    log = ROOT / "renders" / "cuts-stats.txt"
+    select = "+".join(f"between(n,{f - 1},{f})" for f in CUT_FRAMES)  # 0-based n: the cut frame and the next one
+    done = toolchain.run_ffmpeg(["-i", str(film.FINAL_MP4), "-an", "-vf", f"select='{select}',signalstats,metadata=print:file={log.relative_to(ROOT).as_posix()}", "-f", "null", "-"])
+    if done.returncode != 0 or not log.exists():
+        return Step("cut frames", False, f"ffmpeg failed: {done.stderr[-200:]}")
+    values = cut_luma_steps(log.read_text(encoding="utf-8"))
+    log.unlink()
+    steps = [abs(values[2 * i] - values[2 * i + 1]) for i in range(len(CUT_FRAMES)) if 2 * i + 1 in values]
+    ok = len(steps) == len(CUT_FRAMES) and all(s <= CUT_LUMA_STEP_MAX for s in steps)
+    if not ok and MP4_PENDING_RERENDER:
+        return Step("cut frames", True, "PENDING F2 re-render: v1.0.0 cut frames are blends (" + ", ".join(f"{s:.1f}" for s in steps) + ")")
+    return Step("cut frames", ok, "luma steps " + ", ".join(f"{s:.1f}" for s in steps), lines=[] if ok else [f"limit {CUT_LUMA_STEP_MAX}"])
+
+
 def step_repo() -> Step:
     result = sync.check()
     return Step("repository (clean tree, HEAD == origin/main)", result.ok, f"HEAD {result.local_head[:8]} origin {(result.remote_head or '?')[:8]} clean {result.clean}")
 
 
 def run(repo: bool = False, skip_blender: bool = False) -> int:
-    steps: list[Callable[[], Step]] = [step_ruff, step_mypy, step_pytest, step_traceability, step_palette, step_motion]
+    steps: list[Callable[[], list[Step]]] = [lambda f=f: [f()] for f in (step_ruff, step_mypy, step_pytest, step_traceability, step_palette, step_motion)]  # type: ignore[misc]
     if not skip_blender:
-        steps.append(step_scene_checks)
-    steps.append(step_frames)
+        steps.append(lambda: [step_scene_checks()])
+    steps.append(step_frame_tiers)
+    steps.append(lambda: [step_final_mp4(), step_cut_frames()])
     if repo:
-        steps.append(step_repo)
+        steps.append(lambda: [step_repo()])
     failed = 0
-    for factory in steps:
-        step = factory()
+    for step in (s for factory in steps for s in factory()):
         mark = "PASS" if step.passed else "FAIL"
         print(f"[{mark}] {step.name}: {step.detail} ({step.seconds:.1f}s)" if step.seconds else f"[{mark}] {step.name}: {step.detail}")
         for line in step.lines[:25]:

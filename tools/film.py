@@ -32,6 +32,7 @@ PREVIEW_MAXRATE = "1700k"
 HERO_BEAT = "B-09.2"
 AAC_BITRATE = "192k"
 PREVIEW_AAC_BITRATE = "96k"
+H264_LEVEL = ["-refs", "4", "-level:v", "4.1"]
 BT709 = ["-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709"]
 
 
@@ -95,16 +96,17 @@ def encode(tier: str = "final") -> dict[str, object]:
     beauty = (frames.tier_dir(tier) / "beauty" / "f_%04d.png").as_posix()
     fps = str(timing.FPS)
     graph = ("[1:v]format=rgba[s];[2:v]format=rgba[c];[0:v]format=rgba[b];[b][s]overlay=format=auto[o1];[o1][c]overlay=format=auto[o2];"
-             "[o2]scale=out_color_matrix=bt709:out_range=tv:flags=lanczos,format=yuv420p[v]")
+             "[o2]scale=out_color_matrix=bt709:out_range=tv:flags=lanczos,format=yuv420p,"
+             "setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv[v]")
     args = ["-framerate", fps, "-start_number", str(timing.FRAME_START), "-i", beauty,
             "-f", "concat", "-safe", "0", "-i", str(signs), "-f", "concat", "-safe", "0", "-i", str(caps),
             "-i", str(AUDIO_DIR / "mix.wav"), "-filter_complex", graph, "-map", "[v]", "-map", "3:a", "-r", fps,
-            "-c:v", "libx264", "-preset", "slow", "-crf", str(CRF_FINAL), *BT709, "-c:a", "aac", "-b:a", AAC_BITRATE, "-ar", "48000",
+            "-c:v", "libx264", "-preset", "slow", "-crf", str(CRF_FINAL), *H264_LEVEL, *BT709, "-c:a", "aac", "-b:a", AAC_BITRATE, "-ar", "48000",
             "-t", f"{timing.frame_end() / timing.FPS:.3f}", "-movflags", "+faststart", str(FINAL_MP4)]
     done = _ffmpeg(args)
     if done.returncode != 0:
         raise RuntimeError(done.stderr)
-    prev = _ffmpeg(["-i", str(FINAL_MP4), "-vf", "scale=1280:720:flags=lanczos,format=yuv420p", "-c:v", "libx264", "-preset", "slow", "-crf", str(CRF_PREVIEW),
+    prev = _ffmpeg(["-i", str(FINAL_MP4), "-vf", "scale=1280:720:flags=lanczos,format=yuv420p", "-c:v", "libx264", "-preset", "slow", "-crf", str(CRF_PREVIEW), *H264_LEVEL,
                     "-maxrate", PREVIEW_MAXRATE, "-bufsize", "3400k", *BT709, "-c:a", "aac", "-b:a", PREVIEW_AAC_BITRATE, "-movflags", "+faststart", str(PREVIEW_MP4)])
     if prev.returncode != 0:
         raise RuntimeError(prev.stderr)
