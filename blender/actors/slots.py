@@ -25,6 +25,11 @@ UI_DESKTOP = 17
 UI_TASKBAR = 18
 UI_ICON = 19
 
+# V5b: the PKI symbol meshes (``cff.stage.icons``) use their own, shorter slot list: slot 0 is the stage material as above.
+ICON_INK = 1  # the symbol's ink strokes (palette.ICON_INK_HEX, static, never a state colour)
+ICON_SEAL = 2  # a card's seal disc in its issuer's role colour (stage material, so it takes the glow channel)
+ICON_NAMES: tuple[str, ...] = ("signal", "ink", "seal")
+
 NAMES: tuple[str, ...] = (
     "signal", "steel", "steel_light", "bezel", "caddy", "vent", "aluminium", "perforated", "led", "accent_led", "glass", "cable",
     "concrete", "tile", "desk", "fabric", "ui_title", "ui_desktop", "ui_taskbar", "ui_icon",

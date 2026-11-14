@@ -95,6 +95,7 @@ CONCRETE_ROUGHNESS = 0.85
 TILE_ROUGHNESS = 0.5
 DESK_ROUGHNESS = 0.6
 FABRIC_ROUGHNESS = 0.9
+ICON_INK_ROUGHNESS = 0.7  # V5b: matte ink on the PKI symbols, so the strokes read as print, not as specular highlights
 POWDER_NOISE_SCALE = 260.0  # orange-peel bump of powder coat
 POWDER_BUMP = 0.06
 BRUSHED_REPEAT_PER_M = 3.0  # Metal009 (CC0)

@@ -20,11 +20,12 @@ from dataclasses import dataclass, field
 
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
-from mathutils import Matrix, Vector
+from mathutils import Euler, Matrix, Vector
 
 from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, PROP_OWNER, bundled_font, glyph_cap_ratio, linear
 from cff.stage import camera as stage_camera
 from cff.stage import hardware
+from cff.stage import icons as stage_icons
 from cff.stage import labels as stage_labels
 from cff.stage import signs as stage_signs
 from cff.stage.objects import BY_ID, CATALOGUE, Kind
@@ -258,6 +259,43 @@ def check_root_no_cables(scene: bpy.types.Scene) -> Result:
         if ob.type == "CURVE" and ob.parent is not None and ob.parent.get(PROP_ID) in root_parts:
             r.failures.append(f"curve {ob.name} is attached to {ob.parent.name}")
     r.metrics = {"cables": len(cables), "root_parts": len(root_parts)}
+    return r
+
+
+def _rest_matrix(object_id: str) -> Matrix:
+    o = BY_ID[object_id]
+    rot = Euler(tuple(math.radians(a) for a in o.rotation), "XYZ").to_matrix().to_4x4()
+    return Matrix.Translation(Vector(o.home)) @ rot @ Matrix.Diagonal((*o.full, 1.0))
+
+
+def silhouette(shape: stage_icons.Shape) -> set[int]:
+    """A C-11 silhouette: the scene meshes of the shape's objects at their rest pose (full size, links stretched to their
+    length), in the frame of the first object, seen from the front (XZ) or from above (XY), normalised to unit bounding-box
+    area and rasterised on the common grid."""
+    frame = Matrix.Diagonal((*BY_ID[shape.object_ids[0]].full, 1.0)) @ _rest_matrix(shape.object_ids[0]).inverted()  # (T0 R0)^-1
+    second = 2 if shape.view == "FRONT" else 1
+    tris = []
+    for oid in shape.object_ids:
+        mesh = bpy.data.objects[oid].data
+        mesh.calc_loop_triangles()
+        to_frame = frame @ _rest_matrix(oid)
+        verts = [to_frame @ v.co for v in mesh.vertices]
+        for tri in mesh.loop_triangles:
+            tris.append(tuple((verts[i][0], verts[i][second]) for i in tri.vertices))
+    return stage_icons.rasterise(stage_icons.normalise(tris))  # type: ignore[arg-type]
+
+
+def check_silhouettes() -> Result:
+    """V5b (C-11): the 14 shapes keep greyscale-distinct silhouettes after the iconography pass. Pairwise IoU of the normalised
+    silhouettes <= 0.75, and <= 0.6 for private vs public key and the handshake proof vs either key."""
+    r = Result("silhouettes")
+    shapes = {s.name: silhouette(s) for s in stage_icons.C11_SHAPES}
+    report = stage_icons.pair_report(shapes)
+    for a, b, value, limit in report:
+        if value > limit:
+            r.failures.append(f"{a} vs {b}: silhouette IoU {value:.3f} > {limit}")
+    r.metrics = {"shapes": len(shapes), "worst": [f"{a} vs {b} {v:.3f} (limit {lim})" for a, b, v, lim in report[:5]],
+                 "strict": {f"{a} vs {b}": round(stage_icons.iou(shapes[a], shapes[b]), 3) for a, b in stage_icons.STRICT_PAIRS}}
     return r
 
 
@@ -749,5 +787,5 @@ def run_all(scene: bpy.types.Scene) -> list[Result]:
     results.append(check_camera_motion(scene))
     results.append(check_captions())
     results += [check_fonts(), check_text_materials(), check_signs(scene), check_pool_lights(), check_dressing(), check_character(scene)]
-    results += [check_shell_bounds(), check_root_no_cables(scene)]
+    results += [check_shell_bounds(), check_root_no_cables(scene), check_silhouettes()]
     return results

@@ -11,6 +11,7 @@ from mathutils import Matrix
 
 from blender import actors, finishes, materials
 from blender.common import PROP_ID, PROP_KIND, PROP_OWNER, PROP_ROLE, linear4, tag
+from cff.stage import icons
 from cff.stage import layout as lo
 from cff.stage.objects import CATALOGUE, Kind, StageObject
 from cff.theme import look, motion, palette
@@ -131,6 +132,12 @@ def build_actor(o: StageObject, collection: bpy.types.Collection) -> bpy.types.O
         ob.data.materials.append(materials.chassis_material())
     else:
         ob.data.materials.append(materials.stage_material(o.role, o.kind in materials.GLOW_ONLY_KINDS))
+    if o.kind in icons.ICON_KINDS:  # V5b: slot 1 is the symbol's ink, slot 2 a card's seal in its issuer's colour
+        ob.data.materials.append(finishes.plain("icon-ink", palette.ICON_INK_HEX, look.ICON_INK_ROUGHNESS))
+        if o.kind is Kind.CARD:
+            ob.data.materials.append(materials.seal_material(icons.issuer_role(o.id)))
+        else:
+            ob.data.materials.append(materials.stage_material(o.role, o.kind in materials.GLOW_ONLY_KINDS))
     if o.kind in DETAILED_KINDS:  # V5a: slots 1.. are the physical finishes; slot 0 above keeps the glow channel
         for mat in finishes.slot_materials(o.role):
             ob.data.materials.append(mat)

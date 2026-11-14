@@ -68,6 +68,30 @@ def vault_material(role: ColourRole) -> bpy.types.Material:
     return mat
 
 
+def seal_material(role: ColourRole) -> bpy.types.Material:
+    """V5b: a card's issuer seal. Base and emission are the ISSUER's role colour; the emission follows the card's glow level
+    (the HSV value of ``Object Info > Color``), so a CA card's gold root seal stays gold while the card itself glows cyan."""
+    name = f"MAT-seal-{role.value}"
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+    mat = stage_material(role).copy()
+    mat.name = name
+    nt = mat.node_tree
+    bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+    info = next(n for n in nt.nodes if n.type == "OBJECT_INFO")
+    hsv = nt.nodes.new("ShaderNodeSeparateColor")
+    hsv.mode = "HSV"
+    nt.links.new(info.outputs["Color"], hsv.inputs["Color"])
+    tint = nt.nodes.new("ShaderNodeMix")
+    tint.data_type = "RGBA"
+    tint.blend_type = "MULTIPLY"
+    tint.inputs["Factor"].default_value = 1.0
+    tint.inputs["A"].default_value = linear4(palette.role_hex(role))
+    nt.links.new(hsv.outputs["Blue"], tint.inputs["B"])
+    nt.links.new(tint.outputs["Result"], bsdf.inputs["Emission Color"])
+    return mat
+
+
 def chassis_material() -> bpy.types.Material:
     """A server chassis: the neutral stage material with noise-varied roughness (brushed metal), so its walls catch light
     unevenly instead of reading as a flat grey box (v1.3 interiors). Glow and opacity still come from ``Object Info``."""

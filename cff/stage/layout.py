@@ -109,10 +109,13 @@ ROOT_PLINTH_SIZE: Vec3 = (2.4, 2.4, 4.5)
 ROOT_VAULT_SIZE: Vec3 = (3.0, 2.4, 2.4)
 ROOT_VAULT_Z = ROOT_DAIS_Z + ROOT_PLINTH_SIZE[2]  # underside of the vault
 ROOT_DAIS_RADIUS = 5.0
-CARD_SIZE: Vec3 = (0.7, 0.03, 0.45)  # width, thickness, height (card plane faces -Y)
+CARD_SIZE: Vec3 = (0.7, 0.03, 0.5)  # width, thickness, height (card plane faces -Y); V5b: 0.45 -> 0.5, room for the ribbon tails and CA badge
 CAPSULE_LENGTH = 0.38
 CAPSULE_RADIUS = 0.1
 KEY_SIZE = 0.26
+CRL_SIZE: Vec3 = (0.56, 0.12, 0.8)  # V5b: the CRL as a hanging list document, tall where the card is wide (C-11)
+PROOF_SIZE: Vec3 = (1.2, 0.075, 0.2)
+BADGE_SIZE: Vec3 = (0.7, 0.3, 0.06)  # V5b: the template badge, longer and slimmer (was 0.62 x 0.34): its plan stays apart from the capsule (C-11)  # V5b: the handshake proof as a signature banner (was 0.85 x 0.5, a card-like plate: C-11)
 
 # --- rack-relative anchors (add to RDP or WEB) ----------------------------------------------
 FRONT_Y = -0.5  # chassis front face
@@ -123,7 +126,7 @@ KEY_FORM_PUB: Vec3 = (0.40, 0.0, 1.45)
 CONTAINER: Vec3 = (-0.30, 0.10, 0.95)
 CAPSULE_SPOT: Vec3 = (0.25, 0.10, 1.6)
 CERT_SLOT: Vec3 = (0.30, 0.10, 0.95)
-INTERMEDIATE_SLOT: Vec3 = (0.30, 0.10, 0.50)
+INTERMEDIATE_SLOT: Vec3 = (0.30, 0.10, 0.46)  # V5b: 0.50 -> 0.46, so the card above's ribbon tails clear this card
 RDP_PORT_SIDE = 1.0  # the RDP server's outbound port is on its +X face; the web server's on its -X face
 WEB_PORT_SIDE = -1.0
 PORT_Z = 1.3

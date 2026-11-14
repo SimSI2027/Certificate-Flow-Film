@@ -329,7 +329,7 @@ def laptop(bm: bmesh.types.BMesh, size: tuple[float, float, float]) -> None:
         with p.slot(bm, slot_index):
             centre = pivot @ Vector(((n0 + n1) / 2, (y0 + y1) / 2, (a0 + a1) / 2))
             m = Matrix.Translation(centre) @ Matrix.Rotation(-tilt, 4, "Y") @ Matrix.Diagonal((n1 - n0, y1 - y0, a1 - a0, 1.0))
-            bmesh.ops.create_cube(bm, size=1.0, matrix=m)
+            p.cube(bm, m)
 
     face = 0.003  # the lid's inner face; the idle screen (layout.LAPTOP_LID_X_OFFSET) lies on it
     lid_box(s.ALUMINIUM, face - t, face, -hy, hy, 0.0, length)
@@ -391,6 +391,6 @@ def office_chair(bm: bmesh.types.BMesh) -> None:
         for i in range(5):
             a = 2 * math.pi * i / 5
             m = Matrix.Translation(Vector((-0.12 + 0.16 * math.cos(a), 0.16 * math.sin(a), 0.07))) @ Matrix.Rotation(a, 4, "Z")
-            bmesh.ops.create_cube(bm, size=1.0, matrix=m @ Matrix.Diagonal((0.32, 0.045, 0.035, 1.0)))
+            p.cube(bm, m @ Matrix.Diagonal((0.32, 0.045, 0.035, 1.0)))
             p.cylinder(bm, 0.025, 0.03, 10, (-0.12 + 0.3 * math.cos(a), 0.3 * math.sin(a), 0.025), "Y")
     # no armrests: the seated character's forearms reach forward to the keyboard over the seat edge

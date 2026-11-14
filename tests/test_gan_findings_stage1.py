@@ -153,13 +153,19 @@ def test_PKI_S1R1_05_issuer_links_are_gold_to_ca_gradients_and_bowed_light() -> 
 
 
 @pytest.mark.covers("C-11", "F-03")
-def test_LEG_S1R1_02_the_public_key_has_no_key_silhouette() -> None:  # noqa: N802
+def test_LEG_S1R1_02_the_public_key_never_reads_as_the_private_key() -> None:  # noqa: N802
+    """V5b ruling V5B-R1: the owner asked for an open key as the public-key symbol, which supersedes this finding's remedy (a
+    non-key token). Its concern stays guarded: the private key is a key LOCKED in a padlock, the public key has no lock, and the
+    in-Blender ``silhouettes`` check holds their C-11 IoU to <= 0.6."""
     source = (ROOT / "blender" / "actors" / "artifacts.py").read_text(encoding="utf-8")
     tree = ast.parse(source)
-    fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "public_key")
-    body = ast.unparse(fn)
-    assert "torus" not in body, "a ring bow makes the public key read as a key"
-    assert "cylinder(bm, s * 0.42, s * 0.08, 6" in body, "the public key is a notched hexagonal token"
+    fns = {n.name: ast.unparse(n) for n in tree.body if isinstance(n, ast.FunctionDef)}
+    assert "padlock" in fns["private_key"] and "shackle" in fns["private_key"], "the private key is locked"
+    for name in ("public_key", "open_key"):
+        assert "padlock" not in fns[name] and "shackle" not in fns[name], f"{name}: the public key carries no lock"
+    from cff.stage import icons  # noqa: PLC0415
+
+    assert ("private key", "public key") in icons.STRICT_PAIRS and icons.STRICT_IOU_MAX <= 0.6
 
 
 # V1-LEG-04 asks for 0.02 counting every sign (F1 reached 0.042 with the plate-beat table). After V1-LEG-03's fixed list places (F2):

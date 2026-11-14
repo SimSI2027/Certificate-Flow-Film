@@ -111,6 +111,7 @@ UI_TITLE_HEX = "#2B5C9E"  # the RDP client's title and connection bar on the lap
 UI_DESKTOP_HEX = "#7FB4E8"  # the remote desktop inside the RDP client window (SCREEN_HEX family)
 UI_TASKBAR_HEX = "#18263C"  # the remote session's taskbar
 UI_ICON_HEX = "#F7FAFF"  # desktop icons and window text bars
+ICON_INK_HEX = PLATE_HEX  # V5b: the ink of every PKI symbol (document lines, seal rims, ribbons, badges, keyholes): the label-plate navy
 
 
 def role_hex(role: ColourRole) -> str:

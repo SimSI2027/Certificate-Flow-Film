@@ -292,7 +292,12 @@ def test_V1_PKI_06_self_signed_seals_are_perceivable() -> None:  # noqa: N802
 
     tl, plan = _plan()
     assert focal_audit.longer_side(tl, plan, ("SEAL-ROOT",), *_hold("B-05.1")) >= 110.0
-    assert "h * 0.36, 0.012" in _text("blender/actors/artifacts.py")  # the self-seal ring radius doubled (was h * 0.18)
+    # the self-seal ring radius doubled (was 0.18 x the 0.45 m card); V5b keeps that absolute size on the new card (icons.py)
+    from cff.stage import icons  # noqa: PLC0415
+
+    assert icons.SELF_SEAL_RADIUS_M >= 0.36 * 0.45 - 1e-9
+    assert icons.SELF_SEAL_RADIUS_M * icons.SELF_SEAL_TUBE_FRACTION >= 0.012
+    assert "icons.SELF_SEAL_RADIUS_M" in _text("blender/actors/artifacts.py")
 
 
 @pytest.mark.covers("F-04", "B-03.4")

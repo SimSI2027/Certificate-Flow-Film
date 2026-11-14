@@ -49,7 +49,7 @@ PLANNED: dict[str, list[tuple[str, str, str]]] = {
     "C-08": [("Clipped-highlight fraction, haze lift, particle audit", f"{IMAGE} + {IN_BLENDER}", STAGE2)],
     "C-09": [("Camera audit: perspective only, 24-50 mm, no frontal grid-of-cards framing", IN_BLENDER, STAGE1)],
     "C-10": [("Material audit: every object's colour is its role token", IN_BLENDER, STAGE1)],
-    "C-11": [("Silhouette IoU test of the shape vocabulary", IMAGE, STAGE1)],
+    "C-11": [("Silhouette IoU of the 14 shapes (V5b: `silhouettes` scene check, `cff/stage/icons.py`)", IN_BLENDER, STAGE1)],
     "L-01": [("Caption and must-read label cap height", IN_BLENDER, STAGE1)],
     "L-02": [("Sampled caption and label contrast", IMAGE, STAGE1)],
     "L-03": [("Projected text bounds inside 90% title-safe", IN_BLENDER, STAGE1)],
