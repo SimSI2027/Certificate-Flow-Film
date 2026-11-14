@@ -38,6 +38,10 @@ Requires Blender 5.2.x LTS, FFmpeg and Python 3.12 (paths in `config\toolchain.l
 - **Code** (`cff\`, `blender\`, `tools\`, `tests\`, `scripts\`): GPL-3.0-or-later. Blender scripts import `bpy`, which is GPL, so the whole code base uses a GPL-compatible licence. Text: `LICENSES\GPL-3.0-or-later.txt`.
 - **Rendered film, images and documentation**: CC BY 4.0. Text: `LICENSES\CC-BY-4.0.txt`.
 - **Bundled font**: Inter (SIL OFL 1.1), `assets\fonts\`, with its licence in `assets\fonts\OFL.txt`.
+- **User character** (`assets\character.blend`, from session V4; the build loads it locally and never downloads anything): every piece is CC0 1.0 (text: `LICENSES\CC0-1.0.txt`). Sources, SHA-256 hashes and the CC0 statement quoted from each source file are in `assets\character.manifest.json`.
+  - MakeHuman base mesh (`base.obj`) and default rig skin weights (`weights.default.json`), as shipped in MPFB 2.0.18. Both are CC0. The skeleton definition (`rig.default.json`) carries no licence field of its own.
+  - From the MakeHuman system asset pack (CC0, released September 2020): eyes `low-poly`, eyebrows `eyebrow001`, hair `short02`, clothes `male_casualsuit01`, shoes `shoes02`, with their textures (downscaled and packed).
+  - Generated with the MPFB add-on 2.0.18 (extensions.blender.org, GPL-3.0-or-later). MPFB is only the generator: none of its code is in the asset or the repository. Regenerate with `python -m tools character`, which fetches the pinned files and checks their SHA-256.
 
 See `LICENSE` for the summary.
 

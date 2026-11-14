@@ -159,7 +159,7 @@ def build_catalogue() -> tuple[StageObject, ...]:
         StageObject("DESK", Kind.DESK, R.NEUTRAL, (-12.0, -8.0, 0.0), size=(1.8, 1.2, 0.76)),
         StageObject(m.CLIENT, Kind.LAPTOP, R.NEUTRAL, lo.LAPTOP, size=(0.5, 0.36, 0.3), owner=m.CLIENT),
         StageObject(m.USER, Kind.FIGURE, R.NEUTRAL, lo.USER, yaw=180.0, size=(0.5, 0.4, 1.25), owner=m.USER),
-        StageObject("SCREEN-IDLE", Kind.SCREEN, R.NEUTRAL, (-12.2, -8.0, 0.92), yaw=90.0, size=(0.46, 0.01, 0.27), variant="idle"),
+        StageObject("SCREEN-IDLE", Kind.SCREEN, R.NEUTRAL, (lo.LAPTOP[0] + lo.LAPTOP_LID_X_OFFSET, lo.LAPTOP[1], 0.92), yaw=90.0, size=(0.46, 0.01, 0.27), variant="idle"),
         StageObject("SCREEN-RDP", Kind.SCREEN, R.NEUTRAL, lo.SCREEN_CENTRE, yaw=90.0, size=(0.9, 0.02, 0.56), variant="session", on_stage=False),
         StageObject("SCREEN-WEB", Kind.SCREEN, R.NEUTRAL, lo.SCREEN_CENTRE, yaw=90.0, size=(0.9, 0.02, 0.56), variant="browser", on_stage=False),
         StageObject("TS-CLIENT-ROOT", Kind.CRADLE, R.NEUTRAL, lo.CRADLE_ROOT, size=(0.9, 0.12, 0.62), spec_ids=("AR-05",)),

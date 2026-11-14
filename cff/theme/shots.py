@@ -58,7 +58,7 @@ RACK_FROM, RACK_TO = 0.35, 0.75  # beat fractions over which a rack focus happen
 FOCUS_PULL_FRACTION = 0.3  # the focus settles on a beat's subject within this fraction of the beat
 
 # Fixed points the shots refer to (world metres).
-USER_HEAD: Vec3 = (-10.4, -8.0, 1.3)
+USER_HEAD: Vec3 = (-10.96, -8.0, 1.27)  # V4: the seated character's head (chair at x -10.9, leaning 12 degrees to the desk)
 LISTENER: Vec3 = (0.0, -0.5, 1.5)
 PRESS1_OUT: Vec3 = (-2.0, 13.8, 1.1)
 PRESS2_OUT: Vec3 = (12.0, 13.8, 1.1)

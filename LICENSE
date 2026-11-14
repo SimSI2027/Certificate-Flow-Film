@@ -19,3 +19,11 @@ This repository is dual-licensed by content type. Full texts are in LICENSES/.
    assets/fonts/Inter-*.ttf (Inter, (c) 2016 The Inter Project Authors,
    https://github.com/rsms/inter, release v4.1). Licence text:
    assets/fonts/OFL.txt. The font keeps its own licence.
+
+4. USER CHARACTER — CC0 1.0 (SPDX: CC0-1.0)
+   assets/character.blend: the MakeHuman base mesh, default rig weights,
+   eyes, eyebrows, hair, clothes and shoes, all released as CC0 by the
+   MakeHuman project (September 2020). Generated with the MPFB add-on
+   (GPL-3.0-or-later, used only as a tool; none of its code is included).
+   Sources, hashes and per-file licence statements:
+   assets/character.manifest.json. Full text: LICENSES/CC0-1.0.txt

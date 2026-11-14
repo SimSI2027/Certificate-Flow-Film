@@ -1,0 +1,65 @@
+{
+  "asset": "assets/character.blend",
+  "sha256": "6a6bc66646ab03b777d53384ea52c672b75713cf724a2c0e42993c568c8c1961",
+  "bytes": 4223493,
+  "generator": {
+    "name": "MPFB",
+    "version": "2.0.18",
+    "url": "https://extensions.blender.org/download/sha256:c075b3e9b94b8e5556a5f03f4653602d02ea306de08126e8f55ed6dee28a2dad/add-on-mpfb-v2.0.18.zip",
+    "sha256": "c075b3e9b94b8e5556a5f03f4653602d02ea306de08126e8f55ed6dee28a2dad",
+    "licence": "GPL-3.0-or-later (the generator only; none of its code is in the asset)"
+  },
+  "asset_pack": {
+    "name": "MakeHuman system assets (CC0)",
+    "url": "https://files.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip",
+    "sha256": "b542127a8e25547c7c29c19f2d1d2adb9a664c80396ecd694095dbc8028a0107",
+    "licence": "CC0-1.0"
+  },
+  "licence_text": "LICENSES/CC0-1.0.txt",
+  "parts": [
+    {
+      "object": "CHAR-body",
+      "source": "MPFB 2.0.18: data/3dobjs/base.obj",
+      "what": "MakeHuman base mesh",
+      "licence": "CC0-1.0",
+      "evidence": "explicitly released as CC0 in september 2020. The license"
+    },
+    {
+      "object": "CHAR-rig",
+      "source": "MPFB 2.0.18: data/rigs/standard/weights.default.json",
+      "what": "default rig skin weights",
+      "licence": "CC0-1.0",
+      "evidence": "\"license\": \"CC0\""
+    },
+    {
+      "object": "CHAR-eyes",
+      "source": "eyes/low-poly/low-poly.mhclo",
+      "licence": "CC0-1.0",
+      "evidence": "explicitly released as CC0 in september 2020. The license"
+    },
+    {
+      "object": "CHAR-brows",
+      "source": "eyebrows/eyebrow001/eyebrow001.mhclo",
+      "licence": "CC0-1.0",
+      "evidence": "explicitly released as CC0 in september 2020. The license"
+    },
+    {
+      "object": "CHAR-hair",
+      "source": "hair/short02/short02.mhclo",
+      "licence": "CC0-1.0",
+      "evidence": "explicitly released as CC0 in september 2020. The license"
+    },
+    {
+      "object": "CHAR-clothes",
+      "source": "clothes/male_casualsuit01/male_casualsuit01.mhclo",
+      "licence": "CC0-1.0",
+      "evidence": "explicitly released as CC0 in september 2020. The license"
+    },
+    {
+      "object": "CHAR-shoes",
+      "source": "clothes/shoes02/shoes02.mhclo",
+      "licence": "CC0-1.0",
+      "evidence": "explicitly released as CC0 in september 2020. The license"
+    }
+  ]
+}

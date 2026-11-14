@@ -60,8 +60,11 @@ def aim_z(start: Vec3, end: Vec3) -> Vec3:
 
 # --- actor anchors -------------------------------------------------------------------------
 CLIENT: Vec3 = (-12.0, -8.0, 0.0)
-LAPTOP: Vec3 = (-12.0, -8.0, 0.78)  # base centre; the screen faces +X
-USER: Vec3 = (-10.4, -8.0, 0.0)  # seated east of the laptop, facing west
+# V4: a realistic seated adult reaches about 0.45 m past the desk edge (x -11.1), so the laptop sits near the edge and the user's
+# chair is pulled in; at the desk centre (x -12.0) the keyboard was 1.6 m from the user, out of any human reach.
+LAPTOP: Vec3 = (-11.42, -8.0, 0.78)  # base centre; the screen faces +X
+LAPTOP_LID_X_OFFSET = -0.2  # the idle screen glow sits on the lid, behind the base centre
+USER: Vec3 = (-10.9, -8.0, 0.0)  # the chair; seated east of the laptop, facing west
 RDP: Vec3 = (0.0, 0.0, 0.0)
 WEB: Vec3 = (9.0, 2.0, 0.0)
 AD: Vec3 = (4.0, 6.0, 0.0)

@@ -813,17 +813,11 @@ class Choreographer:
 
     # ------------------------------------------------------------------ idle micro-motion
     def idle(self) -> None:
-        """The stylized user breathes: a tiny, slow rise and fall (<= 2% of the figure's height)."""
-        user = BY_ID[m.USER]
-        amplitude = user.size[2] * motion.IDLE_AMPLITUDE_FRACTION
-        half = round(motion.IDLE_PERIOD_S * timing.FPS / 2)
-        frame, up = timing.FRAME_START, True
-        base = user.home
-        self._set(m.USER, LOCATION, frame, base, motion.SMOOTH)
-        while frame + half <= FRAME_LAST:
-            frame += half
-            self._set(m.USER, LOCATION, frame, lo.add(base, (0.0, 0.0, amplitude if up else 0.0)), motion.SMOOTH)
-            up = not up
+        """The user object is the chair; it holds still. Since V4 the user's breathing, typing and head turns are keyed on the
+        character's rig from ``cff.stage.character`` (breathing still moves the figure by <= 2% of its height: C-06)."""
+        base = BY_ID[m.USER].home
+        self._set(m.USER, LOCATION, timing.FRAME_START, base, motion.SMOOTH)
+        self._set(m.USER, LOCATION, FRAME_LAST, base, motion.SMOOTH)
 
 
 def build_timeline() -> Timeline:

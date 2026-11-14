@@ -46,6 +46,19 @@ IDLE_PERIOD_S = 2.0
 IDLE_AMPLITUDE_FRACTION = 0.015  # <= 2% of object size (C-06)
 SLIDE_S = 0.5  # short settling moves
 
+# --- the user character (V4; keyed on the rig by blender.character from cff.stage.character) ------------------------------
+BREATH_PERIOD_S = 4.0  # one breath (in and out): about 15 a minute, seated and calm
+BREATH_ANGLE_DEG = 0.7  # chest pitch at the top of a breath; moves the head about 6 mm (<= 2% of the figure: C-06)
+TYPING_STROKE_DOWN_S = 0.07  # a key press: the finger dips ...
+TYPING_STROKE_UP_S = 0.1  # ... and lifts back
+TYPING_STROKE_ANGLE_DEG = 8.0  # knuckle flex of a key press (12 put the fingertip pads up to 6 mm into the laptop base)
+TYPING_INTERVAL_S = 0.14  # between strokes inside a burst (about 7 keys a second, two hands)
+TYPING_BURST_S = (1.4, 3.4)  # a burst of typing lasts this long (seeded uniform) ...
+TYPING_PAUSE_S = (0.7, 2.2)  # ... then the hands rest this long
+TYPING_FINGER_GAP_S = 0.3  # the same finger never strikes twice within this time
+HEAD_TURN_S = 0.8  # the head turns between gaze targets over this long (EASE_IN_OUT)
+CHARACTER_EASE = "EASE_IN_OUT"  # strokes and head turns; breathing is SMOOTH like the other idle motion
+
 # --- scale conventions ---------------------------------------------------------------------
 HIDDEN_SCALE = 0.001  # an object that is not on stage yet or is gone for good
 FULL_SCALE = 1.0

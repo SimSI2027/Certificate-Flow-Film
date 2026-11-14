@@ -32,19 +32,12 @@ def bmesh_box(bm: bmesh.types.BMesh, matrix: Matrix, size: tuple[float, float, f
 
 
 def figure(bm: bmesh.types.BMesh, o: StageObject) -> None:
-    """A seated, faceless low-poly figure (local +X is its forward direction)."""
-    p.box(bm, 0.5, 0.4, 0.05, (-0.12, 0.0, 0.45))  # chair seat
-    p.box(bm, 0.06, 0.4, 0.5, (-0.34, 0.0, 0.72))  # chair back
-    for y in (-0.18, 0.18):
-        p.box(bm, 0.05, 0.05, 0.45, (-0.3, y, 0.225))
-    p.box(bm, 0.24, 0.3, 0.5, (-0.12, 0.0, 0.76))  # torso
-    p.box(bm, 0.45, 0.14, 0.12, (0.12, -0.09, 0.56))  # thighs
-    p.box(bm, 0.45, 0.14, 0.12, (0.12, 0.09, 0.56))
-    p.box(bm, 0.12, 0.12, 0.5, (0.32, -0.09, 0.28))  # lower legs
-    p.box(bm, 0.12, 0.12, 0.5, (0.32, 0.09, 0.28))
-    p.box(bm, 0.3, 0.1, 0.1, (0.1, -0.2, 0.92))  # arms reaching to the keyboard
-    p.box(bm, 0.3, 0.1, 0.1, (0.1, 0.2, 0.92))
-    p.sphere(bm, 0.12, (-0.08, 0.0, 1.13), segments=8, rings=6)  # head
+    """The user's chair (local +X faces the desk). The person sitting on it is the V4 character (``blender.character``)."""
+    p.box(bm, 0.5, 0.44, 0.05, (-0.12, 0.0, 0.45))  # seat
+    p.box(bm, 0.05, 0.42, 0.48, (-0.36, 0.0, 0.74))  # back
+    for x in (-0.33, 0.09):
+        for y in (-0.19, 0.19):
+            p.box(bm, 0.04, 0.04, 0.43, (x, y, 0.215))  # legs
 
 
 def screen(bm: bmesh.types.BMesh, o: StageObject) -> None:

@@ -630,10 +630,59 @@ def check_dressing() -> Result:
     return r
 
 
+CHARACTER_SAMPLE_STEP = 15
+WRIST_TOLERANCE_M = 0.04
+KEY_PENETRATION_TOLERANCE_M = 0.003
+
+
+def check_character(scene: bpy.types.Scene) -> Result:
+    """V4: the user character is the local CC0 asset, sits on the chair, and keeps its hands on the laptop's keyboard all film:
+    wrists at their rest points, every fingertip over the laptop and never below its top surface (also at each keystroke's
+    deepest frame). The first build put the curled fingertips 5 cm into the laptop base; this check found it."""
+    from cff.stage import character as ch  # noqa: PLC0415
+
+    r = Result("character_seated")
+    rig = bpy.data.objects.get(ch.RIG)
+    if rig is None:
+        r.failures.append("no character rig")
+        return r
+    objs = objects_by_id(scene)
+    if rig.parent is not objs[m.USER]:
+        r.failures.append("the character rig is not parented to the user's chair")
+    libraries = [lib.filepath for lib in bpy.data.libraries]
+    if libraries:
+        r.failures.append(f"linked libraries (the asset must be appended): {libraries}")
+    laptop = objs[m.CLIENT]
+    to_laptop = laptop.matrix_world.inverted()
+    half_x, half_y = laptop.dimensions.x / 2, laptop.dimensions.y / 2
+    kx, _, kz = ch.KEYBOARD_HOME
+    down = round(motion.TYPING_STROKE_DOWN_S * timing.FPS)
+    frames = set(range(scene.frame_start, scene.frame_end + 1, CHARACTER_SAMPLE_STEP)) | {s.frame + down for s in ch.typing_strokes()}
+    worst_wrist, lowest_tip = 0.0, math.inf
+    for frame in sorted(f for f in frames if scene.frame_start <= f <= scene.frame_end):
+        scene.frame_set(frame)
+        for side, s in (("L", 1.0), ("R", -1.0)):
+            wrist_goal = laptop.matrix_world @ Vector((kx + ch.WRIST_BACK, -s * ch.HAND_SPREAD, kz + ch.WRIST_LIFT))
+            wrist = rig.matrix_world @ rig.pose.bones[f"wrist.{side}"].head
+            worst_wrist = max(worst_wrist, (wrist - wrist_goal).length)
+            for finger in ch.FINGERS:
+                tip = to_laptop @ (rig.matrix_world @ rig.pose.bones[f"{finger}-3.{side}"].tail)
+                lowest_tip = min(lowest_tip, tip.z)
+                if abs(tip.x) > half_x or abs(tip.y) > half_y:
+                    r.failures.append(f"frame {frame}: {finger}.{side} is off the laptop ({tip.x:.3f}, {tip.y:.3f})")
+                floor = ch.KEYBOARD_TOP_Z + ch.FINGER_PAD_M - KEY_PENETRATION_TOLERANCE_M
+                if tip.z < floor:
+                    r.failures.append(f"frame {frame}: {finger}.{side} pad is {floor - tip.z:.3f} m inside the laptop")
+    if worst_wrist > WRIST_TOLERANCE_M:
+        r.failures.append(f"a wrist leaves the keyboard by {worst_wrist:.3f} m")
+    r.metrics = {"frames": len(frames), "worst_wrist_m": round(worst_wrist, 4), "lowest_fingertip_above_keys_m": round(lowest_tip - ch.KEYBOARD_TOP_Z, 4)}
+    return r
+
+
 def run_all(scene: bpy.types.Scene) -> list[Result]:
     results = [check_provenance(), check_frame_range(scene), check_camera_count(scene), check_shape_vocabulary(scene), check_keyframes()]
     results += check_dynamic(scene)
     results.append(check_camera_motion(scene))
     results.append(check_captions())
-    results += [check_fonts(), check_text_materials(), check_signs(scene), check_pool_lights(), check_dressing()]
+    results += [check_fonts(), check_text_materials(), check_signs(scene), check_pool_lights(), check_dressing(), check_character(scene)]
     return results

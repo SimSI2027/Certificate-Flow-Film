@@ -79,6 +79,19 @@ VAULT_RIB_COUNT = 6
 VAULT_STRIP_EMISSION = 0.6
 VAULT_TOP_W = 12.0
 
+# V4 user character (blender/character.py): realistic shape, slightly stylized shading so it never reads uncanny. Skin is a
+# flat token (palette.SKIN_HEX) with a little subsurface; clothes, hair, eyes and brows keep their CC0 textures, desaturated and
+# matte. No normal maps, no specular sheen.
+CHARACTER_SKIN_ROUGHNESS = 0.6
+CHARACTER_SKIN_SUBSURFACE = 0.15
+CHARACTER_SKIN_SUBSURFACE_RADIUS_M = 0.004
+CHARACTER_TEXTURE_SATURATION = 0.7
+CHARACTER_TEXTURE_VALUE = 0.9
+CHARACTER_CLOTH_ROUGHNESS = 0.85
+CHARACTER_HAIR_ROUGHNESS = 0.55
+CHARACTER_EYE_ROUGHNESS = 0.2
+CHARACTER_SUBDIVISION = {"animatic": 0, "preview": 1, "final": 1}  # render subdivision of the body and clothes per tier
+
 # Film grain at encode (tiers with ``grain``): temporal noise on the beauty layer only; captions and signs stay clean. Fixed seed, so the encode is deterministic.
 GRAIN_STRENGTH = 3
 GRAIN_STRENGTH_FALLBACK = 2  # if the Final MP4 exceeds GRAIN_MAX_MP4_MB at the first strength

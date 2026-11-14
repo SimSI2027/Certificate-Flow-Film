@@ -17,4 +17,5 @@ qa/calibration/**/strips/
 output/animatic/
 *.blend
 *.blend1
+!assets/character.blend
 output/*.mp4

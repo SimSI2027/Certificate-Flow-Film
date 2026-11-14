@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # the repository r
 
 import bpy
 
-from blender import camera_rig, captions_scene, compositor, dressing, lighting, signs_scene, world
+from blender import camera_rig, captions_scene, character, compositor, dressing, lighting, signs_scene, world
 from blender.animation import write_timeline
 from blender.common import ROOT, option, reset_scene, script_args
 from blender.render_settings import apply_tier
@@ -60,6 +60,7 @@ def build(out_path: str, tier_name: str, timeline_hook: TimelineHook | None = No
     camera_rig.build_rig(scene, rig, plan, use_dof=True)
     lighting.build_lights(rig, bpy.data.objects[camera_rig.LOOK_NAME], plan)
     keys = write_timeline(timeline, objects)
+    figure = character.build_character(scene, objects, tier)
     compositor.build_compositor(scene, tier)
     captions_scene.build_caption_scene(tier)
     sign_scene = signs_scene.build_signs_scene(tier, plan)
@@ -73,6 +74,7 @@ def build(out_path: str, tier_name: str, timeline_hook: TimelineHook | None = No
         "signs": len([o for o in sign_scene.objects if o.get("cff_kind") == "sign"]),
         "animated_objects": len(timeline.objects()),
         "keyframes": keys,
+        **figure,
         "seconds": round(time.perf_counter() - started, 1),
         "out": out_path,
     }

@@ -46,7 +46,7 @@ GRID_HEX = "#1C3354"
 CARD_PALE_HEX = "#C9D4E3"  # the pale self-signed card
 TEXT_HEX = "#FFFFFF"  # caption and label text
 PLATE_HEX = "#0B1220"  # label plate and caption backing
-SKIN_HEX = "#8A93A6"  # stylized figure (no realistic human)
+SKIN_HEX = "#A8785C"  # the user character's skin (V4): a flat mid tone, no skin texture (slightly stylized, not uncanny)
 SCREEN_HEX = "#7FB4E8"  # laptop session window
 BACKDROP_HEX = "#18263C"  # far rack silhouettes: a step above the floor, far below any role colour
 PLATE_OPACITY = 0.92  # caption plates: even over a white background, white text keeps >= 4.5:1 (L-02)

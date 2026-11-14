@@ -150,6 +150,12 @@ def _cmd_rerender_range(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_character(args: argparse.Namespace) -> int:
+    from tools import character  # noqa: PLC0415  (downloads: only this command reaches the network)
+
+    return character.main(manifest_only=args.manifest)
+
+
 def _cmd_audio(_: argparse.Namespace) -> int:
     from tools import film  # noqa: PLC0415
 
@@ -169,6 +175,9 @@ def _add_v4_commands(sub: argparse._SubParsersAction) -> None:  # type: ignore[t
     p = sub.add_parser("rerender-range", help="beauty frames touched by a client-cluster change (V4): --snapshot before, then compute after")
     p.add_argument("--snapshot", action="store_true", help="record the current camera plan and cluster bounds as the baseline")
     p.set_defaults(func=_cmd_rerender_range)
+    p = sub.add_parser("character", help="fetch the pinned MPFB add-on and CC0 MakeHuman assets, then generate assets/character.blend (V4)")
+    p.add_argument("--manifest", action="store_true", help="only rewrite assets/character.manifest.json from the downloaded sources")
+    p.set_defaults(func=_cmd_character)
     p = sub.add_parser("audio", help="synthesise the cue mix and loudness-normalise it (output/audio/mix.wav)")
     p.set_defaults(func=_cmd_audio)
 
