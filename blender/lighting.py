@@ -14,6 +14,7 @@ import bpy
 from blender.animation import FCurveWriter
 from blender.common import PROP_ID, PROP_KIND, linear, tag
 from cff.stage import layout as lo
+from cff.stage import rig
 from cff.stage.camera import CameraPlan
 from cff.theme import look, palette
 
@@ -21,11 +22,6 @@ POOL_PREFIX = "LIGHT-pool-"
 KEY_NAME = "LIGHT-key"
 RIM_NAME = "LIGHT-rim"
 TOP_NAME = "LIGHT-top"
-REFERENCE_DISTANCE_M = 4.0
-DISTANCE_CLAMP_M = (3.0, 46.0)
-KEY_OFFSET = (-0.30, 0.35)  # (right, up) in camera distances
-RIM_OFFSET = (0.35, 0.40)
-RIM_BEHIND = 0.85
 SPOT_MIN_RADIUS_M = 5.0
 SPOT_RADIUS_PER_DISTANCE = 0.5
 SPOT_BLEND = 0.6
@@ -88,19 +84,10 @@ def build_lights(collection: bpy.types.Collection, target: bpy.types.Object, pla
     frames = sorted(set(range(plan.frames()[0], plan.frames()[-1] + 1, LIGHT_KEY_STEP)) | set(plan.key_frames()))
     for frame in frames:
         state = plan.state(frame)
-        position = state.position
-        forward = lo.sub(state.look, position)
-        distance = min(max(lo.length(forward), DISTANCE_CLAMP_M[0]), DISTANCE_CLAMP_M[1])
-        unit = lo.mul(forward, 1.0 / max(lo.length(forward), 1e-6))
-        right = (unit[1], -unit[0], 0.0)
-        norm = math.hypot(right[0], right[1]) or 1.0
-        right = (right[0] / norm, right[1] / norm, 0.0)
-        up = (0.0, 0.0, 1.0)
-        key_pos = lo.add(position, lo.add(lo.mul(right, KEY_OFFSET[0] * distance), lo.mul(up, KEY_OFFSET[1] * distance)))
-        rim_pos = lo.add(state.look, lo.add(lo.mul(unit, RIM_BEHIND * distance), lo.add(lo.mul(right, RIM_OFFSET[0] * distance), lo.mul(up, RIM_OFFSET[1] * distance))))
-        scale = (distance / REFERENCE_DISTANCE_M) ** 2
-        radius = max(SPOT_MIN_RADIUS_M, SPOT_RADIUS_PER_DISTANCE * distance)
-        for name, light_pos, watts in ((KEY_NAME, key_pos, palette.KEY_LIGHT_POWER_W), (RIM_NAME, rim_pos, palette.RIM_LIGHT_POWER_W)):
+        placed = rig.rig_frame(state)  # kept out of the actors' bodies before keying, so the Bezier keys stay smooth (L2-CIN-01)
+        scale = placed.power_scale
+        radius = max(SPOT_MIN_RADIUS_M, SPOT_RADIUS_PER_DISTANCE * placed.distance)
+        for name, light_pos, watts in ((KEY_NAME, placed.key, palette.KEY_LIGHT_POWER_W), (RIM_NAME, placed.rim, palette.RIM_LIGHT_POWER_W)):
             writers[name].key("location", frame, light_pos, smooth=True)
             data_writers[name].key("energy", frame, (watts * scale,), smooth=True)
             reach = lo.dist(light_pos, state.look)
