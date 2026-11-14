@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from cff.config import names  # noqa: E402
 from cff.story import captions as story_captions  # noqa: E402
 from cff.story import model  # noqa: E402
 from tools import pipeline  # noqa: E402
@@ -68,8 +69,8 @@ Your browser cannot play this video. <a href="{release}">Download the full MP4</
 <section aria-labelledby="what">
 <h2 id="what">What the film shows</h2>
 <div class="card">
-<p><strong>RDP path.</strong> The RDP server is issued a certificate from the <span class="path">RDPAuth</span> template by <span class="path">1SN0S Issuing CA 1</span>, whose CA certificate was signed offline by the <span class="path">1SN0S Root CA</span>. The client validates the whole chain up to the root it already trusts.</p>
-<p><strong>TLS path.</strong> The web server is issued a certificate from the <span class="path">WebServer-TLS</span> template by <span class="path">1SN0S Issuing CA 2</span>, signed by the same root.</p>
+<p><strong>RDP path.</strong> The RDP server is issued a certificate from the <span class="path">{rdp_template}</span> template by <span class="path">{ca1}</span>, whose CA certificate was signed offline by the <span class="path">{root}</span>. The client validates the whole chain up to the root it already trusts.</p>
+<p><strong>TLS path.</strong> The web server is issued a certificate from the <span class="path">{web_template}</span> template by <span class="path">{ca2}</span>, signed by the same root.</p>
 <p><strong>One trusted root.</strong> Different templates can use different issuing CAs, but trust always anchors at the single Root CA. The private key never leaves the machine that generated it: the request is signed with it, and the request carries only the public key.</p>
 </div>
 </section>
@@ -118,13 +119,21 @@ def transcript_html() -> str:
     return "\n".join(parts)
 
 
+def page_html(release_url: str) -> str:
+    """The page text; every lab name comes from ``cff.config.names`` (V4: the MALAWI rename reaches the site through here)."""
+    esc = html.escape
+    return PAGE.format(release=release_url, transcript=transcript_html(), repo=REPO, lab=LAB, lab_pages=LAB_PAGES,
+                       rdp_template=esc(names.RDP_TEMPLATE), web_template=esc(names.WEB_TEMPLATE), root=esc(names.ROOT_CA_NAME),
+                       ca1=esc(names.ISSUING_CA1_NAME), ca2=esc(names.ISSUING_CA2_NAME))
+
+
 def main(release_url: str) -> int:
     SITE.mkdir(exist_ok=True)
     shutil.copyfile(OUTPUT / "Certificate-Flow-Film-Poster.png", SITE / "poster.png")
     shutil.copyfile(OUTPUT / "Certificate-Flow-Film-Preview.mp4", SITE / "preview.mp4")
     pipeline.write_captions()
     shutil.copyfile(OUTPUT / "captions.vtt", SITE / "captions.vtt")
-    page = PAGE.format(release=release_url, transcript=transcript_html(), repo=REPO, lab=LAB, lab_pages=LAB_PAGES)
+    page = page_html(release_url)
     (SITE / "index.html").write_text(page, encoding="utf-8", newline="\n")
     (SITE / ".nojekyll").write_text("", encoding="utf-8")
     print(f"wrote {SITE / 'index.html'}")

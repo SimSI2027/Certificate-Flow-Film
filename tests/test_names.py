@@ -52,27 +52,27 @@ def test_expected_fallbacks_in_use() -> None:
         "CLIENT_HOSTNAME": "CLIENT01",
         "RDP_SERVER_HOSTNAME": "RDP01",
         "WEB_SERVER_HOSTNAME": "WEB01",
-        "WEB_SITE_DNS_NAME": "portal.1sn0s.lab",
-        "ROOT_CA_NAME": "1SN0S Root CA",
-        "ISSUING_CA1_NAME": "1SN0S Issuing CA 1",
-        "ISSUING_CA2_NAME": "1SN0S Issuing CA 2",
-        "PKI_HTTP_HOST": "pki.1sn0s.lab",
+        "WEB_SITE_DNS_NAME": "portal.malawi.lab",
+        "ROOT_CA_NAME": "MALAWI Root CA",
+        "ISSUING_CA1_NAME": "MALAWI Issuing CA 1",
+        "ISSUING_CA2_NAME": "MALAWI Issuing CA 2",
+        "PKI_HTTP_HOST": "pki.malawi.lab",
     }
 
 
 def test_fixed_names() -> None:
-    assert n.AD_DOMAIN_FQDN == "1SN0S.LAB"
-    assert n.AD_NETBIOS == "1SN0S"
-    assert n.DNS_SUFFIX == "1sn0s.lab"
+    assert n.AD_DOMAIN_FQDN == "MALAWI.LAB"
+    assert n.AD_NETBIOS == "MALAWI"
+    assert n.DNS_SUFFIX == "malawi.lab"
     assert n.RDP_TEMPLATE == "RDPAuth"
     assert n.WEB_TEMPLATE == "WebServer-TLS"
     assert n.AD_DOMAIN_FQDN.lower() == n.DNS_SUFFIX
 
 
 def test_derived_fqdns_are_lower_case_and_computed() -> None:
-    assert n.RDP_SERVER_FQDN == f"{n.RDP_SERVER_HOSTNAME.lower()}.{n.DNS_SUFFIX}" == "rdp01.1sn0s.lab"
-    assert n.WEB_SERVER_FQDN == "web01.1sn0s.lab"
-    assert n.DC_FQDN == "dc01.1sn0s.lab" and n.CLIENT_FQDN == "client01.1sn0s.lab"
+    assert n.RDP_SERVER_FQDN == f"{n.RDP_SERVER_HOSTNAME.lower()}.{n.DNS_SUFFIX}" == "rdp01.malawi.lab"
+    assert n.WEB_SERVER_FQDN == "web01.malawi.lab"
+    assert n.DC_FQDN == "dc01.malawi.lab" and n.CLIENT_FQDN == "client01.malawi.lab"
     for name in (*n.derived_names().values(), n.WEB_SITE_DNS_NAME, n.PKI_HTTP_HOST):
         assert name == name.lower() and _is_dns_name(name), name
         assert name.endswith("." + n.DNS_SUFFIX)
@@ -84,7 +84,7 @@ def test_hostnames_fit_netbios_limits() -> None:
 
 
 def test_file_slug() -> None:
-    assert n.file_slug("1SN0S Issuing CA 1") == "1SN0S-Issuing-CA-1"
+    assert n.file_slug("MALAWI Issuing CA 1") == "MALAWI-Issuing-CA-1"
 
 
 @pytest.mark.covers("L-06", "L-08")

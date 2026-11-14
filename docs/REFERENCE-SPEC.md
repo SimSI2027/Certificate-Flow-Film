@@ -34,22 +34,22 @@ From `cff/config/names.py`. Fallbacks are marked; placeholder text is never rend
 
 | Variable | Value | Fallback? |
 |---|---|---|
-| `AD_DOMAIN_FQDN` | `1SN0S.LAB` | no |
-| `AD_NETBIOS` | `1SN0S` | no |
-| `DNS_SUFFIX` | `1sn0s.lab` | no |
+| `AD_DOMAIN_FQDN` | `MALAWI.LAB` | no |
+| `AD_NETBIOS` | `MALAWI` | no |
+| `DNS_SUFFIX` | `malawi.lab` | no |
 | `DC_HOSTNAME` | `DC01` | yes |
 | `CLIENT_HOSTNAME` | `CLIENT01` | yes |
 | `RDP_SERVER_HOSTNAME` | `RDP01` | yes |
 | `WEB_SERVER_HOSTNAME` | `WEB01` | yes |
-| `WEB_SITE_DNS_NAME` | `portal.1sn0s.lab` | yes |
-| `ROOT_CA_NAME` | `1SN0S Root CA` | yes |
-| `ISSUING_CA1_NAME` | `1SN0S Issuing CA 1` | yes |
-| `ISSUING_CA2_NAME` | `1SN0S Issuing CA 2` | yes |
-| `PKI_HTTP_HOST` | `pki.1sn0s.lab` | yes |
+| `WEB_SITE_DNS_NAME` | `portal.malawi.lab` | yes |
+| `ROOT_CA_NAME` | `MALAWI Root CA` | yes |
+| `ISSUING_CA1_NAME` | `MALAWI Issuing CA 1` | yes |
+| `ISSUING_CA2_NAME` | `MALAWI Issuing CA 2` | yes |
+| `PKI_HTTP_HOST` | `pki.malawi.lab` | yes |
 | `RDP_TEMPLATE` | `RDPAuth` | no |
 | `WEB_TEMPLATE` | `WebServer-TLS` | no |
 
-Derived (lower-case hostname + `.` + DNS suffix): `RDP_SERVER_FQDN` = `rdp01.1sn0s.lab`, `WEB_SERVER_FQDN` = `web01.1sn0s.lab`, `DC_FQDN` = `dc01.1sn0s.lab`, `CLIENT_FQDN` = `client01.1sn0s.lab`.
+Derived (lower-case hostname + `.` + DNS suffix): `RDP_SERVER_FQDN` = `rdp01.malawi.lab`, `WEB_SERVER_FQDN` = `web01.malawi.lab`, `DC_FQDN` = `dc01.malawi.lab`, `CLIENT_FQDN` = `client01.malawi.lab`.
 
 The `.lab` suffix and its status in the IANA root zone are covered in `docs/PKI-TECHNICAL-NOTES.md`, section "Lab names and the .lab suffix".
 
@@ -64,7 +64,7 @@ A beat verdict of **WRONG** is a BLOCKER. A verdict of **MISLEADING** is at leas
 ## Architecture
 
 ### AR-01 Root CA
-`1SN0S Root CA` is an offline, standalone, non-domain-joined Root CA. Its certificate is self-signed. It is the **trust anchor**. It has no live network connection at any time in the film. On screen: a sealed gold vault on its own plinth, with no cables or network channels.
+`MALAWI Root CA` is an offline, standalone, non-domain-joined Root CA. Its certificate is self-signed. It is the **trust anchor**. It has no live network connection at any time in the film. On screen: a sealed gold vault on its own plinth, with no cables or network channels.
 
 ### AR-02 What the Root CA signs
 The Root CA signs only:
@@ -74,7 +74,7 @@ The Root CA signs only:
 It never signs end-entity certificates. It never receives an end-entity request.
 
 ### AR-03 Issuing CAs
-`1SN0S Issuing CA 1` and `1SN0S Issuing CA 2` are enterprise subordinate (intermediate) issuing CAs:
+`MALAWI Issuing CA 1` and `MALAWI Issuing CA 2` are enterprise subordinate (intermediate) issuing CAs:
 - their CA certificates are signed by the Root CA
 - their certificates carry Basic Constraints CA=true
 - they are online and domain-joined
@@ -86,7 +86,7 @@ It never signs end-entity certificates. It never receives an end-entity request.
 - The Root CA publishes no templates: a standalone CA does not use templates.
 
 ### AR-05 Active Directory
-Active Directory `1SN0S.LAB` (domain controller `DC01`):
+Active Directory `MALAWI.LAB` (domain controller `DC01`):
 - authenticates requesters (Kerberos, computer accounts)
 - stores the certificate templates and their permissions
 - stores the Enrollment Services objects, which list which CA publishes which template
@@ -95,7 +95,7 @@ Active Directory `1SN0S.LAB` (domain controller `DC01`):
 AD does not receive, sign or forward certificate requests.
 
 ### AR-06 AIA and CDP
-AIA and CDP are HTTP locations on `pki.1sn0s.lab`, embedded as extensions in the certificates the CAs issue:
+AIA and CDP are HTTP locations on `pki.malawi.lab`, embedded as extensions in the certificates the CAs issue:
 - AIA gives the location of the issuer's certificate.
 - CDP gives the location of the issuer's CRL.
 
@@ -109,7 +109,7 @@ OCSP appears only as "if an Online Responder is deployed". No Online Responder i
 The film must never contradict these.
 
 ### F-01 Who initiates and who presents
-The user initiates RDP from `CLIENT01`. The **RDP server** (`rdp01.1sn0s.lab`) owns and presents the RDP certificate. The client never owns, requests or presents the server's certificate.
+The user initiates RDP from `CLIENT01`. The **RDP server** (`rdp01.malawi.lab`) owns and presents the RDP certificate. The client never owns, requests or presents the server's certificate.
 
 ### F-02 The problem
 Out of the box, RDP uses a **self-signed** certificate the client cannot verify. That is the problem being solved. The self-signed certificate *is* signed (by its own key); what it lacks is an issuer the client already trusts.
@@ -204,7 +204,7 @@ Scene durations are frozen (total 109 s). Each beat's caption wording is frozen.
 ### S1 — The connection begins (7 s)
 
 #### B-01.1 User opens RDP
-A night-lit desk. The stylized low-poly user at `CLIENT01` opens an RDP connection to `rdp01.1sn0s.lab`.
+A night-lit desk. The user, an adult office worker seated at the laptop `CLIENT01`, opens an RDP connection to `rdp01.malawi.lab`.
 - Accuracy constraint: the user connects by the server's FQDN, which is the name later matched against the SAN.
 - Caption: *Secure RDP connection*
 
@@ -214,7 +214,7 @@ An amber connection pulse travels along a floor light-channel toward a distant r
 ### S2 — An identity the client can't verify (7 s)
 
 #### B-02.1 Listener lights
-Arrival at `rdp01.1sn0s.lab`; the RDP listener lights up.
+Arrival at `rdp01.malawi.lab`; the RDP listener lights up.
 - Caption: *The RDP server needs a trusted identity*
 
 #### B-02.2 Self-signed, unverified
@@ -245,7 +245,7 @@ A beam from the private key **seals** the capsule (proof of possession). The key
 ### S4 — Finding the right CA, then evaluation (14 s)
 
 #### B-04.1 Who publishes RDPAuth?
-The capsule pauses at the server's outbound port, framed with the AD node (`1SN0S.LAB`). A lookup for "who publishes RDPAuth?" lights a route to Issuing CA 1 only.
+The capsule pauses at the server's outbound port, framed with the AD node (`MALAWI.LAB`). A lookup for "who publishes RDPAuth?" lights a route to Issuing CA 1 only.
 - Accuracy constraint: the request has not been submitted and is not sent to AD. The capsule is held at the RDP server's outbound port, framed together with the AD node. The lookup is a separate steel-blue query pulse that travels to AD and back. The answer comes from the Enrollment Services objects. The capsule never enters the AD node, and AD neither receives, signs nor forwards the request.
 
 #### B-04.2 Into Issuing CA 1
@@ -262,7 +262,7 @@ Four checks resolve with staggered ticks:
 
 #### B-04.4 CA signs
 The request capsule is consumed at the press: the request ends its life inside Issuing CA 1 and never reappears. Issuing CA 1's own key stays in a sealed module and drives a signing press, which stamps a certificate card. The card shows:
-- the SAN `rdp01.1sn0s.lab`
+- the SAN `rdp01.malawi.lab`
 - the Remote Desktop Authentication EKU
 - a validity bar
 - small AIA/CDP ports
@@ -273,7 +273,7 @@ The card returns and locks into the server **beside** the existing private key, 
 ### S5 — The hierarchy and the trust anchor (12 s)
 
 #### B-05.1 The trust anchor
-The camera cranes up to a sealed gold vault on its own plinth, **with no cables**: `1SN0S Root CA`. Its self-signed seal, a ring that closes on itself, is revealed by a sweep of light as an existing property.
+The camera cranes up to a sealed gold vault on its own plinth, **with no cables**: `MALAWI Root CA`. Its self-signed seal, a ring that closes on itself, is revealed by a sweep of light as an existing property.
 - Accuracy constraint: the root is offline and performs no signing in the present-tense part of the film. The seal does not animate closed. The root's key module does not glow and its press does not move outside the flashback.
 
 #### B-05.2 Offline ceremony (flashback)
@@ -304,7 +304,7 @@ Staggered checks:
 1. Chain ends at a trusted root
 2. Signatures verify
 3. Currently valid
-4. Name matches `rdp01.1sn0s.lab`
+4. Name matches `rdp01.malawi.lab`
 5. EKU permits RDP
 6. Revocation OK
 
@@ -324,7 +324,7 @@ The new connection's channel turns from amber to green and the session window op
 ### S7 — A second workload (12 s)
 
 #### B-07.1 Web server
-The camera glides to `WEB01` (serving `portal.1sn0s.lab`), which has a `WebServer-TLS` badge.
+The camera glides to `WEB01` (serving `portal.malawi.lab`), which has a `WebServer-TLS` badge.
 
 #### B-07.2 Local key, sealed request
 A local key pair forms. The private key is locked and anchored, and the request is sealed by proof of possession.
@@ -347,7 +347,7 @@ The capsule travels **only** to Issuing CA 2.
 Faster, compressed versions of the same four checks, including the note "name supplied in request — enrollment restricted".
 
 #### B-08.2 TLS certificate
-The web request capsule is consumed at the press. Issuing CA 2's key-driven press stamps the TLS certificate (SAN `portal.1sn0s.lab`, Server Authentication EKU). It returns and locks beside the web server's private key, with a translucent copy of Issuing CA 2's certificate for the server's intermediate store.
+The web request capsule is consumed at the press. Issuing CA 2's key-driven press stamps the TLS certificate (SAN `portal.malawi.lab`, Server Authentication EKU). It returns and locks beside the web server's private key, with a translucent copy of Issuing CA 2's certificate for the server's intermediate store.
 - Caption: *Issuing CA 2 signs the TLS certificate*
 
 #### B-08.3 Same root
@@ -358,7 +358,7 @@ Issuing CA 2's own certificate is revealed, linked in gold to the **same** root.
 
 #### B-09.1 Browser validation
 A quick browser validation (about 5 s):
-- `portal.1sn0s.lab` → Issuing CA 2 → Root
+- `portal.malawi.lab` → Issuing CA 2 → Root
 - the server presents its chain and proves possession, and the client verifies the proof
 - compressed ticks: name, EKU, validity, revocation (with one CRL fetch per non-root link)
 - the channel turns green

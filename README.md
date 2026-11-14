@@ -43,8 +43,10 @@ See `LICENSE` for the summary.
 
 ## Names in use
 
-Fixed: AD domain `1SN0S.LAB`, NetBIOS `1SN0S`, DNS suffix `1sn0s.lab`, templates `RDPAuth` and `WebServer-TLS`.
-Fallbacks currently in use (owner may replace them later): `DC01`, `CLIENT01`, `RDP01`, `WEB01`, `portal.1sn0s.lab`, `1SN0S Root CA`, `1SN0S Issuing CA 1`, `1SN0S Issuing CA 2`, `pki.1sn0s.lab`.
+Fixed: AD domain `MALAWI.LAB`, NetBIOS `MALAWI`, DNS suffix `malawi.lab`, templates `RDPAuth` and `WebServer-TLS`.
+Fallbacks currently in use (owner may replace them later): `DC01`, `CLIENT01`, `RDP01`, `WEB01`, `portal.malawi.lab`, `MALAWI Root CA`, `MALAWI Issuing CA 1`, `MALAWI Issuing CA 2`, `pki.malawi.lab`.
+
+The lab was renamed from its earlier name to MALAWI on 2026-11-14 (session V4). The released v1.2.0 film and the Pages demo still show the earlier name until the next audited release.
 
 ## Links
 

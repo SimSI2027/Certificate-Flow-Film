@@ -2,6 +2,8 @@
 
 Every adversarial round is recorded here, in order (Charter 2.4 step 8). This file also records spec freezes, amendments and calibration results. Discriminator replies are saved verbatim in each round's packet folder under `qa/rounds/`.
 
+> **Note (2026-11-14, session V4):** the lab was renamed to `MALAWI` (`MALAWI.LAB`, `malawi.lab`, `MALAWI Root CA`, `MALAWI Issuing CA 1/2`, `portal.malawi.lab`, `pki.malawi.lab`) at the owner's request (amendment V4-A1 below). The entries before "Session V4" are historical and are left as written, so they still use the earlier lab name; read it as `MALAWI`.
+
 ## Stage 0 — Spec freeze
 
 Only `pki-discriminator` runs at Stage 0, and it judges the written spec (no frames). Cinematic and legibility scores start at Stage 1. Changes made between Stage 0 rounds are pre-freeze drafting, not amendments: the spec is frozen only when this stage's gate passes.
@@ -445,3 +447,13 @@ Scores (Chief of Staff estimate, not a discriminator score): **PKI 9, legibility
 Images viewed: baseline sheet (v1.2 final frames), preview strips (found the white-rib bug: dressing objects glowed through `Object Info > Color`; fixed and checked in `interior_dressing`), preview contact sheet, difference sheet for V3-CIN-01, final contact sheet. Not heard: the audio (unchanged). Not run: a discriminator round (lean mode).
 
 Next: V3 audit (Fable 5.2, High): re-audit this Final MP4 and decide whether v1.3.0 is released.
+
+## Session V4 (2026-11-14, `claude-opus-5-5`; lean mode, no subagents, at most 10 images): MALAWI rename and a realistic user character, no release
+
+The owner set this session before the V3 audit ran, so the V3 Final MP4 (`e5050765…30b6`) was never audited. It is superseded by the V4 render, and the next audit judges the V4 film. Pages stays on v1.2.0.
+
+### Amendments (Chief of Staff, owner request)
+
+- **V4-A1 Names (owner request, 2026-11-14).** `AD_DOMAIN_FQDN` `MALAWI.LAB`, `AD_NETBIOS` `MALAWI`, `DNS_SUFFIX` `malawi.lab`; fallbacks `MALAWI Root CA`, `MALAWI Issuing CA 1`, `MALAWI Issuing CA 2`, `portal.malawi.lab`, `pki.malawi.lab`. REFERENCE-SPEC treats a names change as a names update, not a content change, but its bytes changed, so the hash is recorded below. Current source, tests, docs, README, `qa\regressions.json` and the site builder were updated. Left as written: historical ledger, approval and audit entries, and the frozen round packets under `qa\rounds\` and `qa\calibration\`. `site\` was also left as it is: it is the deployed v1.2.0 page, and a push under `site/**` redeploys Pages. The site text now comes from `cff.config.names` through `scripts\build_site.py`, so the next audited release publishes MALAWI. Test: `tests\test_v4.py::test_V4_REN_01_*`.
+- **V4-A2 User character (owner request, 2026-11-14).** Charter Section 9 "World" said "no realistic humans … no external models, textures". That rule is replaced for the user character only: a realistic adult office worker generated with the MPFB add-on (extensions.blender.org, 2.0.18) from CC0 MakeHuman assets, saved as `assets\character.blend`, loaded locally at build time, with skin and cloth slightly stylized. REFERENCE-SPEC B-01.1, the charter's B-01.1 line and the STORYBOARD blocking row now say "an adult office worker seated at the laptop", which fits option A (stylized fallback) as well. Every other object stays procedural. Licences: `LICENSES\` and `README.md`. Test: `tests\test_v4.py::test_V4_CHR_01_*`.
+- **Frozen REFERENCE-SPEC SHA-256:** `6a60d216f350bff163e5708c227e1af6143d25c248f5c5b3c30e64e0a4fc1a55` (V4-A1 + V4-A2; was `7cf45afa…6d23`). The Stage 4 clean-round counter resets to 0.

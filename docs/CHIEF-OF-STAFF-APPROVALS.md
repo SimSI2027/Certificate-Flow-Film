@@ -1,5 +1,7 @@
 # Chief of Staff approvals
 
+> **Note (2026-11-14, session V4):** the lab was renamed to `MALAWI` at the owner's request (`docs\GAN-LEDGER.md` amendment V4-A1). The phase entries before "Session V4" are historical and are left as written, so they still use the earlier lab name.
+
 ## Phase 1 — Environment (Session 1)
 - **Scope:** Charter 5.1–5.3: inspect and record tools, install and pin Blender 5.2 LTS, headless GPU probe with engine decision, `.venv` and `requirements-dev.txt`, `docs\TOOLCHAIN.md`, `config\toolchain.local.json`.
 - **Acceptance criteria:** every tool verified with versions recorded; probe frame not blank; decision recorded.

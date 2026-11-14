@@ -46,20 +46,20 @@ def resolve(variable: str, raw: str) -> NameValue:
 
 # Raw values exactly as in Charter Section 1. The owner edits only this table.
 RAW: dict[str, str] = {
-    "AD_DOMAIN_FQDN": "1SN0S.LAB",
-    "AD_NETBIOS": "1SN0S",
-    "DNS_SUFFIX": "1sn0s.lab",
+    "AD_DOMAIN_FQDN": "MALAWI.LAB",
+    "AD_NETBIOS": "MALAWI",
+    "DNS_SUFFIX": "malawi.lab",
     "DC_HOSTNAME": "<<REPLACE: domain controller hostname | fallback: DC01>>",
     "CLIENT_HOSTNAME": "<<REPLACE: user laptop hostname | fallback: CLIENT01>>",
     "RDP_SERVER_HOSTNAME": "<<REPLACE: RDP server hostname | fallback: RDP01>>",
     "WEB_SERVER_HOSTNAME": "<<REPLACE: web server hostname | fallback: WEB01>>",
     "WEB_SITE_DNS_NAME": (
-        "<<REPLACE: website DNS name in the TLS certificate SAN | fallback: portal.1sn0s.lab>>"
+        "<<REPLACE: website DNS name in the TLS certificate SAN | fallback: portal.malawi.lab>>"
     ),
-    "ROOT_CA_NAME": "<<REPLACE: Root CA common name | fallback: 1SN0S Root CA>>",
-    "ISSUING_CA1_NAME": "<<REPLACE: Issuing CA 1 common name | fallback: 1SN0S Issuing CA 1>>",
-    "ISSUING_CA2_NAME": "<<REPLACE: Issuing CA 2 common name | fallback: 1SN0S Issuing CA 2>>",
-    "PKI_HTTP_HOST": "<<REPLACE: host serving AIA/CDP over HTTP | fallback: pki.1sn0s.lab>>",
+    "ROOT_CA_NAME": "<<REPLACE: Root CA common name | fallback: MALAWI Root CA>>",
+    "ISSUING_CA1_NAME": "<<REPLACE: Issuing CA 1 common name | fallback: MALAWI Issuing CA 1>>",
+    "ISSUING_CA2_NAME": "<<REPLACE: Issuing CA 2 common name | fallback: MALAWI Issuing CA 2>>",
+    "PKI_HTTP_HOST": "<<REPLACE: host serving AIA/CDP over HTTP | fallback: pki.malawi.lab>>",
     "RDP_TEMPLATE": "RDPAuth",
     "WEB_TEMPLATE": "WebServer-TLS",
     "GITHUB_OWNER": "SimSI2027",

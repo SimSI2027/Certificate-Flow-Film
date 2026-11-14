@@ -149,7 +149,7 @@
     "severity": "MINOR",
     "criterion": "F-11",
     "beat": "B-06.3",
-    "summary": "The pki.1sn0s.lab kiosk is only passively highlighted as where a fetch could go; nothing is requested or answers.",
+    "summary": "The pki.malawi.lab kiosk is only passively highlighted as where a fetch could go; nothing is requested or answers.",
     "hard_test": "tests/test_model_integrity.py::test_aia_is_never_a_trust_source"
   },
   {

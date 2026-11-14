@@ -4,7 +4,7 @@ This document gives the full technical meaning of every beat, including the comp
 
 ## Lab names and the .lab suffix
 
-The lab uses the AD domain `1SN0S.LAB` (NetBIOS `1SN0S`) and the DNS suffix `1sn0s.lab`. DNS names are case-insensitive (RFC 4343), so SAN dNSNames appear in lower case, as they normally do in certificates.
+The lab uses the AD domain `MALAWI.LAB` (NetBIOS `MALAWI`) and the DNS suffix `malawi.lab`. DNS names are case-insensitive (RFC 4343), so SAN dNSNames appear in lower case, as they normally do in certificates.
 
 **Status of `.lab` in the DNS root zone (checked 2026-11-06).** Three sources were checked:
 - The IANA TLD list `https://data.iana.org/TLD/tlds-alpha-by-domain.txt` (version 2026110600, "Last Updated Fri Nov 6 07:07:01 2026 UTC") does not list `LAB`.
@@ -21,34 +21,34 @@ Public CAs do not issue certificates for internal names, so the lab's names come
 
 **`.internal`.** ICANN has permanently reserved `.internal` for private use. ICANN Board resolution 2024.07.29.06, of 29 July 2024, "reserves .INTERNAL from delegation in the DNS root zone permanently to provide for its use in private-use applications". A new deployment might choose it.
 
-**Decision.** The lab keeps `1SN0S.LAB` / `1sn0s.lab` unchanged, as the charter requires. This note records the risk.
+**Decision.** The lab keeps `MALAWI.LAB` / `malawi.lab` unchanged, as the charter requires. This note records the risk.
 
 ## Architecture in one page
 
 | Component | Role | Model |
 |---|---|---|
-| `1SN0S Root CA` | Offline, standalone, non-domain-joined. Self-signed certificate. Trust anchor. Signs only issuing CA certificates (offline ceremony) and its own CRL. | `ROOT_CA`, `CERT-ROOT`, `CRL-ROOT` (AR-01, AR-02) |
-| `1SN0S Issuing CA 1` | Enterprise subordinate CA. Its certificate is signed by the root (CA=true). Publishes `RDPAuth` only. | `ISSUING_CA1`, `CERT-CA1`, `CRL-CA1` (AR-03, AR-04) |
-| `1SN0S Issuing CA 2` | Enterprise subordinate CA. Its certificate is signed by the root (CA=true). Publishes `WebServer-TLS` only. | `ISSUING_CA2`, `CERT-CA2`, `CRL-CA2` (AR-03, AR-04) |
-| AD `1SN0S.LAB` on `DC01` | Authenticates requesters (Kerberos). Stores templates, permissions and Enrollment Services objects. Distributes the root to Trusted Root stores. | `AD` (AR-05) |
-| `pki.1sn0s.lab` | HTTP publication point for AIA (issuer certificates) and CDP (CRLs). | `PKI_HTTP`, `SVC-AIA`, `SVC-CDP` (AR-06) |
+| `MALAWI Root CA` | Offline, standalone, non-domain-joined. Self-signed certificate. Trust anchor. Signs only issuing CA certificates (offline ceremony) and its own CRL. | `ROOT_CA`, `CERT-ROOT`, `CRL-ROOT` (AR-01, AR-02) |
+| `MALAWI Issuing CA 1` | Enterprise subordinate CA. Its certificate is signed by the root (CA=true). Publishes `RDPAuth` only. | `ISSUING_CA1`, `CERT-CA1`, `CRL-CA1` (AR-03, AR-04) |
+| `MALAWI Issuing CA 2` | Enterprise subordinate CA. Its certificate is signed by the root (CA=true). Publishes `WebServer-TLS` only. | `ISSUING_CA2`, `CERT-CA2`, `CRL-CA2` (AR-03, AR-04) |
+| AD `MALAWI.LAB` on `DC01` | Authenticates requesters (Kerberos). Stores templates, permissions and Enrollment Services objects. Distributes the root to Trusted Root stores. | `AD` (AR-05) |
+| `pki.malawi.lab` | HTTP publication point for AIA (issuer certificates) and CDP (CRLs). | `PKI_HTTP`, `SVC-AIA`, `SVC-CDP` (AR-06) |
 | Online Responder | Not deployed. Shown only as "OCSP if deployed". | `SVC-OCSP` (AR-07) |
-| `rdp01.1sn0s.lab` | RDP server (`RDP01`). Owns its key pair and RDP certificate. | `RDP_SERVER`, `KP-RDP`, `CERT-RDP` |
-| `WEB01` serving `portal.1sn0s.lab` | Web server. Owns its key pair and TLS certificate. | `WEB_SERVER`, `KP-WEB`, `CERT-WEB` |
+| `rdp01.malawi.lab` | RDP server (`RDP01`). Owns its key pair and RDP certificate. | `RDP_SERVER`, `KP-RDP`, `CERT-RDP` |
+| `WEB01` serving `portal.malawi.lab` | Web server. Owns its key pair and TLS certificate. | `WEB_SERVER`, `KP-WEB`, `CERT-WEB` |
 | `CLIENT01` | The user's domain-joined laptop. Relying party for both connections. | `CLIENT`, `TS-CLIENT-ROOT` |
 
 **Certificates in the story.**
 
 | Certificate | Subject / SAN | Issuer (signed with) | EKU | Basic Constraints | AIA → | CDP → |
 |---|---|---|---|---|---|---|
-| `CERT-ROOT` | CN=1SN0S Root CA | itself (root key) | none (unrestricted) | CA=true | — | — |
-| `CERT-CA1` | CN=1SN0S Issuing CA 1 | Root CA | none (unrestricted) | CA=true | `http://pki.1sn0s.lab/pki/1SN0S-Root-CA.crt` | `http://pki.1sn0s.lab/pki/1SN0S-Root-CA.crl` |
-| `CERT-CA2` | CN=1SN0S Issuing CA 2 | Root CA | none (unrestricted) | CA=true | same as CA 1 | same as CA 1 |
-| `CERT-RDP` | CN=rdp01.1sn0s.lab; SAN dNSName=rdp01.1sn0s.lab | Issuing CA 1 | Remote Desktop Authentication 1.3.6.1.4.1.311.54.1.2 | not a CA | `http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-1.crt` | `http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-1.crl` |
-| `CERT-WEB` | CN=portal.1sn0s.lab; SAN dNSName=portal.1sn0s.lab | Issuing CA 2 | Server Authentication 1.3.6.1.5.5.7.3.1 | not a CA | `http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-2.crt` | `http://pki.1sn0s.lab/pki/1SN0S-Issuing-CA-2.crl` |
-| `CERT-RDP-SELF` | CN=rdp01.1sn0s.lab (no SAN is modelled or shown) | itself (its own separate key `KP-RDP-SELF`) | Server Authentication | not a CA | — | — |
+| `CERT-ROOT` | CN=MALAWI Root CA | itself (root key) | none (unrestricted) | CA=true | — | — |
+| `CERT-CA1` | CN=MALAWI Issuing CA 1 | Root CA | none (unrestricted) | CA=true | `http://pki.malawi.lab/pki/MALAWI-Root-CA.crt` | `http://pki.malawi.lab/pki/MALAWI-Root-CA.crl` |
+| `CERT-CA2` | CN=MALAWI Issuing CA 2 | Root CA | none (unrestricted) | CA=true | same as CA 1 | same as CA 1 |
+| `CERT-RDP` | CN=rdp01.malawi.lab; SAN dNSName=rdp01.malawi.lab | Issuing CA 1 | Remote Desktop Authentication 1.3.6.1.4.1.311.54.1.2 | not a CA | `http://pki.malawi.lab/pki/MALAWI-Issuing-CA-1.crt` | `http://pki.malawi.lab/pki/MALAWI-Issuing-CA-1.crl` |
+| `CERT-WEB` | CN=portal.malawi.lab; SAN dNSName=portal.malawi.lab | Issuing CA 2 | Server Authentication 1.3.6.1.5.5.7.3.1 | not a CA | `http://pki.malawi.lab/pki/MALAWI-Issuing-CA-2.crt` | `http://pki.malawi.lab/pki/MALAWI-Issuing-CA-2.crl` |
+| `CERT-RDP-SELF` | CN=rdp01.malawi.lab (no SAN is modelled or shown) | itself (its own separate key `KP-RDP-SELF`) | Server Authentication | not a CA | — | — |
 
-URL file names are illustrative. ADCS also offers LDAP AIA/CDP locations by default. This lab publishes HTTP locations, which suit any client and are common practice. The offline root's CRL and certificate are copied to `pki.1sn0s.lab` by an administrator, because the root has no network connection.
+URL file names are illustrative. ADCS also offers LDAP AIA/CDP locations by default. This lab publishes HTTP locations, which suit any client and are common practice. The offline root's CRL and certificate are copied to `pki.malawi.lab` by an administrator, because the root has no network connection.
 
 **Templates.**
 
@@ -66,7 +66,7 @@ Because `WebServer-TLS` lets the requester choose the subject, restricted Enroll
 ### B-01.1
 **On screen:** the user at `CLIENT01` opens RDP. Caption *Secure RDP connection*.
 
-**Meaning:** the user starts the Remote Desktop client and connects to `rdp01.1sn0s.lab` by its FQDN (F-01). That typed name is the one the client later compares with the certificate's SAN dNSName (B-06.4, check 4), so connecting by FQDN matters.
+**Meaning:** the user starts the Remote Desktop client and connects to `rdp01.malawi.lab` by its FQDN (F-01). That typed name is the one the client later compares with the certificate's SAN dNSName (B-06.4, check 4), so connecting by FQDN matters.
 
 The caption names the goal: an RDP connection whose server identity the client can verify. RDP's security layer runs the connection inside TLS. With NLA, CredSSP then authenticates the user over that TLS channel, so server authentication protects the user's credentials.
 
@@ -78,7 +78,7 @@ Kerberos server authentication is out of scope on screen (F-16; see "Kerberos sc
 **Meaning:** a network connection is being set up (TCP 3389, then RDP and TLS negotiation). Amber means pending: nothing is verified or trusted yet. The floor channel is a network connection. It is never used for trust relationships, which are shown as trust links.
 
 ### B-02.1
-**On screen:** arrival at `rdp01.1sn0s.lab`; the RDP listener lights up. Caption *The RDP server needs a trusted identity*.
+**On screen:** arrival at `rdp01.malawi.lab`; the RDP listener lights up. Caption *The RDP server needs a trusted identity*.
 
 **Meaning:** the Remote Desktop service on `RDP01` accepts the connection. The server, not the client, owns and presents the certificate used for server authentication (F-01). The caption states the problem: the server needs a certificate that clients can validate up to a root they already trust.
 
@@ -140,7 +140,7 @@ The caption compresses two facts:
 The CA verifies the signature with the public key inside the request (part of B-04.3 check 4). The beam is the act of signing. No key material leaves the container (F-03).
 
 ### B-04.1
-**On screen:** the capsule pauses, framed against the AD node `1SN0S.LAB`. A steel-blue query asks "who publishes RDPAuth?", and a route lights to Issuing CA 1 only.
+**On screen:** the capsule pauses, framed against the AD node `MALAWI.LAB`. A steel-blue query asks "who publishes RDPAuth?", and a route lights to Issuing CA 1 only.
 
 **Meaning:** before submitting, the enrollment client discovers eligible CAs from AD (F-05, AR-05). It reads the Enrollment Services objects in the Configuration partition, which list each enterprise CA and the templates it publishes. Only Issuing CA 1 publishes `RDPAuth` (AR-04), so only Issuing CA 1 is eligible (F-14).
 
@@ -165,7 +165,7 @@ The capsule carries the public key and request information only (F-04). It never
 Caption *Issuing CA 1 verifies, then signs*.
 
 **Meaning:** arriving at a CA is never sufficient (F-06). The enterprise CA:
-1. **Authenticates the requester.** The request arrives over an authenticated connection, and the CA knows it comes from the `RDP01` computer account in `1SN0S.LAB` (Kerberos via the domain controller).
+1. **Authenticates the requester.** The request arrives over an authenticated connection, and the CA knows it comes from the `RDP01` computer account in `MALAWI.LAB` (Kerberos via the domain controller).
 2. **Confirms the template is published on this CA.** `RDPAuth` is in Issuing CA 1's published templates.
 3. **Confirms Enroll permission.** The requester has Enroll on the `RDPAuth` template, and the Request Certificates permission on the CA.
 4. **Confirms the request satisfies the template's policy.** This covers:
@@ -177,19 +177,19 @@ Caption *Issuing CA 1 verifies, then signs*.
 Because `RDPAuth` builds the subject from AD, the CA looks up the computer object and takes its DNS name for the subject and SAN (F-07). It does not use names from the request. Only after all four checks does it sign.
 
 ### B-04.4
-**On screen:** the request capsule is consumed at the press. Issuing CA 1's key stays in a sealed module and drives a press that stamps the card. The card shows SAN `rdp01.1sn0s.lab`, the Remote Desktop Authentication EKU, a validity bar and small AIA/CDP ports.
+**On screen:** the request capsule is consumed at the press. Issuing CA 1's key stays in a sealed module and drives a press that stamps the card. The card shows SAN `rdp01.malawi.lab`, the Remote Desktop Authentication EKU, a validity bar and small AIA/CDP ports.
 
 The request ends its life here (model `E-04.4a`). The CA records the request and the issued certificate in its database. The request is never forwarded anywhere, and it never appears again; in particular, it is not in the S5 flashback.
 
 **Meaning:** the CA signs the end-entity certificate (`CERT-RDP`) with Issuing CA 1's private key. That key stays in the CA's protected key storage (an HSM or the CA's KSP) and never leaves it (F-03). The press represents the signing operation; nothing from the key is stamped onto the card except the signature.
 
 The certificate contains:
-- subject CN=rdp01.1sn0s.lab and SAN dNSName=rdp01.1sn0s.lab (from AD; F-07)
+- subject CN=rdp01.malawi.lab and SAN dNSName=rdp01.malawi.lab (from AD; F-07)
 - EKU Remote Desktop Authentication, 1.3.6.1.4.1.311.54.1.2 (F-08). RDP would also accept Server Authentication, 1.3.6.1.5.5.7.3.1.
 - a validity period
 - not-a-CA Basic Constraints
 - the AIA extension (where to get Issuing CA 1's certificate)
-- the CDP extension (where to get Issuing CA 1's CRL), both on `pki.1sn0s.lab` (AR-06)
+- the CDP extension (where to get Issuing CA 1's CRL), both on `pki.malawi.lab` (AR-06)
 
 ### B-04.5
 **On screen:** the card returns and locks in beside the private key.
@@ -201,7 +201,7 @@ The response also carries the issuing CA's certificate as part of its chain. The
 (Docs only, F-09: the Remote Desktop service needs read access to that private key in order to use the certificate. When the Group Policy template setting is used, the service uses the enrolled certificate for RDP's TLS.)
 
 ### B-05.1
-**On screen:** the camera cranes up to a sealed gold vault on its own cable-free plinth: `1SN0S Root CA`. A sweep of light reveals its existing self-signed seal, a ring that closes on itself. The seal does not animate closed, and the root's key module and press stay dark and still.
+**On screen:** the camera cranes up to a sealed gold vault on its own cable-free plinth: `MALAWI Root CA`. A sweep of light reveals its existing self-signed seal, a ring that closes on itself. The seal does not animate closed, and the root's key module and press stay dark and still.
 
 **Meaning:** the Root CA is offline, standalone and not domain-joined (AR-01). It is never connected to the network, which is why there are no cables. Its certificate is self-signed: it signs itself.
 
@@ -220,7 +220,7 @@ The band and tag make the capsule unmistakably a different request from the RDP 
    - the issued certificate
    - the root certificate
    - the root's current CRL
-5. The CA certificate was installed on Issuing CA 1. The root certificate and CRL were published to `pki.1sn0s.lab` and AD.
+5. The CA certificate was installed on Issuing CA 1. The root certificate and CRL were published to `pki.malawi.lab` and AD.
 
 Issuing CA 2 was certified the same way (not shown).
 
@@ -263,7 +263,7 @@ The caption's "validates the whole chain" previews B-06.4–B-06.5. Building the
 
 The kiosk is only highlighted passively as the place a fetch *could* go. Nothing is requested and nothing answers.
 
-**Meaning:** if the server had not sent `CERT-CA1`, the client could read the AIA extension in `CERT-RDP` and download Issuing CA 1's certificate from `pki.1sn0s.lab` (AR-06).
+**Meaning:** if the server had not sent `CERT-CA1`, the client could read the AIA extension in `CERT-RDP` and download Issuing CA 1's certificate from `pki.malawi.lab` (AR-06).
 
 Here the intermediate was presented, so nothing is fetched. Even when AIA is used, the downloaded certificate is only a chain-building aid. The chain must still end at a root already in the Trusted Root store. AIA never creates trust (F-11).
 
@@ -272,7 +272,7 @@ Here the intermediate was presented, so nothing is fetched. Even when AIA is use
 1. *Chain ends at a trusted root*
 2. *Signatures verify*
 3. *Currently valid*
-4. *Name matches rdp01.1sn0s.lab*
+4. *Name matches rdp01.malawi.lab*
 5. *EKU permits RDP*
 
 A sixth tick, *Revocation OK*, appears as pending.
@@ -281,7 +281,7 @@ A sixth tick, *Revocation OK*, appears as pending.
 1. **Chain ends at a trusted root.** The path terminates at a certificate in the Trusted Root store. This step of path validation also enforces Basic Constraints: `CERT-CA1` must have CA=true, and the end-entity certificate must not be a CA. It also rejects any certificate with an unrecognized critical extension. Those two checks are part of F-12, but have no tick of their own.
 2. **Signatures verify.** `CERT-RDP`'s signature verifies with Issuing CA 1's public key, and `CERT-CA1`'s with the root's public key.
 3. **Currently valid.** Every certificate in the chain is within its validity period.
-4. **Name matches `rdp01.1sn0s.lab`.** The name the user connected to matches a SAN dNSName in `CERT-RDP`. This is the identity check. It is separate from chain building: a valid chain for a different name would fail here.
+4. **Name matches `rdp01.malawi.lab`.** The name the user connected to matches a SAN dNSName in `CERT-RDP`. This is the identity check. It is separate from chain building: a valid chain for a different name would fail here.
 5. **EKU permits RDP.** `CERT-RDP` carries Remote Desktop Authentication. RDP also accepts Server Authentication (F-08).
 6. **Revocation OK.** Pending, resolved in B-06.5.
 
@@ -296,7 +296,7 @@ The root is not revocation-checked; nothing above it could revoke it.
 
 Each CRL is signed by its issuer, and the client verifies that signature and the CRL's freshness (nextUpdate). Issuing CAs may also publish delta CRLs, which the client would also consult. The film shows one fetch per link. CRLs are cached, so a real client may not download them on every connection.
 
-CDP/CRL is the ADCS default (AR-06). OCSP would be used only if an Online Responder were deployed (AR-07); none is. The "OCSP if deployed" tag therefore sits on the client's revocation check slot, not on the `pki.1sn0s.lab` kiosk, and the model gives the undeployed responder no host.
+CDP/CRL is the ADCS default (AR-06). OCSP would be used only if an Online Responder were deployed (AR-07); none is. The "OCSP if deployed" tag therefore sits on the client's revocation check slot, not on the `pki.malawi.lab` kiosk, and the model gives the undeployed responder no host.
 
 ### B-06.6
 **On screen:** the channel turns green; the session window opens. Caption *Trusted RDP connection established*.
@@ -304,14 +304,14 @@ CDP/CRL is the ADCS default (AR-06). OCSP would be used only if an Online Respon
 **Meaning:** all checks passed on this new connection, so the client accepts the server's identity (F-12). The TLS session completes. With NLA, the user's credentials are then sent through CredSSP inside this authenticated channel, and the remote session opens. Green appears only now.
 
 ### B-07.1
-**On screen:** the camera glides to `WEB01`, which serves `portal.1sn0s.lab` and carries a `WebServer-TLS` badge.
+**On screen:** the camera glides to `WEB01`, which serves `portal.malawi.lab` and carries a `WebServer-TLS` badge.
 
-**Meaning:** a second workload. The web server needs a TLS certificate for the site name `portal.1sn0s.lab` (F-14). The `WebServer-TLS` template is chosen by an authorized request for this server: for example, an administrator using the certificate snap-in or `certreq`, under an account allowed to enroll. Templates whose subject is supplied in the request are not used for autoenrollment.
+**Meaning:** a second workload. The web server needs a TLS certificate for the site name `portal.malawi.lab` (F-14). The `WebServer-TLS` template is chosen by an authorized request for this server: for example, an administrator using the certificate snap-in or `certreq`, under an account allowed to enroll. Templates whose subject is supplied in the request are not used for autoenrollment.
 
 ### B-07.2
 **On screen:** a local key pair; the private key is locked and anchored; the request is sealed by proof of possession.
 
-**Meaning:** the same rules as S3 (F-03, F-04). `WEB01` generates its key pair locally, and the private key stays in its key container. Here the request carries the subject `CN=portal.1sn0s.lab` and SAN dNSName `portal.1sn0s.lab`, because `WebServer-TLS` takes the subject from the request (F-07). The request is signed with the private key. The key is not sent.
+**Meaning:** the same rules as S3 (F-03, F-04). `WEB01` generates its key pair locally, and the private key stays in its key container. Here the request carries the subject `CN=portal.malawi.lab` and SAN dNSName `portal.malawi.lab`, because `WebServer-TLS` takes the subject from the request (F-07). The request is signed with the private key. The key is not sent.
 
 ### B-07.3
 **On screen:** AD shows both CAs. Issuing CA 1 dims to grey ("WebServer-TLS not published here"); Issuing CA 2 lights violet. Eligibility tags: *Template published*, *Enrollment policy*, *Permissions*, *CA available*. Caption *Different templates can use different issuing CAs*.
@@ -343,13 +343,13 @@ Issuing CA 1 does not publish `WebServer-TLS`, so it is ineligible. Only Issuing
 The note compresses F-07. This template takes the subject and SAN from the request, so the CA will issue whatever name an allowed requester asks for. That is why Enroll is restricted to authorized web-server accounts. (A CA certificate manager approval step is also possible, but is not depicted.)
 
 ### B-08.2
-**On screen:** the web request capsule is consumed at the press. Issuing CA 2's key-driven press stamps the TLS card (SAN `portal.1sn0s.lab`, Server Authentication EKU). It returns and locks beside the web server's private key. Caption *Issuing CA 2 signs the TLS certificate*.
+**On screen:** the web request capsule is consumed at the press. Issuing CA 2's key-driven press stamps the TLS card (SAN `portal.malawi.lab`, Server Authentication EKU). It returns and locks beside the web server's private key. Caption *Issuing CA 2 signs the TLS certificate*.
 
 **Meaning:** Issuing CA 2 signs `CERT-WEB` with its own private key, which stays in its protected storage (F-03). The certificate has:
-- subject and SAN `portal.1sn0s.lab`
+- subject and SAN `portal.malawi.lab`
 - EKU Server Authentication, 1.3.6.1.5.5.7.3.1 (F-08)
 - not-a-CA Basic Constraints
-- AIA and CDP pointing to Issuing CA 2's certificate and CRL on `pki.1sn0s.lab`
+- AIA and CDP pointing to Issuing CA 2's certificate and CRL on `pki.malawi.lab`
 
 It is installed in `WEB01`'s `LocalMachine\My` with the existing private key (F-09), and bound to the site's HTTPS listener. As in B-04.5, the response chain gives `WEB01` its own copy of `CERT-CA2` for its Intermediate store (model `E-08.2e`, object `CERT-CA2-COPY-WEB`). That copy is what it presents in B-09.1.
 
@@ -359,14 +359,14 @@ It is installed in `WEB01`'s `LocalMachine\My` with the existing private key (F-
 **Meaning:** `CERT-CA2` was signed by the same Root CA at setup, in an offline ceremony like B-05.2 (not shown). It already existed before Issuing CA 2 signed anything, and it sits dimmed on Issuing CA 2's crown from B-07.3. B-08.3 is a reveal sweep of that existing certificate and its issuer relationship. The root does nothing now: its key module and press stay dark here and in B-09.2. Both issuing paths therefore terminate at one root (F-15, AR-03). The link is a trust relationship; the root stays cable-free.
 
 ### B-09.1
-**On screen:** a quick browser validation: `portal.1sn0s.lab` → Issuing CA 2 → Root. Compressed ticks for name, EKU, validity and revocation (with one CRL fetch per non-root link). The channel turns green.
+**On screen:** a quick browser validation: `portal.malawi.lab` → Issuing CA 2 → Root. Compressed ticks for name, EKU, validity and revocation (with one CRL fetch per non-root link). The channel turns green.
 
 **Meaning:** the same validation as S6, faster (F-10–F-13):
-- The browser on `CLIENT01` connects to `https://portal.1sn0s.lab`.
+- The browser on `CLIENT01` connects to `https://portal.malawi.lab`.
 - After the connection arrives, the web server sends `CERT-WEB` and its copy of `CERT-CA2`, and proves possession of its private key in the handshake. The client verifies the proof (model `E-09.1q`).
 - The client builds the chain to the same pre-installed root.
 - Chain-to-root and signature checks are conveyed by the docking, without ticks of their own. Basic Constraints and critical extensions are checked as in B-06.4.
-- The ticks show the name (`portal.1sn0s.lab` matches the SAN dNSName), EKU (Server Authentication) and validity.
+- The ticks show the name (`portal.malawi.lab` matches the SAN dNSName), EKU (Server Authentication) and validity.
 - Revocation is checked per link: `CERT-WEB` against Issuing CA 2's CRL, and `CERT-CA2` against the Root's CRL. The root itself is not checked. The revocation tick resolves only after both CRLs have arrived.
 
 **Browser caveat (docs only).** Browser revocation behaviour depends on the browser and on policy:

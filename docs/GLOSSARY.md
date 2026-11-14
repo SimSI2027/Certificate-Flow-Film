@@ -19,19 +19,19 @@ Part of the frozen reference spec (`docs/REFERENCE-SPEC.md`). On-screen wording 
 The Windows Server role that runs certification authorities and integrates them with Active Directory: templates, enrollment and publication.
 
 ### Active Directory (AD)
-The directory service of the domain `1SN0S.LAB` (NetBIOS `1SN0S`), hosted on the domain controller `DC01`. In this story it authenticates requesters with Kerberos and stores the certificate templates, their permissions and the Enrollment Services objects. It also distributes the root certificate to domain members.
+The directory service of the domain `MALAWI.LAB` (NetBIOS `MALAWI`), hosted on the domain controller `DC01`. In this story it authenticates requesters with Kerberos and stores the certificate templates, their permissions and the Enrollment Services objects. It also distributes the root certificate to domain members.
 
 ### Certification authority (CA)
 A service that signs certificates and CRLs with its private key.
 
 ### Root CA
-The CA at the top of the hierarchy: `1SN0S Root CA`. Its certificate is self-signed. In this lab it is offline, standalone and not domain-joined, and it signs only the issuing CA certificates and its own CRL.
+The CA at the top of the hierarchy: `MALAWI Root CA`. Its certificate is self-signed. In this lab it is offline, standalone and not domain-joined, and it signs only the issuing CA certificates and its own CRL.
 
 ### Trust anchor
 A certificate a relying party trusts directly, because it was deliberately placed in that party's trusted root store. Here, only the Root CA's certificate. Being self-signed does not make a certificate a trust anchor; being installed as trusted does.
 
 ### Subordinate (intermediate) issuing CA
-A CA whose own certificate is signed by another CA (here, by the root), with Basic Constraints CA=true. `1SN0S Issuing CA 1` and `1SN0S Issuing CA 2` are enterprise subordinate issuing CAs. They are not trust anchors. On screen: "Issuing CA 1", "Issuing CA 2".
+A CA whose own certificate is signed by another CA (here, by the root), with Basic Constraints CA=true. `MALAWI Issuing CA 1` and `MALAWI Issuing CA 2` are enterprise subordinate issuing CAs. They are not trust anchors. On screen: "Issuing CA 1", "Issuing CA 2".
 
 ### Standalone CA
 A CA that does not require AD and does not use certificate templates. Requests are typically held pending until an administrator issues them. The offline root here is a standalone CA and is not domain-joined.
@@ -94,13 +94,13 @@ The protected storage that holds a private key:
 The Windows cryptographic provider that creates, stores and uses keys without exposing them.
 
 ### Subject
-The identity a certificate names, for example `CN=rdp01.1sn0s.lab`.
+The identity a certificate names, for example `CN=rdp01.malawi.lab`.
 
 ### Subject Alternative Name (SAN)
 A certificate extension that lists the subject's names. Clients match the name they connected to against the SAN dNSName entries.
 
 ### dNSName
-The SAN entry type that holds a DNS host name, for example `rdp01.1sn0s.lab` or `portal.1sn0s.lab`. DNS names are case-insensitive (RFC 4343) and shown in lower case.
+The SAN entry type that holds a DNS host name, for example `rdp01.malawi.lab` or `portal.malawi.lab`. DNS names are case-insensitive (RFC 4343) and shown in lower case.
 
 ### Extended Key Usage (EKU)
 A certificate extension listing the purposes a certificate may be used for. The two here:
@@ -117,10 +117,10 @@ An extension marked critical must be understood by the relying party. A certific
 The notBefore–notAfter interval in which a certificate may be used. On screen: the validity bar.
 
 ### Authority Information Access (AIA)
-A certificate extension that says where to download the issuer's certificate (here, over HTTP from `pki.1sn0s.lab`). It helps build a chain when an intermediate certificate is missing. It never creates trust.
+A certificate extension that says where to download the issuer's certificate (here, over HTTP from `pki.malawi.lab`). It helps build a chain when an intermediate certificate is missing. It never creates trust.
 
 ### CRL Distribution Point (CDP)
-A certificate extension that says where to download the CRL of the CA that issued that certificate (here, over HTTP from `pki.1sn0s.lab`).
+A certificate extension that says where to download the CRL of the CA that issued that certificate (here, over HTTP from `pki.malawi.lab`).
 
 ### Certificate Revocation List (CRL)
 A list, signed by a CA, of the serial numbers of certificates that CA has revoked before expiry. The CRL has its own validity (thisUpdate/nextUpdate). ADCS CAs may also publish delta CRLs.
@@ -166,7 +166,7 @@ The transport used for the offline root ceremony (for example, a USB drive). It 
 ## Protocols and Windows terms
 
 ### Remote Desktop Protocol (RDP)
-The protocol the user's client uses to open a remote session on `rdp01.1sn0s.lab`. Here it is protected by TLS, with the server authenticated by its certificate.
+The protocol the user's client uses to open a remote session on `rdp01.malawi.lab`. Here it is protected by TLS, with the server authenticated by its certificate.
 
 ### TLS handshake
 The start of a TLS connection, in which the server sends its certificate chain and proves possession of its private key. The client validates the chain and the name.
@@ -183,7 +183,7 @@ AD-delivered configuration. Here it does two things:
 - distributes the root certificate (as an alternative to AD publication)
 
 ### Fully qualified domain name (FQDN)
-A complete DNS name, for example `rdp01.1sn0s.lab`.
+A complete DNS name, for example `rdp01.malawi.lab`.
 
 ## Film shapes
 

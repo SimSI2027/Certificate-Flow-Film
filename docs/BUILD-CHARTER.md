@@ -42,22 +42,22 @@ Values shaped like `<<REPLACE: … | fallback: …>>` are placeholders the owner
 
 | Variable | Value |
 |---|---|
-| `AD_DOMAIN_FQDN` | `1SN0S.LAB` (shown in this form on the Active Directory node) |
-| `AD_NETBIOS` | `1SN0S` |
-| `DNS_SUFFIX` | `1sn0s.lab`. DNS is case-insensitive (RFC 4343); SAN dNSNames are shown lower-case, as they normally appear in certificates. |
+| `AD_DOMAIN_FQDN` | `MALAWI.LAB` (shown in this form on the Active Directory node) |
+| `AD_NETBIOS` | `MALAWI` |
+| `DNS_SUFFIX` | `malawi.lab`. DNS is case-insensitive (RFC 4343); SAN dNSNames are shown lower-case, as they normally appear in certificates. |
 | `DC_HOSTNAME` | `<<REPLACE: domain controller hostname \| fallback: DC01>>` |
 | `CLIENT_HOSTNAME` | `<<REPLACE: user laptop hostname \| fallback: CLIENT01>>` |
 | `RDP_SERVER_HOSTNAME` | `<<REPLACE: RDP server hostname \| fallback: RDP01>>` |
 | `WEB_SERVER_HOSTNAME` | `<<REPLACE: web server hostname \| fallback: WEB01>>` |
-| `WEB_SITE_DNS_NAME` | `<<REPLACE: website DNS name in the TLS certificate SAN \| fallback: portal.1sn0s.lab>>` |
-| `ROOT_CA_NAME` | `<<REPLACE: Root CA common name \| fallback: 1SN0S Root CA>>` |
-| `ISSUING_CA1_NAME` | `<<REPLACE: Issuing CA 1 common name \| fallback: 1SN0S Issuing CA 1>>` |
-| `ISSUING_CA2_NAME` | `<<REPLACE: Issuing CA 2 common name \| fallback: 1SN0S Issuing CA 2>>` |
-| `PKI_HTTP_HOST` | `<<REPLACE: host serving AIA/CDP over HTTP \| fallback: pki.1sn0s.lab>>` |
+| `WEB_SITE_DNS_NAME` | `<<REPLACE: website DNS name in the TLS certificate SAN \| fallback: portal.malawi.lab>>` |
+| `ROOT_CA_NAME` | `<<REPLACE: Root CA common name \| fallback: MALAWI Root CA>>` |
+| `ISSUING_CA1_NAME` | `<<REPLACE: Issuing CA 1 common name \| fallback: MALAWI Issuing CA 1>>` |
+| `ISSUING_CA2_NAME` | `<<REPLACE: Issuing CA 2 common name \| fallback: MALAWI Issuing CA 2>>` |
+| `PKI_HTTP_HOST` | `<<REPLACE: host serving AIA/CDP over HTTP \| fallback: pki.malawi.lab>>` |
 | `RDP_TEMPLATE` | `RDPAuth` |
 | `WEB_TEMPLATE` | `WebServer-TLS` |
 | `GITHUB_OWNER` | The account authenticated in GitHub CLI (expected `SimSI2027`). Verify it; if it differs, use the authenticated account and report this. |
-| `REPO_NAME` | `Certificate-Flow-Film` (fallback if taken: `1SN0S-Certificate-Flow-Film`) |
+| `REPO_NAME` | `Certificate-Flow-Film` (fallback if taken: `MALAWI-Certificate-Flow-Film`) |
 | `RELATED_LINKS` | `https://github.com/SimSI2027/Certificate-Flow-Lab`, and the Approach A repository `https://github.com/<GITHUB_OWNER>/Certificate-Flow-Animation` if it exists. Verify each with `gh`. Link only those verified, plus their Pages URLs if `gh api repos/<owner>/<repo>/pages` returns one. |
 
 Derived values (compute, never hard-code):
@@ -469,7 +469,7 @@ Script errors must fail the process. `--factory-startup` ignores user preference
 - **`ISSUING_CA1_NAME`** and **`ISSUING_CA2_NAME`** — enterprise subordinate (intermediate) issuing CAs. Their CA certificates are signed by the Root and have Basic Constraints CA=true. They are not trust anchors.
   - `RDPAuth` is published only on Issuing CA 1.
   - `WebServer-TLS` is published only on Issuing CA 2.
-- **Active Directory `1SN0S.LAB` (`DC_HOSTNAME`)**:
+- **Active Directory `MALAWI.LAB` (`DC_HOSTNAME`)**:
   - authenticates requesters (Kerberos, computer accounts)
   - stores templates and their permissions
   - stores the Enrollment Services objects that list which CA publishes which template
@@ -541,7 +541,7 @@ Scenes, captions, audio cues, manifests and TRACEABILITY are all generated from 
 Timings are named constants in seconds, converted to frames via FPS in `cff\story\timing.py`. Captions follow L-04. Beat IDs are stable. `docs\STORYBOARD.md` expands each beat with shot description, lens, camera move, focal subject and caption.
 
 **S1 — The connection begins (7 s)**
-- **B-01.1** A night-lit desk; the stylized low-poly user at `CLIENT_HOSTNAME` opens RDP.
+- **B-01.1** A night-lit desk; the user, an adult office worker seated at `CLIENT_HOSTNAME`, opens RDP.
 - **B-01.2** An amber connection pulse travels along a floor light-channel toward a distant rack; the camera follows it.
 - Caption: *Secure RDP connection*
 
@@ -559,7 +559,7 @@ Timings are named constants in seconds, converted to frames via FPS in `cff\stor
 - Captions: *The private key stays on the server* → *The request is signed, not the key sent*
 
 **S4 — Finding the right CA, then evaluation (14 s)** (the vertical slice)
-- **B-04.1** The capsule pauses at the AD node (`1SN0S.LAB`); a lookup for "who publishes RDPAuth?" lights a route to Issuing CA 1 only.
+- **B-04.1** The capsule pauses at the AD node (`MALAWI.LAB`); a lookup for "who publishes RDPAuth?" lights a route to Issuing CA 1 only.
 - **B-04.2** The capsule travels into the Issuing CA 1 vault (cyan).
 - **B-04.3** Four checks resolve with staggered ticks:
   1. Requester authenticated
@@ -628,7 +628,7 @@ Timings are named constants in seconds, converted to frames via FPS in `cff\stor
   - vignette
   - very restrained film grain
   
-  "Windows-style" infrastructure must be generic. **No Microsoft, Windows or other vendor logos or trademarks.** No realistic humans: the user is a stylized low-poly figure. No external models, textures, HDRIs or footage.
+  "Windows-style" infrastructure must be generic. **No Microsoft, Windows or other vendor logos or trademarks.** No external models, textures, HDRIs or footage, with one exception: the user character (amendment V4-A2, 2026-11-14, owner request; `docs\GAN-LEDGER.md` "Session V4"). The user may be a realistic adult office worker generated with the MPFB add-on from CC0 MakeHuman assets, saved locally as `assets\character.blend` and loaded at build time (nothing is downloaded at render time). Skin and cloth stay slightly stylized. Each asset's licence is recorded in `LICENSES\` and `README.md`.
 - **Camera.**
   - One rig: a dolly/crane path with a "look-at" target and an animated focus target.
   - Real lens values (24–50 mm).
