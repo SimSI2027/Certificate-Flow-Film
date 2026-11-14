@@ -59,6 +59,31 @@ def test_LOOK_A_haze_density_stays_in_its_tuning_range() -> None:
     assert look.HAZE_DENSITY_MIN <= look.HAZE_DENSITY <= look.HAZE_DENSITY_MAX
 
 
+def test_F3_LEG_01_flashback_marker_ends_at_the_cut() -> None:
+    from cff.stage import signs  # noqa: PLC0415
+
+    sign = signs.plan_signs()["LBL-FLASHBACK"]
+    assert max(f for f, s in sign.frames.items() if s.alpha > 0) <= 1395
+
+
+def test_F3_AUD_01_true_peak_aim_and_mp4_measurement() -> None:
+    from tools import film, verify  # noqa: PLC0415
+
+    assert film.TARGET_TP == -2.0
+    assert verify.MP4_TRUE_PEAK_MAX_DBFS == -1.0
+    summary = "  Integrated loudness:\n    I:         -16.0 LUFS\n  True peak:\n    Peak:       -1.4 dBFS\n"
+    assert verify.mp4_true_peak(summary) == -1.4
+    assert verify.mp4_true_peak("nothing here") is None
+
+
+def test_F3_PIPE_02_metadata_records_a_dirty_flag() -> None:
+    from tools import film  # noqa: PLC0415
+
+    assert isinstance(film.source_dirty(), bool)
+    assert '"dirty": source_dirty()' in (ROOT / "tools" / "film.py").read_text(encoding="utf-8")
+    assert '.get("dirty") is True' in (ROOT / "tools" / "verify.py").read_text(encoding="utf-8")
+
+
 def test_LOOK_C_web_badge_rests_before_the_flyovers() -> None:
     from cff.stage import choreography  # noqa: PLC0415
     from cff.stage.tracks import GLOW  # noqa: PLC0415

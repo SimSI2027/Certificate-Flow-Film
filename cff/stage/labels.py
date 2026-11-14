@@ -171,7 +171,7 @@ def _build() -> tuple[Placement, ...]:
         Placement("LBL-CONNECT", "SCREEN-IDLE", (0.0, 0.0, 0.35), CAP_TAG, window=Window("B-01.1", 0.3)),  # on the client's screen (PKI-S1R1-07)
         Placement("LBL-UNVERIFIED", m.CLIENT, (0.0, 0.0, 1.0), CAP_TAG * 1.2, window=Window("B-02.2", 0.7)),
         # fixed screen position for the whole flashback so the "earlier" marker is never hidden or moved (V1-PKI-02)
-        Placement("LBL-FLASHBACK", None, (0.0, 0.0, 0.0), CAP_TAG * 1.4, window=Window("B-05.2", 0.1, 4.9), screen_px=FLASHBACK_SCREEN_PX),
+        Placement("LBL-FLASHBACK", None, (0.0, 0.0, 0.0), CAP_TAG * 1.4, window=Window("B-05.2", 0.1, 4.7), screen_px=FLASHBACK_SCREEN_PX),
         Placement("LBL-KEY-RDP-PRIV", "KEY-RDP-PRIV", (-0.45, -0.12, 0.34), CAP_TAG, window=Window("B-03.1", 0.4, until="B-03.4")),
         Placement("LBL-KEY-RDP-PUB", "KEY-RDP-PUB", (0.45, -0.12, 0.34), CAP_TAG, window=Window("B-03.1", 0.1, until="B-03.3")),
         Placement("LBL-KEY-WEB-PRIV", "KEY-WEB-PRIV", (0.0, -0.12, -0.34), CAP_TAG, window=Window("B-07.2", 0.2)),

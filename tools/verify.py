@@ -105,7 +105,7 @@ EXPECTED_VIDEO = {"codec_name": "h264", "width": 1920, "height": 1080, "r_frame_
 DURATION_TOLERANCE_S = 0.05
 # The v1.0.0 MP4 predated the F1 fixes (blended cut frames, sRGB transfer tag, level 5.0). While this was True the two MP4 steps
 # reported those known problems without failing. Session F2 set it to False after the final re-render: the MP4 checks are binding.
-MP4_PENDING_RERENDER = False
+MP4_PENDING_RERENDER = True  # Session L1: True from the F3-AUD-01/F3-PIPE-02 commit until the v1.2 re-render is encoded, then False again
 
 
 def step_frame_tiers() -> list[Step]:
@@ -131,15 +131,33 @@ def mp4_problems(info: dict[str, object]) -> list[str]:
     return problems
 
 
+MP4_TRUE_PEAK_MAX_DBFS = -1.0  # F3-AUD-01: measured on the AAC stream of the Final MP4, not on the WAV mix
+
+
+def mp4_true_peak(stderr: str) -> float | None:
+    """True peak in dBFS from the ``ebur128=peak=true`` summary (the last ``Peak:`` line), or None when absent."""
+    found = re.findall(r"Peak:\s+(-?[0-9.]+|-inf)\s+dBFS", stderr)
+    return float(found[-1]) if found else None
+
+
 def step_final_mp4() -> Step:
     from tools import film  # noqa: PLC0415
 
     if not film.FINAL_MP4.exists():
         return Step("final MP4", True, "skipped (not built)")
     problems = mp4_problems(film.probe(film.FINAL_MP4))
+    peak_run = toolchain.run_ffmpeg(["-loglevel", "info", "-i", str(film.FINAL_MP4), "-vn", "-af", "ebur128=peak=true", "-f", "null", "-"])
+    peak = mp4_true_peak(peak_run.stderr)
+    if peak is None:
+        problems.append("true peak could not be measured")
+    elif peak > MP4_TRUE_PEAK_MAX_DBFS:
+        problems.append(f"AAC true peak {peak:.1f} dBFS is above {MP4_TRUE_PEAK_MAX_DBFS:.1f} dBFS")
+    if film.METADATA.exists() and json.loads(film.METADATA.read_text(encoding="utf-8")).get("dirty") is True:
+        problems.append("render-metadata.json says dirty: true (the render was made from uncommitted source)")
     if problems and MP4_PENDING_RERENDER:
-        return Step("final MP4", True, f"PENDING F2 re-render: {len(problems)} known v1.0.0 problem(s)", lines=problems)
-    return Step("final MP4", not problems, "matches the delivery spec" if not problems else f"{len(problems)} problem(s)", lines=problems)
+        return Step("final MP4", True, f"PENDING re-render: {len(problems)} known problem(s) of the previous MP4", lines=problems)
+    detail = "matches the delivery spec" if not problems else f"{len(problems)} problem(s)"
+    return Step("final MP4", not problems, f"{detail}; true peak {peak} dBFS" if peak is not None and not problems else detail, lines=problems)
 
 
 def cut_luma_steps(text: str) -> dict[int, float]:

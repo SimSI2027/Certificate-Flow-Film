@@ -24,7 +24,7 @@ POSTER_PNG = OUTPUT / "Certificate-Flow-Film-Poster.png"
 CONTACT_PNG = OUTPUT / "Certificate-Flow-Film-Contact-Sheet.png"
 METADATA = OUTPUT / "render-metadata.json"
 TARGET_LUFS = -16.0
-TARGET_TP = -1.5  # loudnorm aims here so the measured true peak of the written mix stays <= -1 dBFS (F2 measured -0.9 at a -1.0 aim)
+TARGET_TP = -2.0  # F3-AUD-01: loudnorm aims here so the AAC true peak of the Final MP4 stays <= -1 dBFS (a -1.5 aim gave -0.6 after AAC)
 TARGET_LRA = 11.0
 CRF_FINAL = 17
 CRF_PREVIEW = 27
@@ -123,6 +123,15 @@ def probe(path: Path) -> dict[str, object]:
     return json.loads(out.stdout)  # type: ignore[no-any-return]
 
 
+SOURCE_PATHS = ("cff", "blender", "tools", "scripts", "tests", "pyproject.toml")  # what a render is built from; deliverables and docs are excluded
+
+
+def source_dirty() -> bool:
+    """F3-PIPE-02: True when any source file differs from HEAD (tracked changes or untracked files), so ``commit`` would not describe the render."""
+    status = subprocess.run(["git", "status", "--porcelain", "--", *SOURCE_PATHS], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    return bool(status.strip())
+
+
 def write_metadata(tier: str) -> dict[str, object]:
     from cff.config import names  # noqa: PLC0415
 
@@ -131,7 +140,7 @@ def write_metadata(tier: str) -> dict[str, object]:
     loud = json.loads((AUDIO_DIR / "loudness.json").read_text(encoding="utf-8"))
     progress = json.loads((frames.tier_dir(tier) / "progress.json").read_text(encoding="utf-8")) if (frames.tier_dir(tier) / "progress.json").exists() else {}
     data: dict[str, object] = {
-        "commit": commit, "tier": tier, "blender": toolchain.load().blender_version, "engine": "BLENDER_EEVEE", "frames": timing.frame_end(),
+        "commit": commit, "dirty": source_dirty(), "tier": tier, "blender": toolchain.load().blender_version, "engine": "BLENDER_EEVEE", "frames": timing.frame_end(),
         "fps": timing.FPS, "duration_s": timing.total_duration_s(), "beats": len(model.MODEL.beats), "spec_sha256": spec,
         "last_render_progress": progress, "loudness": loud, "names": {k: v for k, v in vars(names).items() if k.isupper() and isinstance(v, str)},
         "final": probe(FINAL_MP4), "preview": probe(PREVIEW_MP4),
