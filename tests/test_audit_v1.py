@@ -262,7 +262,7 @@ def test_V1_CIN_02_hero_holds_the_whole_topology() -> None:  # noqa: N802
     assert "CAP-S9a" not in caption_layout.focal_overlaps()
 
 
-HERO_ARRIVED_FRAMES = 60  # residual: the camera pulls back from the B-09.1 close-up, so the topology is whole from ~102 s
+HERO_ARRIVED_FRAMES = 60  # kept; v1.3 is stricter: tests/test_v13.py wants every frame whole from 98.5 s
 
 
 @pytest.mark.covers("C-05")

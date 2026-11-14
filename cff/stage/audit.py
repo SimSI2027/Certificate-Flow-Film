@@ -29,7 +29,7 @@ FRONTAL_MAX_S = 2.0
 # Beats where the measured C-03 framing or focus is still below threshold at the end of Session 3. They are reported
 # (advisory) and ratcheted: no other beat may fail, and the Stage 1 rounds must clear these. Remove a beat from this
 # set as soon as it passes; the test in tests/test_camera.py fails if a listed beat now passes (the list never rots).
-C03_OPEN_BEATS: frozenset[str] = frozenset({"B-05.1", "B-09.2"})
+C03_OPEN_BEATS: frozenset[str] = frozenset({"B-05.1"})  # B-09.2 closed in v1.3 (the hero arrives by 98.5 s)
 
 
 @dataclass(frozen=True)

@@ -44,6 +44,9 @@ class Shot:
     focus: tuple[Target, ...] = ()  # default: the look targets
     rack_to: tuple[Target, ...] = ()  # focus racks to these targets mid-beat
     start: Pose | None = None  # an explicit opening pose (the opening shot and the two cuts)
+    lead_s: float = 0.0  # the move into this beat starts this long before the beat (the previous beat's move ends early)
+    arrive: float = 1.0  # fraction of the move by which the pose (az, el, dist, look) is reached; the camera then holds it
+    focus_pull: float | None = None  # fraction of the move over which the focus settles on the subject (default FOCUS_PULL_FRACTION)
 
 
 # Camera limits (C-02) and lens-rate planning.
@@ -142,7 +145,9 @@ SHOTS: tuple[Shot, ...] = (
     Shot("same-root", "B-08.3", ("CERT-CA2", "ROOT_CA"), -32, 18, 26.22, 28, 4.0, follow=0.35, bulge=4.8, focus=("CERT-CA2",)),
     # S9
     Shot("browser-arc", "B-09.1", (STACK_MID,), -80, 8, 6.0, 35, 2.8, follow=0.4, bulge=5.5),  # V1-PKI-04
-    Shot("hero", "B-09.2", (WORLD_CENTRE,), -45, 30, 42.0, 24, 5.6, follow=0.45, focus=("ROOT_CA",)),  # V1-CIN-02 (v1.2 tried 0.3/0.2/0.1: 62 inside-frames each against 63 at 0.45, and camera tests failed)
+    # V1-CIN-02, v1.3: the pull-back starts 0.8 s before the beat, reaches the pose in 27% of its move and racks to the root early
+    # (C-02 is relative to the focus distance), so the whole topology is in frame from 98.5 s (was about 101 s)
+    Shot("hero", "B-09.2", (WORLD_CENTRE,), -45, 30, 42.0, 24, 5.6, follow=0.7, focus=("ROOT_CA",), lead_s=0.8, arrive=0.27, focus_pull=0.08),
     Shot("close", "B-09.3", (WORLD_CENTRE,), -41, 32, 44.0, 24, 5.6, focus=("ROOT_CA",)),
 )
 

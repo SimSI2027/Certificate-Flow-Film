@@ -94,8 +94,11 @@ class CameraPlan:
         beats = list(timing.BEAT_DURATIONS_S)
         for index, beat_id in enumerate(beats):
             shot = shots.BY_BEAT[beat_id]
-            first, last = timing.frame_range(*timing.beat_window(beat_id))
-            self.beat_first[beat_id] = first
+            beat_first, beat_last = timing.frame_range(*timing.beat_window(beat_id))
+            self.beat_first[beat_id] = beat_first
+            first, last = beat_first - self._lead(shot, index), beat_last  # the camera's own window for this beat's move
+            if index + 1 < len(beats):
+                last -= self._lead(shots.BY_BEAT[beats[index + 1]], index + 1)
             if shot.start is not None:
                 start = self._pose_state(shot.start, first)
                 if prev is not None:
@@ -116,6 +119,11 @@ class CameraPlan:
             if index == len(beats) - 1 and prev is not None:
                 self.states[last + 1] = prev
         self._smooth()
+
+    @staticmethod
+    def _lead(shot: Shot, index: int) -> int:
+        """Frames by which the move into ``shot`` starts before its beat; never across a cut or before the opening."""
+        return round(shot.lead_s * timing.FPS) if shot.start is None and index > 0 else 0
 
     def _smooth(self) -> None:
         """Gaussian-filter camera position, look-at and lens inside each cut-free segment (no motion across a cut)."""
@@ -148,11 +156,12 @@ class CameraPlan:
                     lens, fstop, raw[frame].focus)
 
     def _state(self, shot: Shot, start: CamState, first: int, frame: int, t: float, lens_t: float) -> CamState:
-        w = ease(t / shot.follow) if shot.follow > 0 else 1.0
-        e = ease(t)
+        t_pose = t / shot.arrive
+        w = ease(t_pose / shot.follow) if shot.follow > 0 else 1.0
+        e = ease(t_pose)
         target = self.centre(shot.look, frame)
         look = lo.lerp(start.look, target, w)
-        bump = math.sin(math.pi * min(1.0, t))
+        bump = math.sin(math.pi * min(1.0, t_pose))
         dist = _lerp(start.dist, shot.dist, e) + shot.bulge * bump
         lens = _lerp(start.lens, shot.lens, ease(t / lens_t) if lens_t > 0 else 1.0)
         focus_targets = shot.focus or shots.focal_objects(shot.beat, self.beat_focal[shot.beat])
@@ -160,7 +169,7 @@ class CameraPlan:
         if shot.rack_to:
             r = max(0.0, min(1.0, (t - shots.RACK_FROM) / (shots.RACK_TO - shots.RACK_FROM)))
             focus_now = lo.lerp(focus_now, self.centre(shot.rack_to, frame), ease(r))
-        focus = lo.lerp(start.focus, focus_now, ease(t / shots.FOCUS_PULL_FRACTION))
+        focus = lo.lerp(start.focus, focus_now, ease(t / (shot.focus_pull or shots.FOCUS_PULL_FRACTION)))
         return CamState(frame, look, _lerp_angle(start.az, shot.az, e), _lerp(start.el, shot.el, e), dist, lens,
                         _lerp(start.fstop, shot.fstop, e), focus)
 
