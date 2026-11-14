@@ -63,7 +63,21 @@ CLIENT: Vec3 = (-12.0, -8.0, 0.0)
 # V4: a realistic seated adult reaches about 0.45 m past the desk edge (x -11.1), so the laptop sits near the edge and the user's
 # chair is pulled in; at the desk centre (x -12.0) the keyboard was 1.6 m from the user, out of any human reach.
 LAPTOP: Vec3 = (-11.42, -8.0, 0.78)  # base centre; the screen faces +X
-LAPTOP_LID_X_OFFSET = -0.2  # the idle screen glow sits on the lid, behind the base centre
+# V5a: a thin laptop whose lid leans back LAPTOP_LID_TILT_DEG from the hinge; the idle screen (the RDP client) lies on the lid's
+# inner face, tilted with it (it stood 5 cm behind the lid before). Laptop frame: +X toward the user, origin at the base centre.
+LAPTOP_HINGE_XZ: tuple[float, float] = (-0.165, 0.021)
+LAPTOP_LID_TILT_DEG = 12.0
+LAPTOP_LID_THICKNESS = 0.007
+LAPTOP_LID_LENGTH = 0.29
+LAPTOP_SCREEN_ALONG = 0.145  # screen centre, measured up the lid from the hinge
+_TILT = math.radians(LAPTOP_LID_TILT_DEG)
+LAPTOP_LID_X_OFFSET = LAPTOP_HINGE_XZ[0] - math.sin(_TILT) * LAPTOP_SCREEN_ALONG + math.cos(_TILT) * (LAPTOP_LID_THICKNESS + 0.001)
+LAPTOP_SCREEN_Z = LAPTOP[2] + LAPTOP_HINGE_XZ[1] + math.cos(_TILT) * LAPTOP_SCREEN_ALONG + math.sin(_TILT) * (LAPTOP_LID_THICKNESS + 0.001)
+CONNECT_SIGN_POINT: Vec3 = (LAPTOP[0] - 0.2, LAPTOP[1], 1.27)  # the "connect" sign's V4 position above the lid (its legibility hold was tuned there)
+
+
+def idle_screen_centre() -> Vec3:
+    return (LAPTOP[0] + LAPTOP_LID_X_OFFSET, LAPTOP[1], LAPTOP_SCREEN_Z)
 USER: Vec3 = (-10.9, -8.0, 0.0)  # the chair; seated east of the laptop, facing west
 RDP: Vec3 = (0.0, 0.0, 0.0)
 WEB: Vec3 = (9.0, 2.0, 0.0)
@@ -84,8 +98,12 @@ KIOSK: Vec3 = (-8.0, 4.0, 0.0)
 # --- sizes -----------------------------------------------------------------------------------
 CHASSIS_SIZE: Vec3 = (1.4, 1.0, 2.2)
 CA_VAULT_SIZE: Vec3 = (4.0, 3.2, 2.8)
-AD_RADIUS = 0.8
-AD_HEIGHT = 3.4
+# V5a (amendment V5-A1): the AD/DC node is a real 42U rack cabinet (it was a 3.4 m hexagonal column of radius 0.8).
+AD_WIDTH = 0.8
+AD_DEPTH = 1.1
+AD_HEIGHT = 2.2
+AD_RING_Z: tuple[float, float] = (1.55, 1.95)  # the two Enrollment Services rings circle the rack's upper body
+AD_RING_DIAMETER = 1.75  # clears the rack's footprint half-diagonal (0.68 m)
 ROOT_DAIS_Z = 1.5
 ROOT_PLINTH_SIZE: Vec3 = (2.4, 2.4, 4.5)
 ROOT_VAULT_SIZE: Vec3 = (3.0, 2.4, 2.4)

@@ -43,7 +43,7 @@ SOLIDS: tuple[Solid, ...] = tuple(
         ("desk", lo.CLIENT, _half_diagonal(1.8, 1.2), 0.76),
         ("rdp", lo.RDP, _half_diagonal(lo.CHASSIS_SIZE[0], lo.CHASSIS_SIZE[1]), lo.TOP_PLATE[2]),
         ("web", lo.WEB, _half_diagonal(lo.CHASSIS_SIZE[0], lo.CHASSIS_SIZE[1]), lo.TOP_PLATE[2]),
-        ("ad", lo.AD, lo.AD_RADIUS, lo.AD_HEIGHT),  # the 0.35 m cap is inside RIG_KEEP_OUT_ABOVE_M
+        ("ad", lo.AD, _half_diagonal(lo.AD_WIDTH, lo.AD_DEPTH), lo.AD_HEIGHT),
         ("ca1", lo.CA1, _half_diagonal(lo.CA_VAULT_SIZE[0], lo.CA_VAULT_SIZE[1]), lo.CA_CROWN[2]),
         ("ca2", lo.CA2, _half_diagonal(lo.CA_VAULT_SIZE[0], lo.CA_VAULT_SIZE[1]), lo.CA_CROWN[2]),
         ("root", lo.ROOT, _half_diagonal(lo.ROOT_VAULT_SIZE[0], lo.ROOT_VAULT_SIZE[1]), lo.ROOT_VAULT_Z + lo.ROOT_VAULT_SIZE[2]),

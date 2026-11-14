@@ -89,6 +89,29 @@ POOL_CA2_HEX = "#C4B1FF"
 POOL_ROOT_HEX = "#FFE08A"
 AMBIENT_TO_KEY_MAX = 0.20
 
+# --- V5a realistic hardware and datacenter (amendment V5-A1) --------------------------------
+# Surface colours of the physical finishes. Identity still comes from the role colours (accents and the glow channel); these are
+# the neutral materials around them, all low-saturation and far from every state colour (C-10).
+STEEL_HEX = "#262B33"  # powder-coated rack and enclosure steel (graphite)
+STEEL_LIGHT_HEX = "#5A616B"  # rails, posts, cage mesh and plinth hardware
+BEZEL_HEX = "#121418"  # black plastic bezels, keycaps, drive caddies
+CADDY_HEX = "#2E333B"  # drive-caddy fronts (a step above the bezel, so the bays read)
+VENT_HEX = "#050608"  # port holes, vent slots and grilles
+ALUMINIUM_HEX = "#A7ADB5"  # laptop shell and handles (brushed)
+GLASS_HEX = "#07090C"  # laptop display glass and the root machine's dark panels
+CABLE_HEX = "#1A1C20"  # network and power cable jackets: dark, never a state colour
+CONCRETE_HEX = "#8A8C8F"  # the root plinth and dais (multiplied by the CC0 concrete albedo)
+TILE_HEX = "#2A313B"  # raised-floor tile laminate
+TILE_SEAM_HEX = "#0B0E12"  # the steel grid between floor tiles
+DESK_HEX = "#3B3530"  # dark wood-tone desk top (matte laminate)
+FABRIC_HEX = "#23272E"  # the office chair's mesh and cushion
+LED_HEX = "#CFE0FF"  # static status LEDs on every device (pale blue-white, the pool tint): never green or amber (C-10)
+AISLE_LIGHT_HEX = "#DCE8FF"  # cold-aisle LED fixtures (cool white)
+UI_TITLE_HEX = "#2B5C9E"  # the RDP client's title and connection bar on the laptop screen
+UI_DESKTOP_HEX = "#7FB4E8"  # the remote desktop inside the RDP client window (SCREEN_HEX family)
+UI_TASKBAR_HEX = "#18263C"  # the remote session's taskbar
+UI_ICON_HEX = "#F7FAFF"  # desktop icons and window text bars
+
 
 def role_hex(role: ColourRole) -> str:
     return ROLE_HEX[role]

@@ -9,7 +9,7 @@ import bmesh
 import bpy
 from mathutils import Matrix
 
-from blender import actors, materials
+from blender import actors, finishes, materials
 from blender.common import PROP_ID, PROP_KIND, PROP_OWNER, PROP_ROLE, linear4, tag
 from cff.stage import layout as lo
 from cff.stage.objects import CATALOGUE, Kind, StageObject
@@ -18,6 +18,12 @@ from cff.theme.render import Tier
 
 FLOOR_HALF_EXTENT_M = 200.0  # past the backdrop ring, so no floor edge shows in a wide shot
 FLOOR_CENTRE_Y_M = 20.0
+# V5a: kinds built from detailed hardware (multi-slot meshes); the big hero pieces also get a chamfer on every edge.
+DETAILED_KINDS: frozenset[Kind] = frozenset({
+    Kind.CHASSIS, Kind.PANEL, Kind.PORT, Kind.CA_VAULT, Kind.EVAL_CRADLE, Kind.MODULE, Kind.PRESS, Kind.ROOT_VAULT, Kind.PLINTH,
+    Kind.DAIS, Kind.READER, Kind.AD_COLUMN, Kind.KIOSK, Kind.DESK, Kind.LAPTOP, Kind.FIGURE, Kind.SCREEN, Kind.CONTAINER, Kind.CONTAINER_LID,
+})
+BEVELLED_KINDS: frozenset[Kind] = frozenset({Kind.PANEL, Kind.MODULE, Kind.PRESS, Kind.LAPTOP, Kind.DESK, Kind.PLINTH, Kind.CONTAINER, Kind.CONTAINER_LID})
 
 
 def _horizon(world: bpy.types.World) -> None:
@@ -85,7 +91,7 @@ def build_floor(collection: bpy.types.Collection) -> bpy.types.Object:
     half = FLOOR_HALF_EXTENT_M
     verts = [(-half, FLOOR_CENTRE_Y_M - half, 0.0), (half, FLOOR_CENTRE_Y_M - half, 0.0), (half, FLOOR_CENTRE_Y_M + half, 0.0), (-half, FLOOR_CENTRE_Y_M + half, 0.0)]
     mesh.from_pydata(verts, [], [(0, 1, 2, 3)])
-    mesh.materials.append(materials.floor_material())
+    mesh.materials.append(finishes.raised_floor())  # V5a: raised-floor tiles (was the navy grid, materials.floor_material)
     floor = bpy.data.objects.new("FLOOR", mesh)
     collection.objects.link(floor)
     tag(floor, **{PROP_ID: "FLOOR", PROP_KIND: "floor"})
@@ -125,6 +131,15 @@ def build_actor(o: StageObject, collection: bpy.types.Collection) -> bpy.types.O
         ob.data.materials.append(materials.chassis_material())
     else:
         ob.data.materials.append(materials.stage_material(o.role, o.kind in materials.GLOW_ONLY_KINDS))
+    if o.kind in DETAILED_KINDS:  # V5a: slots 1.. are the physical finishes; slot 0 above keeps the glow channel
+        for mat in finishes.slot_materials(o.role):
+            ob.data.materials.append(mat)
+        if o.kind in BEVELLED_KINDS:
+            bevel = ob.modifiers.new("edge-bevel", "BEVEL")
+            bevel.width = look.EDGE_BEVEL_M
+            bevel.segments = 1
+            bevel.limit_method = "ANGLE"
+            bevel.use_clamp_overlap = True
     collection.objects.link(ob)
     ob.location = o.home
     ob.rotation_mode = "XYZ"

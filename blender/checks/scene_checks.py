@@ -22,11 +22,12 @@ import bpy
 from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Matrix, Vector
 
-from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, bundled_font, glyph_cap_ratio, linear
+from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, PROP_OWNER, bundled_font, glyph_cap_ratio, linear
 from cff.stage import camera as stage_camera
+from cff.stage import hardware
 from cff.stage import labels as stage_labels
 from cff.stage import signs as stage_signs
-from cff.stage.objects import CATALOGUE, Kind
+from cff.stage.objects import BY_ID, CATALOGUE, Kind
 from cff.story import captions as story_captions
 from cff.story import model as m
 from cff.story import timing
@@ -182,19 +183,82 @@ def check_keyframes() -> Result:
 # --- containment, isolation, routes -------------------------------------------------------------------
 
 
+def declared_bounds(ob: bpy.types.Object) -> tuple[Vector, Vector]:
+    """V5a: a shell's declared box (``cff.stage.hardware.SHELL_BOUNDS``) through its current ``matrix_world``. The PKI checks use
+    this, not the mesh's bounding box, so detailed hardware can never widen what counts as inside (``check_shell_bounds``)."""
+    (x0, y0, z0), (x1, y1, z1) = hardware.SHELL_BOUNDS[ob[PROP_ID]]
+    pts = [ob.matrix_world @ Vector((x, y, z)) for x in (x0, x1) for y in (y0, y1) for z in (z0, z1)]
+    return (Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts))),
+            Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts))))
+
+
 def _owner_bounds(objs: dict[str, bpy.types.Object]) -> dict[str, tuple[Vector, Vector]]:
     """Bounds of what contains an actor's keys: its chassis or vault; for the root, the sealed complex and its dais."""
     shells = {Kind.CHASSIS, Kind.CA_VAULT, Kind.ROOT_VAULT, Kind.PLINTH, Kind.DAIS}
     grouped: dict[str, list[tuple[Vector, Vector]]] = {}
     for o in CATALOGUE:
         if o.kind in shells and o.owner:
-            grouped.setdefault(o.owner, []).append(world_bounds(objs[o.id]))
+            grouped.setdefault(o.owner, []).append(declared_bounds(objs[o.id]))
     out = {owner: union(bounds) for owner, bounds in grouped.items()}
     return out
 
 
 def _root_sealed(objs: dict[str, bpy.types.Object]) -> tuple[Vector, Vector]:
-    return union([world_bounds(objs[m.ROOT_CA]), world_bounds(objs["ROOT-PLINTH"])])
+    return union([declared_bounds(objs[m.ROOT_CA]), declared_bounds(objs["ROOT-PLINTH"])])
+
+
+def _shell_or_mesh_bounds(ob: bpy.types.Object) -> tuple[Vector, Vector]:
+    return declared_bounds(ob) if ob[PROP_ID] in hardware.SHELL_BOUNDS else world_bounds(ob)
+
+
+def check_shell_bounds() -> Result:
+    """V5a: every shell's detailed mesh (devices, cage, enclosure racks, bevels) stays inside its declared box, so the containment,
+    isolation and route checks above measure exactly what the film shows."""
+    r = Result("shell_bounds")
+    tol = hardware.BOUNDS_TOLERANCE_M
+    for oid, ((x0, y0, z0), (x1, y1, z1)) in hardware.SHELL_BOUNDS.items():
+        ob = bpy.data.objects[oid]
+        if any(abs(a) > 1e-9 for a in BY_ID[oid].rotation):
+            r.failures.append(f"{oid} is rotated: declared bounds assume an axis-aligned shell")
+        corners = [Vector(c) for c in ob.bound_box]  # local, evaluated (modifiers included)
+        lo_ = Vector((min(c.x for c in corners), min(c.y for c in corners), min(c.z for c in corners)))
+        hi_ = Vector((max(c.x for c in corners), max(c.y for c in corners), max(c.z for c in corners)))
+        if lo_.x < x0 - tol or lo_.y < y0 - tol or lo_.z < z0 - tol or hi_.x > x1 + tol or hi_.y > y1 + tol or hi_.z > z1 + tol:
+            r.failures.append(f"{oid} mesh {tuple(round(v, 3) for v in lo_)}..{tuple(round(v, 3) for v in hi_)} leaves its declared box")
+    r.metrics["shells"] = len(hardware.SHELL_BOUNDS)
+    return r
+
+
+def check_root_no_cables(scene: bpy.types.Scene) -> Result:
+    """V5a (AR-01): the Root CA is air-gapped. No cable belongs to it or hangs from any of its parts, every cable in the scene is
+    one of ``hardware.CABLE_RUNS``, and every cable keeps ``ROOT_CABLE_CLEARANCE_M`` from the root complex at its rest pose."""
+    r = Result("root_no_cables")
+    scene.frame_set(scene.frame_end)
+    objs = objects_by_id(scene)
+    root_parts = {o.id for o in CATALOGUE if o.owner == m.ROOT_CA}
+    complex_box = union([_shell_or_mesh_bounds(objs[oid]) for oid in root_parts])
+    cables = [o for o in bpy.data.objects if o.get(PROP_KIND) == "cable"]
+    expected = {c.name for c in hardware.CABLE_RUNS}
+    if {o.name for o in cables} != expected:
+        r.failures.append(f"cables in the scene {len(cables)} differ from the {len(expected)} declared runs")
+    clearance = hardware.ROOT_CABLE_CLEARANCE_M
+    for ob in cables:
+        if ob.get(PROP_OWNER) in hardware.NO_CABLE_OWNERS or ob.get(PROP_OWNER) in root_parts:
+            r.failures.append(f"{ob.name} belongs to the Root CA")
+        parent = ob.parent
+        while parent is not None:
+            if parent.get(PROP_ID) in root_parts:
+                r.failures.append(f"{ob.name} hangs from {parent.name}, part of the Root CA")
+            parent = parent.parent
+        lo_, hi_ = world_bounds(ob)
+        gap = [max(complex_box[0][i] - hi_[i], 0.0, lo_[i] - complex_box[1][i]) for i in range(3)]
+        if math.hypot(*gap) < clearance:
+            r.failures.append(f"{ob.name} comes within {math.hypot(*gap):.2f} m of the Root CA complex (minimum {clearance})")
+    for ob in bpy.data.objects:  # nothing cable-like (a curve) is attached to a root part
+        if ob.type == "CURVE" and ob.parent is not None and ob.parent.get(PROP_ID) in root_parts:
+            r.failures.append(f"curve {ob.name} is attached to {ob.parent.name}")
+    r.metrics = {"cables": len(cables), "root_parts": len(root_parts)}
+    return r
 
 
 def check_dynamic(scene: bpy.types.Scene) -> list[Result]:
@@ -217,7 +281,7 @@ def check_dynamic(scene: bpy.types.Scene) -> list[Result]:
     # The whole root complex (dais, reader bay, press, key module, plinth, vault) at its rest pose. End-entity requests
     # and end-entity certificates may never reach any of it (AR-02; found by the Charter 2.8 mutation run, root_issues_leaf: a request
     # parked at the root's press and a server certificate stamped there both passed the vault-and-plinth test).
-    complex_bounds = union([world_bounds(objs[o.id]) for o in CATALOGUE if o.owner == m.ROOT_CA])
+    complex_bounds = union([_shell_or_mesh_bounds(objs[o.id]) for o in CATALOGUE if o.owner == m.ROOT_CA])
     end_entity = sorted({r.id for r in m.MODEL.requests if r.kind is m.RequestKind.END_ENTITY}
                         | {c.id for c in m.MODEL.certificates if m.MODEL.issuer_actor(c.id) != m.ROOT_CA and c.id in objs})
     touchers = [o for o in CATALOGUE if o.owner != m.ROOT_CA and o.kind is not Kind.TRUST_LINK]
@@ -227,7 +291,7 @@ def check_dynamic(scene: bpy.types.Scene) -> list[Result]:
     last_visible: dict[str, bool] = {}
     screen_max = 0.0
     camera = scene.camera
-    shell_bounds = {actor: world_bounds(objs[oid]) for actor, oid in actor_shells.items()}
+    shell_bounds = {actor: _shell_or_mesh_bounds(objs[oid]) for actor, oid in actor_shells.items()}
     reported: set[str] = set()
     for frame in frames(scene):
         scene.frame_set(frame)
@@ -685,4 +749,5 @@ def run_all(scene: bpy.types.Scene) -> list[Result]:
     results.append(check_camera_motion(scene))
     results.append(check_captions())
     results += [check_fonts(), check_text_materials(), check_signs(scene), check_pool_lights(), check_dressing(), check_character(scene)]
+    results += [check_shell_bounds(), check_root_no_cables(scene)]
     return results

@@ -20,6 +20,7 @@ from mathutils import Matrix
 
 from blender import materials
 from blender.common import PROP_ID, PROP_KIND, linear, tag
+from cff.stage import hardware as hw
 from cff.stage import layout as lo
 from cff.stage.objects import CATALOGUE, Kind
 from cff.story.model import ColourRole
@@ -30,11 +31,6 @@ PREFIX = "DRESS-"
 CHASSIS_WALL_M = 0.06  # blender/actors/servers.py WALL
 VAULT_WALL_M = 0.14  # blender/actors/authorities.py ca_vault wall
 STRIP_M = 0.02  # width of a light strip
-RIB_DEPTH_M = 0.025
-RIB_HEIGHT_M = 0.03
-LED_M = 0.025
-LED_STEP_M = 0.06
-VAULT_RIB_M = (0.08, 0.06)  # width, depth
 FACE_FRONT = (-math.pi / 2, 0.0, 0.0)  # an area light emits along its local -Z; this turns it to face -Y (the open front)
 UNLIT = (0.0, 0.0, 0.0, 1.0)  # as blender/world.py build_actor: no glow, fully opaque
 VAULT_POOL_TOKENS ={ColourRole.ISSUING_CA1: "POOL_CA1_HEX", ColourRole.ISSUING_CA2: "POOL_CA2_HEX"}
@@ -79,23 +75,21 @@ def _area_light(name: str, hex_colour: str, watts: float, size: tuple[float, flo
 
 def _chassis(shell: bpy.types.Object, collection: bpy.types.Collection) -> None:
     sx, sy, sz = lo.CHASSIS_SIZE
-    back = sy / 2 - CHASSIS_WALL_M  # inner face of the back wall
     side = sx / 2 - CHASSIS_WALL_M
     roof = sz - 0.08
     name = f"{PREFIX}{shell.name}"
     z0, z1 = look.CHASSIS_RIB_Z
-    ribs: list[Box] = [((0.0, back - RIB_DEPTH_M / 2, z0 + (z1 - z0) * i / (look.CHASSIS_RIB_COUNT - 1)), (sx - 2 * CHASSIS_WALL_M - 0.1, RIB_DEPTH_M, RIB_HEIGHT_M))
-                       for i in range(look.CHASSIS_RIB_COUNT)]
+    # V5a: the back wall is lined with the rack's devices (blender/actors/hardware.py), so it carries no ribs or LEDs
     rails: list[Box] = [((s * (side - 0.03), -sy / 2 + 0.12, roof / 2 + 0.04), (0.04, 0.04, roof - 0.08)) for s in (-1, 1)]
-    _mesh_object(f"{name}-ribs", ribs + rails, materials.chassis_material(), shell, collection)
-    strips: list[Box] = [((s * (side - 0.04), back - 0.02, (z0 + z1) / 2), (STRIP_M, 0.015, z1 - z0)) for s in (-1, 1)]
+    _mesh_object(f"{name}-ribs", rails, materials.chassis_material(), shell, collection)
+    # rack light bars just inside the front frame, on the side panels
+    strips: list[Box] = [((s * (side - 0.008), -sy / 2 + 0.06, (z0 + z1) / 2), (STRIP_M * 0.5, STRIP_M, z1 - z0)) for s in (-1, 1)]
     _mesh_object(f"{name}-strips", strips, materials.dressing_material(palette.POOL_NEUTRAL_HEX, look.CHASSIS_STRIP_EMISSION), shell, collection)
     lamp: list[Box] = [((0.0, -sy / 2 + 0.14, roof - 0.02), (sx - 2 * CHASSIS_WALL_M - 0.2, 0.04, STRIP_M))]
     _mesh_object(f"{name}-lamp", lamp, materials.dressing_material(palette.POOL_NEUTRAL_HEX, look.CHASSIS_LAMP_EMISSION), shell, collection)
-    leds: list[Box] = [((side - 0.14, back - 0.015, z1 - 0.25 + i * LED_STEP_M), (LED_M, 0.012, LED_M)) for i in range(look.CHASSIS_LED_COUNT)]
-    _mesh_object(f"{name}-leds", leds, materials.dressing_material(palette.RIM_LIGHT_HEX, look.CHASSIS_LED_EMISSION), shell, collection)
     _area_light(f"{name}-top", palette.POOL_NEUTRAL_HEX, look.CHASSIS_TOP_W, (sx - 0.3, sy - 0.3), (0.0, -0.05, roof - 0.06), (0.0, 0.0, 0.0), shell, collection)
-    _area_light(f"{name}-rim", palette.RIM_LIGHT_HEX, look.CHASSIS_RIM_W, (sx - 0.4, z1 - z0), (0.0, back - 0.08, (z0 + z1) / 2), FACE_FRONT, shell, collection)
+    # the cool rim now stands just in front of the device faces (it lit the back wall before), still behind every story artefact
+    _area_light(f"{name}-rim", palette.RIM_LIGHT_HEX, look.CHASSIS_RIM_W, (sx - 0.4, z1 - z0), (0.0, hw.CHASSIS_FACE_Y - 0.01, (z0 + z1) / 2), FACE_FRONT, shell, collection)
 
 
 def _vault(shell: bpy.types.Object, role: ColourRole, collection: bpy.types.Collection) -> None:
@@ -105,10 +99,7 @@ def _vault(shell: bpy.types.Object, role: ColourRole, collection: bpy.types.Coll
     roof = sz - VAULT_WALL_M
     tint = getattr(palette, VAULT_POOL_TOKENS[role])
     name = f"{PREFIX}{shell.name}"
-    span = 2 * side - 0.7
-    ribs: list[Box] = [((-span / 2 + span * i / (look.VAULT_RIB_COUNT - 1), back - VAULT_RIB_M[1] / 2, roof / 2 + 0.06), (VAULT_RIB_M[0], VAULT_RIB_M[1], roof - 0.3))
-                       for i in range(look.VAULT_RIB_COUNT)]
-    _mesh_object(f"{name}-ribs", ribs, materials.vault_material(role), shell, collection)
+    # V5a: the back wall is lined with the CA server racks (blender/actors/authorities.py), so it carries no ribs
     strips: list[Box] = [((s * (side - 0.06), back - 0.03, roof / 2 + 0.06), (STRIP_M, 0.02, roof - 0.3)) for s in (-1, 1)]
     strips.append(((0.0, back - 0.03, roof - 0.12), (2 * side - 0.2, 0.02, STRIP_M)))
     _mesh_object(f"{name}-strips", strips, materials.dressing_material(tint, look.VAULT_STRIP_EMISSION), shell, collection)

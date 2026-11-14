@@ -159,7 +159,8 @@ def build_catalogue() -> tuple[StageObject, ...]:
         StageObject("DESK", Kind.DESK, R.NEUTRAL, (-12.0, -8.0, 0.0), size=(1.8, 1.2, 0.76)),
         StageObject(m.CLIENT, Kind.LAPTOP, R.NEUTRAL, lo.LAPTOP, size=(0.5, 0.36, 0.3), owner=m.CLIENT),
         StageObject(m.USER, Kind.FIGURE, R.NEUTRAL, lo.USER, yaw=180.0, size=(0.5, 0.4, 1.25), owner=m.USER),
-        StageObject("SCREEN-IDLE", Kind.SCREEN, R.NEUTRAL, (lo.LAPTOP[0] + lo.LAPTOP_LID_X_OFFSET, lo.LAPTOP[1], 0.92), yaw=90.0, size=(0.46, 0.01, 0.27), variant="idle"),
+        StageObject("SCREEN-IDLE", Kind.SCREEN, R.NEUTRAL, lo.idle_screen_centre(), yaw=90.0, size=(0.46, 0.01, 0.27),
+                    variant="idle", euler=(-lo.LAPTOP_LID_TILT_DEG, 0.0, 90.0)),  # V5a: on the lid's inner face, tilted with the lid
         StageObject("SCREEN-RDP", Kind.SCREEN, R.NEUTRAL, lo.SCREEN_CENTRE, yaw=90.0, size=(0.9, 0.02, 0.56), variant="session", on_stage=False),
         StageObject("SCREEN-WEB", Kind.SCREEN, R.NEUTRAL, lo.SCREEN_CENTRE, yaw=90.0, size=(0.9, 0.02, 0.56), variant="browser", on_stage=False),
         StageObject("TS-CLIENT-ROOT", Kind.CRADLE, R.NEUTRAL, lo.CRADLE_ROOT, size=(0.9, 0.12, 0.62), spec_ids=("AR-05",)),
@@ -215,9 +216,9 @@ def build_catalogue() -> tuple[StageObject, ...]:
 
     # --- directory, publication point -----------------------------------------------------------
     objs += [
-        StageObject(m.AD, Kind.AD_COLUMN, R.DIRECTORY, lo.AD, size=(lo.AD_RADIUS, lo.AD_RADIUS, lo.AD_HEIGHT), owner=m.AD, spec_ids=("AR-05",)),
-        StageObject("RING-AD-1", Kind.RING, R.ISSUING_CA1, lo.add(lo.AD, (0.0, 0.0, 2.2)), size=(1.15, 1.15, 0.07), on_stage=False, owner=m.AD),
-        StageObject("RING-AD-2", Kind.RING, R.ISSUING_CA2, lo.add(lo.AD, (0.0, 0.0, 2.8)), size=(1.15, 1.15, 0.07), on_stage=False, owner=m.AD),
+        StageObject(m.AD, Kind.AD_COLUMN, R.DIRECTORY, lo.AD, size=(lo.AD_WIDTH, lo.AD_DEPTH, lo.AD_HEIGHT), owner=m.AD, spec_ids=("AR-05",)),
+        StageObject("RING-AD-1", Kind.RING, R.ISSUING_CA1, lo.add(lo.AD, (0.0, 0.0, lo.AD_RING_Z[0])), size=(lo.AD_RING_DIAMETER, lo.AD_RING_DIAMETER, 0.07), on_stage=False, owner=m.AD),
+        StageObject("RING-AD-2", Kind.RING, R.ISSUING_CA2, lo.add(lo.AD, (0.0, 0.0, lo.AD_RING_Z[1])), size=(lo.AD_RING_DIAMETER, lo.AD_RING_DIAMETER, 0.07), on_stage=False, owner=m.AD),
         StageObject(m.PKI_HTTP, Kind.KIOSK, R.NEUTRAL, lo.KIOSK, size=(0.9, 0.7, 1.5), owner=m.PKI_HTTP, spec_ids=("AR-06",)),
     ]
 

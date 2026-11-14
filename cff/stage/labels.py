@@ -168,7 +168,8 @@ def _build() -> tuple[Placement, ...]:
         Placement("LBL-CERT-WEB-EKU", "CERT-WEB", (0.0, -0.12, -0.52), CAP_FIELD * 1.3),
         Placement("LBL-REQ-CA1", "REQ-CA1", (0.0, 0.0, 0.34), CAP_TAG * 0.9),
         # --- windowed tags ---------------------------------------------------------------------------
-        Placement("LBL-CONNECT", "SCREEN-IDLE", (0.0, 0.0, 0.35), CAP_TAG, window=Window("B-01.1", 0.3)),  # on the client's screen (PKI-S1R1-07)
+        # on the client's screen (PKI-S1R1-07); V5a seated the screen on the lid, so the offset keeps the sign where it was read
+        Placement("LBL-CONNECT", "SCREEN-IDLE", lo.sub(lo.CONNECT_SIGN_POINT, lo.idle_screen_centre()), CAP_TAG, window=Window("B-01.1", 0.3)),
         Placement("LBL-UNVERIFIED", m.CLIENT, (0.0, 0.0, 1.0), CAP_TAG * 1.2, window=Window("B-02.2", 0.7)),
         # fixed screen position for the whole flashback so the "earlier" marker is never hidden or moved (V1-PKI-02)
         Placement("LBL-FLASHBACK", None, (0.0, 0.0, 0.0), CAP_TAG * 1.4, window=Window("B-05.2", 0.1, 4.7), screen_px=FLASHBACK_SCREEN_PX),

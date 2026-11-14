@@ -79,6 +79,38 @@ VAULT_RIB_COUNT = 6
 VAULT_STRIP_EMISSION = 0.6
 VAULT_TOP_W = 12.0
 
+# V5a realistic hardware (amendment V5-A1; blender/actors/hardware.py, blender/finishes.py, blender/datacenter.py). Roughness and
+# metallic values of the physical finishes; texture scales are repeats per metre of the CC0 maps in assets/textures.
+STEEL_ROUGHNESS = 0.55
+STEEL_METALLIC = 0.6
+STEEL_LIGHT_ROUGHNESS = 0.4
+STEEL_LIGHT_METALLIC = 0.85
+BEZEL_ROUGHNESS = 0.45
+CADDY_ROUGHNESS = 0.5
+ALUMINIUM_ROUGHNESS = 0.42  # 0.32 / 1.0 rendered the lid near-black in the dark hall (V5a preview close-up 1)
+ALUMINIUM_METALLIC = 0.75
+GLASS_ROUGHNESS = 0.06
+CABLE_ROUGHNESS = 0.6
+CONCRETE_ROUGHNESS = 0.85
+TILE_ROUGHNESS = 0.5
+DESK_ROUGHNESS = 0.6
+FABRIC_ROUGHNESS = 0.9
+POWDER_NOISE_SCALE = 260.0  # orange-peel bump of powder coat
+POWDER_BUMP = 0.06
+BRUSHED_REPEAT_PER_M = 3.0  # Metal009 (CC0)
+PERFORATED_REPEAT_PER_M = 9.0  # SheetMetal001 (CC0): about 9 mm holes on a rack door
+CONCRETE_REPEAT_PER_M = 0.35  # Concrete034 (CC0)
+NORMAL_STRENGTH = 0.6
+EDGE_BEVEL_M = 0.004  # a chamfer on every hero hardware edge, so edges catch the key and rim light
+LED_EMISSION = 3.0  # static device LEDs: small, so bright enough to read as points
+ACCENT_LED_EMISSION = 2.2  # identity-tinted LED strips (CA racks, the AD rack, the root machine)
+UI_EMISSION_GAIN = 1.0  # the laptop screen's UI parts glow with the screen's glow channel, scaled by their tint
+AISLE_LIGHT_EMISSION = 6.0  # the cold-aisle fixture diffusers
+AISLE_LIGHT_W = 900.0  # one shadowless area light per background cold aisle (V3-CIN-01: no shadow pages)
+FLOOR_TILE_M = 0.6
+FLOOR_SEAM_FRACTION = 0.015
+FLOOR_TILE_VARIATION = 0.12  # value variation between tiles
+
 # V4 user character (blender/character.py): realistic shape, slightly stylized shading so it never reads uncanny. Skin is a
 # flat token (palette.SKIN_HEX) with a little subsurface; clothes, hair, eyes and brows keep their CC0 textures, desaturated and
 # matte. No normal maps, no specular sheen.

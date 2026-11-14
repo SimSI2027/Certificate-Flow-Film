@@ -6,11 +6,30 @@ Axis arguments name the local axis the shape runs along. All sizes are full exte
 from __future__ import annotations
 
 import math
+from collections.abc import Iterator
+from contextlib import contextmanager
 
 import bmesh
 from mathutils import Matrix, Vector
 
 Pt = tuple[float, float, float]
+_OPEN_SLOT: list[int] = []
+
+
+@contextmanager
+def slot(bm: bmesh.types.BMesh, index: int) -> Iterator[None]:
+    """Faces created inside the block go to material slot ``index`` (``blender.actors.slots``). Blocks never nest."""
+    if _OPEN_SLOT:
+        raise RuntimeError("primitives.slot blocks never nest")
+    _OPEN_SLOT.append(index)
+    start = len(bm.faces)
+    try:
+        yield
+    finally:
+        _OPEN_SLOT.pop()
+        bm.faces.ensure_lookup_table()
+        for i in range(start, len(bm.faces)):
+            bm.faces[i].material_index = index
 AXIS_ROTATION = {"Z": Matrix.Identity(4), "X": Matrix.Rotation(math.radians(90), 4, "Y"), "Y": Matrix.Rotation(math.radians(-90), 4, "X")}
 
 
