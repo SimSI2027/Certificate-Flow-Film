@@ -61,7 +61,9 @@ PRESS1_OUT: Vec3 = (-2.0, 13.8, 1.1)
 PRESS2_OUT: Vec3 = (12.0, 13.8, 1.1)
 STACK_MID: Vec3 = (-10.6, -7.4, 1.7)
 CA1_MODULE: Vec3 = (-4.1, 14.7, 1.3)
-WORLD_CENTRE: Vec3 = (-1.0, 7.0, 3.5)
+# The hero looks at the middle of the SW-NE topology from the south-east, so the user, both servers, both issuing
+# CAs and the root lie across the 16:9 frame (V1-CIN-02; from az -105 the user and laptop fell below the frame).
+WORLD_CENTRE: Vec3 = (-0.5, 4.0, 6.5)
 
 # The stage objects that stand for each beat's focal subject (the model names concepts such as "CHAIN-RDP").
 # Where the subject is born mid-beat (a stamped card, a sealed request), the machine that makes it is part of the
@@ -97,7 +99,7 @@ SHOTS: tuple[Shot, ...] = (
     # S1
     Shot("desk-push", "B-01.1", (USER_HEAD,), -124, 5, 2.8, 50, 2.8, follow=0.25, bulge=3.8,
          start=Pose((USER_HEAD,), -150, 10, 3.4, 50, 2.8)),
-    Shot("pulse-chase", "B-01.2", ("PULSE-RDP-1",), -128, 8, 7.0, 35, 4.0, follow=0.4, bulge=3.0),
+    Shot("pulse-chase", "B-01.2", ("PULSE-RDP-1",), -128, 8, 7.0, 35, 4.0, follow=0.4, bulge=3.0),  # closer starts B-02.1 too near the RDP plate (V1-CIN-01 residual)
     # S2
     Shot("listener-low", "B-02.1", (LISTENER,), -94, 13, 6.2, 35, 2.8, follow=0.8, bulge=0.1),
     Shot("card-slide", "B-02.2", ("CERT-RDP-SELF",), -111, 14, 18.0, 42, 2.8, follow=0.25, bulge=6.0, rack_to=("CLIENT",)),  # card large (CIN-S1R1-06)
@@ -112,7 +114,7 @@ SHOTS: tuple[Shot, ...] = (
     Shot("capsule-chase", "B-04.2", ("REQ-RDP",), -95, 8, 4.6, 35, 4.0, follow=0.35, bulge=6.0),
     Shot("checks-orbit", "B-04.3", ("EVAL-CA1",), -69, 15, 3.5, 35, 2.8, follow=0.25),
     Shot("press-stamp", "B-04.4", (PRESS1_OUT,), -98, 9, 7.4, 50, 2.8, follow=0.25, bulge=2.7),
-    Shot("card-return", "B-04.5", ("CERT-RDP",), -95, 6, 5.3, 35, 2.8, follow=0.8, bulge=12.3),
+    Shot("card-return", "B-04.5", ("CERT-RDP",), -95, 6, 3.82, 35, 2.8, follow=0.8, bulge=12.3),  # V1-CIN-01
     # S5
     Shot("root-crane", "B-05.1", ("ROOT_CA",), -100, 14, 13.0, 28, 4.0, follow=0.6, bulge=8.0),
     Shot("flashback-glide", "B-05.2", ("CARTRIDGE",), -100, 12, 6.0, 35, 4.0, follow=0.25, bulge=9.0, focus=("CARTRIDGE",),
@@ -120,25 +122,27 @@ SHOTS: tuple[Shot, ...] = (
     Shot("issuer-link", "B-05.3", ("CERT-CA1", "ROOT_CA"), -106, 24, 46.4, 28, 4.0, follow=0.8, bulge=0.1, focus=("CERT-CA1",),
          start=Pose(("CERT-CA1", "ROOT_CA"), -100, 30, 16.0, 28, 4.0)),
     # S6
-    Shot("present-follow", "B-06.1", ("CERT-RDP",), -10, 8, 6.0, 40, 4.0, follow=0.5, bulge=2.5),  # proof readable at film scale (PKI-S1R1-06)
+    # proof readable at film scale (PKI-S1R1-06, V1-PKI-04; dist 4.5 / follow 0.7 failed C-03, so 5.25 / 0.6, then V1-CIN-01 steps)
+    Shot("present-follow", "B-06.1", ("CERT-RDP",), -10, 8, 4.46, 40, 4.0, follow=0.6, bulge=0.15),
     Shot("chain-boom", "B-06.2", (STACK_MID,), 79, 24, 11.2, 35, 2.8, follow=0.4, bulge=1.4),
     Shot("aia-push", "B-06.3", ("AIA-RDP",), 53, 4, 4.4, 50, 2.8, follow=0.8, rack_to=((-9.8, -7.4, 1.7),)),
     Shot("checks-crane", "B-06.4", (STACK_MID,), 45, 25, 8.5, 35, 2.8, follow=0.6, bulge=0.4),
-    Shot("revocation-pan", "B-06.5", ("CRL-CA1", "CRL-ROOT"), -44, 12, 13.5, 32, 4.0, follow=0.25, bulge=11.0),  # kiosk and fetches larger (CIN-S1R1-06)
-    Shot("green-glide", "B-06.6", ("SCREEN-RDP",), -20, 14, 9.0, 35, 2.8),
+    Shot("revocation-pan", "B-06.5", ("CRL-CA1", "CRL-ROOT"), -44, 12, 11.0, 32, 4.0, follow=0.25, bulge=11.0),  # fetches larger (CIN-S1R1-06, V1-PKI-05)
+    # V1-CIN-05: dist 5.0 breaks C-02 on the move into B-07.1 (f2091+); 8.5 at 50 mm is the closest passing framing
+    Shot("green-glide", "B-06.6", ("SCREEN-RDP",), -20, 14, 8.5, 50, 2.8),
     # S7
     Shot("web-glide", "B-07.1", ("WEB_SERVER",), -73, 8, 11.0, 35, 4.0, follow=0.15, bulge=12.0),
     Shot("web-keys", "B-07.2", ("KC-WEB",), -67, 6, 6.1, 50, 2.8, follow=0.4, bulge=-3.0),
     Shot("eligibility-wide", "B-07.3", ("AD", (4.0, 10.0, 2.0)), -90, 24, 17.0, 28, 4.0, focus=("AD",)),
-    Shot("web-capsule-chase", "B-07.4", ("REQ-WEB",), -95, 8, 4.6, 35, 4.0, follow=0.35, bulge=6.0),
+    Shot("web-capsule-chase", "B-07.4", ("REQ-WEB",), -95, 8, 3.91, 35, 4.0, follow=0.35, bulge=0.75),  # V1-CIN-01
     # S8
     Shot("checks-orbit-2", "B-08.1", ("EVAL-CA2",), -77, 11, 3.4, 35, 2.8, bulge=-0.2),
     Shot("tls-stamp", "B-08.2", ("CERT-WEB",), -94, 5, 3.8, 35, 2.8, follow=0.8, bulge=8.8),
-    Shot("same-root", "B-08.3", ("CERT-CA2", "ROOT_CA"), -32, 18, 42.7, 28, 4.0, follow=0.25, bulge=1.8, focus=("CERT-CA2",)),
+    Shot("same-root", "B-08.3", ("CERT-CA2", "ROOT_CA"), -32, 18, 26.22, 28, 4.0, follow=0.35, bulge=1.8, focus=("CERT-CA2",)),  # V1-CIN-01
     # S9
-    Shot("browser-arc", "B-09.1", (STACK_MID,), -80, 8, 7.4, 35, 2.8, follow=0.25, bulge=5.5),
-    Shot("hero", "B-09.2", (WORLD_CENTRE, "ROOT_CA"), -105, 28, 40.0, 24, 5.6, follow=0.45, focus=("ROOT_CA",)),
-    Shot("close", "B-09.3", (WORLD_CENTRE,), -101, 30, 42.0, 24, 5.6, focus=("ROOT_CA",)),
+    Shot("browser-arc", "B-09.1", (STACK_MID,), -80, 8, 6.0, 35, 2.8, follow=0.4, bulge=5.5),  # V1-PKI-04
+    Shot("hero", "B-09.2", (WORLD_CENTRE,), -45, 30, 42.0, 24, 5.6, follow=0.45, focus=("ROOT_CA",)),  # V1-CIN-02
+    Shot("close", "B-09.3", (WORLD_CENTRE,), -41, 32, 44.0, 24, 5.6, focus=("ROOT_CA",)),
 )
 
 BY_BEAT: dict[str, Shot] = {s.beat: s for s in SHOTS}

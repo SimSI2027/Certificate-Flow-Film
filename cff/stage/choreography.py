@@ -38,6 +38,7 @@ SETTLE_BOUNCE = 0.04
 HOLD_EASE = "EASE_IN_OUT"
 SEAL_CLOSED_SCALE = 0.7  # the proof-of-possession ring tightens round its capsule and stays on it
 CHECKS_CLEAR_S = 0.3  # a CA's check slots leave this long into the next beat, with their written list
+CRL_DOCK_OFFSET: Value = (0.95, 0.0, 0.0)  # a CRL scroll docks beside the card it checks (V1-PKI-05: larger scrolls stay out of the cards)
 INELIGIBLE_VAULT_GLOW = 0.25  # a grey cast over the ineligible CA's vault (brighter reads as white under AgX)
 
 
@@ -613,11 +614,11 @@ class Choreographer:
         kiosk_top = lo.add(lo.KIOSK, (0.0, 0.0, 1.55))
         to_stack = tuple(lo.at_z(p, TRAVEL_LIFT) for p in ((-7.0, 3.0, 0.0), (-9.5, -2.5, 0.0), (-10.2, -6.4, 0.0)))
         f0, f1 = self.event("E-06.5a")
-        dock_cert = lo.add(lo.STACK_CERT, (0.62, 0.0, 0.0))
+        dock_cert = lo.add(lo.STACK_CERT, CRL_DOCK_OFFSET)
         self.show("CRL-CA1", f0, 9, rise=(0.0, 0.0, 0.0), glow=rev, at=kiosk_top)
         self.travel("CRL-CA1", f0 + 9, f1, (kiosk_top, *to_stack, dock_cert))
         f0, f1 = self.event("E-06.5b")
-        dock_copy = lo.add(lo.STACK_INTERMEDIATE, (0.62, 0.0, 0.0))
+        dock_copy = lo.add(lo.STACK_INTERMEDIATE, CRL_DOCK_OFFSET)
         self.show("CRL-ROOT", f0, 9, rise=(0.0, 0.0, 0.0), glow=rev, at=lo.add(kiosk_top, (0.3, 0.0, 0.0)))
         self.travel("CRL-ROOT", f0 + 9, f1, (lo.add(kiosk_top, (0.3, 0.0, 0.0)), *to_stack, dock_copy))
         self.event("E-06.5c")  # OCSP note: a tag on the revocation check slot (labels)
@@ -775,7 +776,7 @@ class Choreographer:
         # compressed revocation: each CRL appears as a brief restrained-amber flicker docked against its card
         for scroll, ev_id, dock in (("CRL-CA2", "E-09.1m", lo.STACK_CERT), ("CRL-ROOT-2", "E-09.1n", lo.STACK_INTERMEDIATE)):
             f0, f1 = self.event(ev_id)
-            self.show(scroll, f0, 6, rise=(0.0, 0.0, 0.0), glow=rev, at=lo.add(dock, (0.62, 0.0, 0.0)))
+            self.show(scroll, f0, 6, rise=(0.0, 0.0, 0.0), glow=rev, at=lo.add(dock, CRL_DOCK_OFFSET))
             self.hide(scroll, max(f0 + 6, f1 - 6), 6, sink=(0.0, 0.0, 0.0))
         self.glow_pulse(m.PKI_HTTP, self.event("E-09.1m")[0], self.event("E-09.1n")[1], hex_glow(palette.TEXT_HEX, 0.5), rest=hex_glow(palette.TEXT_HEX, 0.1))
         f0, f1 = self.event("E-09.1p")

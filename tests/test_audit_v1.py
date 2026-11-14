@@ -138,6 +138,133 @@ def test_V1_LEG_04_at_most_10_signs() -> None:  # noqa: N802
 SIGN_COUNT_LIMIT = 10
 
 
+# --- session F2: camera ---------------------------------------------------------------------------------------------
+
+def _event_frames(first_event: str, last_event: str | None = None) -> tuple[int, int]:
+    from cff.story import model  # noqa: PLC0415
+
+    by_id = {e.id: e for e in model.MODEL.events}
+    a, b = by_id[first_event], by_id[last_event or first_event]
+    return timing.frame_range(timing.event_window(a.id, a.beat)[0], timing.event_window(b.id, b.beat)[1])
+
+
+def _hold(beat_id: str) -> tuple[int, int]:
+    from cff.stage.audit import HOLD_MARGIN_S  # noqa: PLC0415
+
+    start, end = timing.beat_window(beat_id)
+    return timing.frame_range(start + HOLD_MARGIN_S, end - HOLD_MARGIN_S)
+
+
+def _plan() -> tuple[Any, camera.CameraPlan]:
+    tl = choreography.build_timeline()
+    return tl, camera.CameraPlan(tl)
+
+
+def _raw_rect(tl: Any, plan: camera.CameraPlan, obj_id: str, frame: int) -> tuple[float, float, float, float] | None:
+    """Unclamped projected bounds (1080p px); None when hidden, an infinite rect when a corner is behind the lens."""
+    import math  # noqa: PLC0415
+
+    from cff.stage.audit import is_visible, position_at  # noqa: PLC0415
+    from cff.stage.tracks import SCALE  # noqa: PLC0415
+
+    if not is_visible(tl, obj_id, frame):
+        return None
+    state = plan.state(frame)
+    scale = tl.value_at(obj_id, SCALE, frame) or (1.0, 1.0, 1.0)
+    xs, ys = [], []
+    for corner in caption_layout._corners(obj_id, position_at(tl, obj_id, frame), scale):
+        px, py, depth = camera.project(state, corner)
+        if depth <= 0 or not math.isfinite(px):
+            return (-math.inf, -math.inf, math.inf, math.inf)
+        xs.append(px * ty.FRAME_W_PX)
+        ys.append(py * ty.FRAME_H_PX)
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
+@pytest.mark.covers("C-03")
+def test_V1_CIN_01_focal_subject_size() -> None:  # noqa: N802
+    from tools import focal_audit  # noqa: PLC0415
+
+    assert focal_audit.failing() == {}
+    sizes = focal_audit.beat_sizes()
+    for beat_id in focal_audit.RESIDUAL_PX:  # a residual that now meets its real target must be removed
+        assert sizes[beat_id] < focal_audit.TARGET_PX.get(beat_id, focal_audit.DEFAULT_TARGET_PX), beat_id
+    assert len(focal_audit.RESIDUAL_PX) <= 9  # v1.0.0: 11 beats under target
+
+
+@pytest.mark.covers("F-10")
+def test_V1_PKI_04_handshake_proof_is_visible() -> None:  # noqa: N802
+    from tools import focal_audit  # noqa: PLC0415
+
+    tl, plan = _plan()
+    assert focal_audit.longer_side(tl, plan, ("HS-RDP",), *_event_frames("E-06.1d", "E-06.1f")) >= 60.0
+    assert focal_audit.longer_side(tl, plan, ("HS-WEB",), *_event_frames("E-09.1d", "E-09.1q")) >= 45.0
+
+
+@pytest.mark.covers("F-13")
+def test_V1_PKI_05_crl_fetches_are_visible() -> None:  # noqa: N802
+    import math  # noqa: PLC0415
+
+    from cff.stage.audit import position_at  # noqa: PLC0415
+    from tools import focal_audit  # noqa: PLC0415
+
+    tl, plan = _plan()
+    for scroll, event_id, card in (("CRL-CA1", "E-06.5a", "CERT-RDP"), ("CRL-ROOT", "E-06.5b", "CERT-CA1-COPY-RDP")):
+        first, last = _event_frames(event_id)
+        assert focal_audit.longer_side(tl, plan, (scroll,), first, last) >= FETCH_MIN_PX, scroll
+        at = position_at(tl, scroll, last)
+        assert math.dist(at, position_at(tl, card, last)) <= 1.0, (scroll, card)
+        assert math.dist(at, position_at(tl, "CERT-ROOT", last)) >= 0.6, scroll
+
+
+FETCH_MIN_PX = 60.0
+
+
+@pytest.mark.covers("C-03", "B-06.6")
+def test_V1_CIN_05_session_window_is_visible() -> None:  # noqa: N802
+    from tools import focal_audit  # noqa: PLC0415
+
+    tl, plan = _plan()
+    first, last = _hold("B-06.6")
+    assert focal_audit.longer_side(tl, plan, ("SCREEN-RDP",), first, last) >= SESSION_WINDOW_MIN_PX
+    plan_signs = signs.plan_signs()
+    for f in range(first, last + 1):
+        screen = caption_layout.objects_rect(tl, plan, ("SCREEN-RDP",), f)
+        if screen is None:
+            continue
+        for label_id, sign in plan_signs.items():
+            s = sign.frames.get(f)
+            if s is not None and s.alpha > 0:
+                assert not caption_layout._hits(s.rect, screen), (label_id, f)
+
+
+SESSION_WINDOW_MIN_PX = 185.0  # residual (target 220): closer framings break C-02 on the move into B-07.1
+
+
+@pytest.mark.covers("B-09.2")
+def test_V1_CIN_02_hero_holds_the_whole_topology() -> None:  # noqa: N802
+    from cff.story import model  # noqa: PLC0415
+
+    tl, plan = _plan()
+    objs = (model.USER, model.CLIENT, model.RDP_SERVER, model.WEB_SERVER, model.ISSUING_CA1, model.ISSUING_CA2, model.ROOT_CA)
+    _, last = _hold("B-09.2")
+    c, d = _hold("B-09.3")
+    frames = [*range(last - HERO_ARRIVED_FRAMES + 1, last + 1), *range(c, d + 1)]
+
+    def inside(f: int) -> bool:
+        rects = [_raw_rect(tl, plan, o, f) for o in objs]
+        return all(r is not None and r[0] >= 96 and r[2] <= 1824 and r[1] >= 200 and r[3] <= 1026 for r in rects)
+
+    assert sum(inside(f) for f in frames) >= 0.9 * len(frames)
+    root = _raw_rect(tl, plan, model.ROOT_CA, last)
+    assert root is not None and root[2] - root[0] >= 110.0
+    assert caption_layout.bands()["CAP-S9a"] == caption_layout.TOP
+    assert "CAP-S9a" not in caption_layout.focal_overlaps()
+
+
+HERO_ARRIVED_FRAMES = 60  # residual: the camera pulls back from the B-09.1 close-up, so the topology is whole from ~102 s
+
+
 @pytest.mark.covers("L-05")
 def test_V1_DOC_01_caption_track_is_opt_in() -> None:  # noqa: N802
     import importlib.util  # noqa: PLC0415

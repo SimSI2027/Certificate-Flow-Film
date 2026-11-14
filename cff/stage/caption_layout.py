@@ -107,7 +107,12 @@ def bands() -> dict[str, str]:
             for band, y in ((BOTTOM, ty.CAPTION_CENTRE_Y_PX), (TOP, ty.CAPTION_TOP_CENTRE_Y_PX)):
                 hits[band] += _hits(focal, _rect_at(caption.id, y))
         out[caption.id] = TOP if hits[BOTTOM] > 0 and hits[TOP] < hits[BOTTOM] else BOTTOM
+    out.update(FORCED_BANDS)
     return out
+
+
+# The hero caption sits in the top band so the servers and the user at the bottom of the hero frame stay clear (V1-CIN-02).
+FORCED_BANDS: dict[str, str] = {"CAP-S9a": TOP}
 
 
 def centre_y_px(caption_id: str) -> float:

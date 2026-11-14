@@ -189,7 +189,7 @@ def build_catalogue() -> tuple[StageObject, ...]:
                   lo.add(base, (lo.CAPSULE_SPOT[0], lo.CAPSULE_SPOT[1], lo.CAPSULE_SPOT[2] - 0.08)), 0.04, ("F-03", "F-04")),
             StageObject(f"SEAL-{tag}", Kind.SEAL_RING, R.REQUEST, lo.add(base, lo.CAPSULE_SPOT), size=(0.3, 0.3, 0.05), on_stage=False),
             StageObject(f"QUERY-{tag}", Kind.QUERY, R.DIRECTORY, lo.port_wait(base, lo.RDP_PORT_SIDE if tag == "RDP" else lo.WEB_PORT_SIDE), size=(0.16, 0.16, 0.16), on_stage=False, spec_ids=("AR-05",)),
-            StageObject(f"HS-{tag}", Kind.PROOF, R.REQUEST, lo.add(base, (lo.CONTAINER[0], lo.CONTAINER[1], lo.CONTAINER[2] + 0.5)), size=(0.34, 0.03, 0.2), on_stage=False, spec_ids=("F-10",)),
+            StageObject(f"HS-{tag}", Kind.PROOF, R.REQUEST, lo.add(base, (lo.CONTAINER[0], lo.CONTAINER[1], lo.CONTAINER[2] + 0.5)), size=(0.85, 0.075, 0.5), on_stage=False, spec_ids=("F-10",)),  # x2.5: proof readable (V1-PKI-04)
         ]
 
     # --- certificates and request artefacts -----------------------------------------------------
@@ -258,10 +258,11 @@ def build_catalogue() -> tuple[StageObject, ...]:
         StageObject("PULSE-RDP-1", Kind.PULSE, R.PENDING, lo.add(start_rdp, (0.0, 0.0, 0.25)), size=(0.2, 0.2, 0.2), on_stage=False),
         StageObject("PULSE-RDP-2", Kind.PULSE, R.PENDING, lo.add(start_rdp, (0.0, 0.0, 0.25)), size=(0.2, 0.2, 0.2), on_stage=False),
         StageObject("PULSE-WEB", Kind.PULSE, R.PENDING, lo.add(start_web, (0.0, 0.0, 0.25)), size=(0.2, 0.2, 0.2), on_stage=False),
-        StageObject("CRL-CA1", Kind.SCROLL, R.REVOCATION, lo.add(lo.KIOSK, (0.0, 0.0, 1.4)), size=(0.34, 0.12, 0.12), on_stage=False, spec_ids=("F-13",)),
-        StageObject("CRL-ROOT", Kind.SCROLL, R.REVOCATION, lo.add(lo.KIOSK, (0.3, 0.0, 1.4)), size=(0.34, 0.12, 0.12), on_stage=False, spec_ids=("F-13",)),
-        StageObject("CRL-CA2", Kind.SCROLL, R.REVOCATION, lo.add(lo.KIOSK, (0.0, 0.0, 1.4)), size=(0.34, 0.12, 0.12), on_stage=False, spec_ids=("F-13",)),
-        StageObject("CRL-ROOT-2", Kind.SCROLL, R.REVOCATION, lo.add(lo.KIOSK, (0.3, 0.0, 1.4)), size=(0.34, 0.12, 0.12), on_stage=False, spec_ids=("F-13",)),
+        # CRL scrolls at 2.5x so one fetch per non-root link reads at film scale (V1-PKI-05)
+        StageObject("CRL-CA1", Kind.SCROLL, R.REVOCATION, lo.add(lo.KIOSK, (0.0, 0.0, 1.4)), size=(0.85, 0.30, 0.30), on_stage=False, spec_ids=("F-13",)),
+        StageObject("CRL-ROOT", Kind.SCROLL, R.REVOCATION, lo.add(lo.KIOSK, (0.3, 0.0, 1.4)), size=(0.85, 0.30, 0.30), on_stage=False, spec_ids=("F-13",)),
+        StageObject("CRL-CA2", Kind.SCROLL, R.REVOCATION, lo.add(lo.KIOSK, (0.0, 0.0, 1.4)), size=(0.85, 0.30, 0.30), on_stage=False, spec_ids=("F-13",)),
+        StageObject("CRL-ROOT-2", Kind.SCROLL, R.REVOCATION, lo.add(lo.KIOSK, (0.3, 0.0, 1.4)), size=(0.85, 0.30, 0.30), on_stage=False, spec_ids=("F-13",)),
     ]
 
     # --- client-side validation lists -----------------------------------------------------------

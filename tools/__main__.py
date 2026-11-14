@@ -117,6 +117,12 @@ def _cmd_legibility(_: argparse.Namespace) -> int:
     return legibility_audit.main()
 
 
+def _cmd_focal(_: argparse.Namespace) -> int:
+    from tools import focal_audit  # noqa: PLC0415
+
+    return focal_audit.main()
+
+
 def _cmd_calibrate(args: argparse.Namespace) -> int:
     from tools import calibrate  # noqa: PLC0415  (imported only by this command, so no other command can reach a fault)
 
@@ -182,6 +188,7 @@ def main(argv: list[str] | None = None) -> int:
         ("palette", _cmd_palette, "L-07 palette check (CIEDE2000, with colour-vision simulation)"),
         ("motion", _cmd_motion, "planned-film audits: camera, focal subject, keys, easing, glow"),
         ("legibility", _cmd_legibility, "planned-film legibility audit: must-read sign holds (L-06), captions clear of the focal subject (L-05)"),
+        ("focal", _cmd_focal, "focal-subject size per beat (V1-CIN-01): median projected longer side over the beat hold"),
     ):
         sub.add_parser(name, help=text).set_defaults(func=func)
 
