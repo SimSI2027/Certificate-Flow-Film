@@ -2,13 +2,25 @@
 
 A 100–120 s, 1920x1080, 30 FPS film (Approach B) that explains an Active Directory Certificate Services PKI flow as one continuous camera move, with a single flashback, through a stylized 3D world. It is built with scripted Blender (`bpy`), rendered headless, and checked by automated hard checks; an adversarial review loop judged the story spec and the first animatic round only.
 
-> **Status: v1.0.0 pre-release, under audit (`docs\AUDIT-v1.md`).** Fixes are being applied toward v1.1.0; see `CHANGELOG.md`. The automated checks in `python -m tools verify` are the quality gate.
+> **Status: v1.1.0 pre-release.** It carries the fixes from the v1 audit (`docs\AUDIT-v1.md`) and passed a targeted re-audit on the rendered film. It is accurate and legible, but it is not yet the finished film: see "Known limitations" below and `CHANGELOG.md`. The automated checks in `python -m tools verify` are the quality gate. The look pass planned for v1.2 is in `docs\LOOK-PLAN-v1.2.md`.
 
 ## The film
 
 109 s, 1920x1080, 30 FPS, H.264 + AAC, captions only (no narration), synthesised sound cues. It shows two certificates issued under one root: an RDP server (`RDPAuth` template, Issuing CA 1) and a web server (`WebServer-TLS` template, Issuing CA 2), both chaining to the single trusted Root CA. The private key never leaves its owner; the request is signed, not the key sent.
 
-Outputs (`output\`; the Final MP4 is a release asset, not committed): `Certificate-Flow-Film-Final.mp4`, `-Preview.mp4` (720p), `-Poster.png`, `-Contact-Sheet.png`, `captions.vtt`, `transcript.md`, `render-metadata.json`, `audio\loudness.json` (-16.0 LUFS).
+Outputs (`output\`; the Final MP4 is a release asset, not committed): `Certificate-Flow-Film-Final.mp4`, `-Preview.mp4` (720p), `-Poster.png`, `-Contact-Sheet.png`, `captions.vtt`, `transcript.md`, `render-metadata.json`, `audio\loudness.json` (-15.9 LUFS).
+
+## Known limitations (v1.1.0)
+
+- **Look (V1-CIN-03, open MAJOR).** The film still looks like a stylised grey-box: flat grey props, little material or light design, an empty dark upper frame. The charter's film gate (cinema score of 8 or more, no open MAJOR) is not met.
+- **Hero shot (98–104 s).** The whole topology, with the user, is in frame only from about 102 s, and the shot is the darkest of the film (mean luma 38.4 against a target of 50).
+- **Small focal subjects.** In 10 beats the focal object is below its size target (39–99 px on its longer side).
+- **Brightness bump at 90.2 s.** A passing highlight steps the picture's mean luma by 7.7 in one frame; three smaller steps are at 24.8, 45.8 and 81.0 s.
+- **Flashback marker.** "Earlier: offline signing ceremony" fades out over the first three frames after the cut back to the present (46.5 s).
+- **Audio.** The AAC track peaks at −0.6 dBFS true peak (the WAV mix is at −1.2 dBFS). Nobody has reviewed the sound by ear.
+- **Review.** No adversarial discriminator round judged this film; it was checked by `python -m tools verify` and by a Chief of Staff re-audit of 56 frames.
+
+Details and measured values: `docs\AUDIT-v1.md` ("F3 targeted re-audit, third run") and `docs\GAN-LEDGER.md` ("Session F3").
 
 ## Rebuild
 
@@ -39,5 +51,5 @@ Fallbacks currently in use (owner may replace them later): `DC01`, `CLIENT01`, `
 
 - Repository: https://github.com/SimSI2027/Certificate-Flow-Film
 - Demo (GitHub Pages): https://simsi2027.github.io/Certificate-Flow-Film/
-- Release: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.0.0
+- Latest pre-release, v1.1.0: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.1.0 (v1.0.0 is superseded)
 - Related: [Certificate-Flow-Lab](https://github.com/SimSI2027/Certificate-Flow-Lab) ([Pages](https://simsi2027.github.io/Certificate-Flow-Lab/)). Approach A (`Certificate-Flow-Animation`) was not found under SimSI2027 (HTTP 404), so it is not linked.
