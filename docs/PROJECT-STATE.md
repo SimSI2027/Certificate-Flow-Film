@@ -1,6 +1,13 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-14 (Session L1, `claude-sonnet-5-5`, no subagents, 5 of 6 images)
+Updated: 2026-11-14 (Session L2, `claude-opus-5-5`, no subagents, 7 of 10 images)
+
+## SESSION L2 DONE (2026-11-14, Opus 5.5, no subagents, 7 of 10 images) — v1.2.0 RELEASED as the PUBLIC LATEST release
+- Re-audit of the L1 Final MP4 `84097e10…3f44`: `python -m tools verify` GREEN (pytest 200, 15 in-Blender checks, both tiers 3270/3270, MP4 on spec, TP −1.2 dBFS, cut steps 0.3/0.1). ffprobe H.264 High 4.1, bt709, 3270 frames, 109.000 s. **0 BLOCKER, 0 MAJOR; V1-CIN-03 closed; scores PKI 9, legibility 8, cinema 7.** Per-item table and rulings: `docs\GAN-LEDGER.md` "Session L2".
+- Rulings: rim haze glow accepted; f746 (24.83 s) and f1376 (45.83 s) are pops from the camera-following rim light passing through the AD tower and the Root CA complex, so they are new MINOR **L2-CIN-01** (fix written in the ledger); f1534–1535 has the same cause; f2454–2455 is camera motion (no finding); F3-PKI-01 stays an open MINOR (film accurate without the label); the 10 focal residuals are accepted.
+- Release: tag `v1.2.0` on `12665b1`; https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.2.0, Latest, `isPrerelease=false`, 7 assets, all 7 downloaded back with equal SHA-256. v1.1.0 retitled "(superseded)", with a superseded note at the top of its notes.
+- Pages: run 43601767869 succeeded; the live `index.html`, `poster.png`, `preview.mp4` and `captions.vtt` are byte-identical to `site\` and say "v1.2.0 is the current release". README and CHANGELOG say v1.2.0. `scripts\build_site.py` is now the source of the status text again.
+- **Next session (optional, v1.3): fix L2-CIN-01. Sonnet 5.5, medium.** Follow the "L2-CIN-01 fix for v1.3" steps in the ledger (rig-light keep-out, new test, partial re-render of B-04.1/B-05.2/B-06.1, encode, verify, luma check), then a short Opus re-audit before any release. The next larger piece of work is interior shape design (LOOK-PLAN Section 7), which needs a model with design judgement.
 
 ## SESSION L1 DONE (2026-11-14, Sonnet 5.5, High, no subagents, 5 of 6 images) — no tag, no release
 - Items A, C, E, B (second change), D, F done, one commit each, plus `tools look-test` and `tools\luma.py`. Gate passed on attempt 2 of 3. Full final render, audio, encode, site build done. **Final MP4 SHA-256 `84097e10311daafa6b9d6b72bb94a31380357a82aee3006cf56536ad25093f44`**, 70.3 MB, grain 3, `dirty: false`. The Final MP4 is gitignored (release asset); Preview, poster, contact sheet and site are committed.
@@ -8,7 +15,7 @@ Updated: 2026-11-14 (Session L1, `claude-sonnet-5-5`, no subagents, 5 of 6 image
 - Measured: B-09.2 mean YAVG 51.3 (was 38.4); film mean 57.7; f2431 step 0.3; f2695–2712 max 3.7. Still over 4.0: f746 8.0, f1376 10.6 (flashback), f1157 4.0, f1534/1535 4.4/6.7, f2454/2455 5.6/5.1. Per-beat table: `docs\GAN-LEDGER.md` "Session L1".
 - Shortfalls for L2 to rule on: `RESIDUAL_PX` has 10 entries (plan: ≤ 6); F3-PKI-01 label removed (36 of 45 frames), finding open; soft haze glow near the rim light; flashback steps.
 - **Housekeeping (2026-11-14, Sonnet 5.5):** v1.1.0 promoted to public latest release (not pre-release). Pages `site\poster.png` and `site\preview.mp4` restored to the v1.1.0 assets (the L1 commit had put the unaudited v1.2 render live); README, CHANGELOG, Pages text say v1.1.0 is current. Release rule added to CLAUDE.md. The v1.2 render stays in git history (1a20816) and is NOT on Pages until it passes audit.
-- **Next session: L2 (Fable 5.2, High): re-audit the Final MP4 (SHA-256 `84097e10…3f44`) and release v1.2.0 (Plan Section 6).** Do not re-render unless the audit demands it. On a pass: publish v1.2.0 as latest, rebuild site from v1.2 assets (`git checkout 1a20816 -- site/poster.png site/preview.mp4`), update README, CHANGELOG, Pages, verify the live page.
+- **(done in L2)** Next session was: L2 (Fable 5.2, High): re-audit the Final MP4 (SHA-256 `84097e10…3f44`) and release v1.2.0 (Plan Section 6).** Do not re-render unless the audit demands it. On a pass: publish v1.2.0 as latest, rebuild site from v1.2 assets (`git checkout 1a20816 -- site/poster.png site/preview.mp4`), update README, CHANGELOG, Pages, verify the live page.
 
 ## L2 pre-flight (2026-11-14, Sonnet 5.5, no code changes)
 - `tools verify`: was FAIL on stale `test_V1_DOC_02_wording_matches_the_film_and_its_status`. **FIXED (2026-11-14, Sonnet 5.5):** the test now expects README and site to say "v1.1.0 is the current release" and no "pre-release". `tools verify` is **GREEN** (200 passed). L2 can gate on verify.
@@ -73,7 +80,7 @@ Updated: 2026-11-14 (Session L1, `claude-sonnet-5-5`, no subagents, 5 of 6 image
 
 ## URLs
 - Repository (public): https://github.com/SimSI2027/Certificate-Flow-Film
-- Pages demo: https://simsi2027.github.io/Certificate-Flow-Film/. Latest pre-release: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.1.0 (v1.0.0 superseded)
+- Pages demo: https://simsi2027.github.io/Certificate-Flow-Film/. Latest release: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.2.0 (v1.1.0 and v1.0.0 superseded)
 - Related (verified in Session 1): https://github.com/SimSI2027/Certificate-Flow-Lab (Pages: https://simsi2027.github.io/Certificate-Flow-Lab/). Approach A: HTTP 404, not linked.
 
 ## Toolchain (details in `docs\TOOLCHAIN.md`; commands in `docs\PIPELINE.md`)
