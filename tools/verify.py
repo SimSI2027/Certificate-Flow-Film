@@ -185,6 +185,29 @@ def step_cut_frames() -> Step:
     return Step("cut frames", ok, "luma steps " + ", ".join(f"{s:.1f}" for s in steps), lines=[] if ok else [f"limit {CUT_LUMA_STEP_MAX}"])
 
 
+L2_CIN_01_FRAMES = (746, 1376, 1534, 1535)  # 1-based frames of the rig-light pops (L2-CIN-01): each step to the previous frame <= STEP_LIMIT
+HERO_LUMA_MIN = 50.0  # V1-CIN-02 / v1.3: mean YAVG of B-09.2, and of the hold from HERO_WHOLE_FROM_S to the beat end
+HERO_WHOLE_FROM_S = 98.5
+
+
+def step_mp4_luma() -> Step:
+    """L2-CIN-01 and the v1.3 hero: luma steps at the old pop frames and the hero brightness, measured on the Final MP4."""
+    from tools import film, luma  # noqa: PLC0415
+
+    if not film.FINAL_MP4.exists():
+        return Step("MP4 luma (L2-CIN-01, hero)", True, "skipped (no final MP4)")
+    yavg = luma.mp4_yavg(film.FINAL_MP4)
+    problems = [f"f{f} step {abs(yavg[f] - yavg[f - 1]):.1f} > {luma.STEP_LIMIT}" for f in L2_CIN_01_FRAMES if abs(yavg[f] - yavg[f - 1]) > luma.STEP_LIMIT]
+    beat_mean = luma.beat_means(yavg)["B-09.2"]
+    first = timing.seconds_to_frame(HERO_WHOLE_FROM_S)
+    last = timing.frame_range(*timing.beat_window("B-09.2"))[1]
+    hold = [yavg[f] for f in range(first, last + 1)]
+    hold_mean = sum(hold) / len(hold)
+    problems += [f"{name} mean YAVG {value:.1f} < {HERO_LUMA_MIN}" for name, value in (("B-09.2", beat_mean), (f"f{first}-f{last}", hold_mean)) if value < HERO_LUMA_MIN]
+    steps = ", ".join(f"f{f} {abs(yavg[f] - yavg[f - 1]):.1f}" for f in L2_CIN_01_FRAMES)
+    return Step("MP4 luma (L2-CIN-01, hero)", not problems, f"steps {steps}; B-09.2 mean {beat_mean:.1f}, from {HERO_WHOLE_FROM_S} s {hold_mean:.1f}", lines=problems)
+
+
 def step_repo() -> Step:
     result = sync.check()
     return Step("repository (clean tree, HEAD == origin/main)", result.ok, f"HEAD {result.local_head[:8]} origin {(result.remote_head or '?')[:8]} clean {result.clean}")
@@ -195,7 +218,7 @@ def run(repo: bool = False, skip_blender: bool = False) -> int:
     if not skip_blender:
         steps.append(lambda: [step_scene_checks()])
     steps.append(step_frame_tiers)
-    steps.append(lambda: [step_final_mp4(), step_cut_frames()])
+    steps.append(lambda: [step_final_mp4(), step_cut_frames(), step_mp4_luma()])
     if repo:
         steps.append(lambda: [step_repo()])
     failed = 0
