@@ -1,6 +1,12 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-14 (Session V3, `claude-opus-5-5`, no subagents)
+Updated: 2026-11-14 (Session V4, `claude-opus-5-5`, no subagents)
+
+## SESSION V4 (2026-11-14, Opus 5.5, no subagents) — MALAWI rename + realistic user character, NO release (Pages stays on v1.2.0)
+- The owner set V4 before the V3 audit ran. The V3 Final MP4 (`e5050765…30b6`) was never audited and is superseded by the V4 render.
+- Done and pushed: d3c600d (rerender-range tool and pre-change baseline), ea51f11 (V4-A1 rename, V4-A2 amendment, new spec hash `6a60d216…1a55`), a58e8d8 (character: `assets\character.blend` 4.2 MB, MPFB 2.0.18 + CC0 MakeHuman assets, option B kept after the preview gate; laptop to x −11.42, chair to −10.9; in-Blender check `character_seated`).
+- **Running:** `python -m tools render --tier final --rebuild` (log `renders\v4-render.log`, resumable). It fills exactly the missing frames: beauty 1364 frames (f1–187, f289–387, f1511–2121, f2804–3270, from `qa\v4\beauty-rerender.json`), all 2808 sign and 1933 caption frames (rename). Replaced frames are kept in `renders\final-v1.3-beauty-replaced`, `renders\final-v1.3-signs` and `renders\final-v1.3-captions`. Audio is kept (no timing change).
+- **If interrupted:** rerun the same command, then `python -m tools encode`, then `python -m tools verify`.
 
 ## SESSION V3 DONE (2026-11-14, Opus 5.5, no subagents, 5 of 8 images) — v1.3 finishing pass, NO release (Pages stays on v1.2.0)
 - **Final MP4 SHA-256 `e5050765e7633399b04b3c3014fd811da7ccff6d3871d36216015001bfd330b6`**, 70.3 MB, render commit 3260ec4, `dirty: false`; H.264 High 4.1, bt709, 3270 frames, 109.000 s. Gitignored (release asset). Poster, contact sheet and metadata in `output\` are committed; `site\` is untouched (still v1.2.0).
