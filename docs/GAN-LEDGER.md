@@ -375,3 +375,40 @@ Haze density stayed at `HAZE_DENSITY` 0.004 (the tuning rule never fired).
 - Not heard: the audio. Not re-run: a discriminator round (lean mode).
 
 Next: L2 (Opus 5.5, medium): re-audit the Final MP4 and release v1.2.0 per `docs\LOOK-PLAN-v1.2.md` Section 6.
+
+## Session L2 (2026-11-14, `claude-opus-5-5`; lean mode, no subagents, 7 of 10 images): targeted re-audit and v1.2.0 release
+
+- **Subject:** the L1 Final MP4, SHA-256 `84097e10311daafa6b9d6b72bb94a31380357a82aee3006cf56536ad25093f44`, render commit `51a87aa`, `dirty: false`. Source changed since then: only the V1-DOC-02 test and `tools\verify.py` (no render input). Spec hash unchanged (`7cf45afa…6d23`); no amendment.
+- **Hard discriminators:** `python -m tools verify` VERIFY GREEN (ruff, mypy 66 files, pytest 200, traceability, palette 87/0, planned-film audits 0 hard, 15 in-Blender checks, both tiers 3270/3270, final MP4 on spec, true peak −1.2 dBFS, cut-frame steps 0.3 / 0.1). ffprobe: H.264 High level 41, yuv420p, bt709 ×3, 1920x1080, 30/1, 3270 frames, 109.000 s; AAC LC 48 kHz stereo.
+- **Review:** Chief of Staff only. 7 images, all cut from the Final MP4 except the committed contact sheet and poster: step pairs (f745|746, f1375|1376, f1533|1536, f2452|2456); proof window f1526–1582 every 8th frame; flash f2431, f2709 and hero f2941–3120 every 30th; the ten focal beats at mid-beat; cuts f1245–1247, f1395–1397, trust store f1640, f1690, f240; the 33-tile contact sheet; the poster. Luma per frame by FFmpeg `signalstats` on the MP4; rig-light positions recomputed from `cff.stage.camera.CameraPlan` with the maths of `blender\lighting.py`.
+
+### Per-item result on the film
+
+| Item | Where | Result | Evidence |
+|---|---|---|---|
+| A / V1-CIN-03 look | whole film | **PASS, closed** | Haze with depth, horizon glow, pool lights in identity tints, reflective floor, bloom on role colours. Wide and medium shots have material and light design. Interiors at 14–24 s remain simple grey shapes (plan Section 7; residual, not a MAJOR). |
+| B hero brightness | 98–104 s | **PASS** | B-09.2 mean YAVG 51.3 (≥ 50). Topology whole from about f3031 (101 s); residual V1-CIN-02 timing kept (follow 0.45). |
+| C flash | 81.0 s, 90.0–90.3 s | **PASS** | f2431 step 0.3; f2695–2712 largest 3.7. Frames show the badge as a dim plate, no flare. |
+| D focal sizes | ten beats | **PASS (residual accepted)** | Six beats grew, none shrank; every subject identifiable and carried by a caption or label. |
+| E F3-LEG-01 | cut at 46.5 s | **PASS** | No "Earlier" marker on f1396–1397; clean cuts at f1246 and f1396 (no blend). |
+| E F3-AUD-01 / F3-PIPE-02 | MP4, metadata | **PASS** | −1.2 dBFS true peak; `dirty: false`. |
+| E F3-PKI-01 | 50.9–52.7 s | **open MINOR, accepted** | See ruling L2-R3. |
+| v1.1.0 fixes | contact sheet + sheets | **PASS, no regression** | Signs legible over haze (dark plates), captions on dark plates, trust store gold before docking with "Installed earlier by policy", keys named, check lists in place, no blank frame. |
+
+### Rulings
+
+| ID | Ruling |
+|---|---|
+| L2-R1 | **Haze glow near the rim light: accepted.** It is a soft, low-contrast backlight bloom (poster upper centre, f1526–1566 top, f3061–3120 behind the root). It never covers a label, caption or focal subject, has no hard dot, and is motivated by the rim light. C-08 restraint holds. |
+| L2-R2 | **Luma steps: new finding L2-CIN-01, MINOR.** Cause found (was "unknown" in the plan): the camera-following rim light (`blender\lighting.py`, `rim_pos = look + 0.85·d·forward + offsets`) is placed without regard to geometry. f746 (24.83 s, step 8.0, B-04.1): the rim is 0.7 m from the AD tower's axis at z 3.2 m, inside the tower, so its light is cut in one frame (the CA 1 vault's side wall goes dark). f1376 (45.83 s, step 10.6, B-05.2, inside the flashback, not its exit): the rim leaves the Root CA complex (0.9 → 1.1 m from its axis), so its light returns in one frame. f1534–1535 (51.1 s, 4.4 / 6.7, B-06.1): the rim's haze glow comes out from behind the root tower over three frames. L1's haze and volumetric shadows amplified all three (v1.1.0: 5.6 and 4.6). **Severity MINOR, by the project's calibrated scale:** the v1 audit classed V1-CIN-06, a 6-frame white flash with a 12.2 step, as MINOR; these are single-step pops of 8.0 and 10.6 that do not hide a subject or a caption. f2454–2455 (81.8 s, 5.6 / 5.1) is the camera passing through the CA 2 doorway (its glowing violet frame leaves the picture over four frames): real motion, **no finding**. |
+| L2-R3 | **F3-PKI-01 accepted as an open MINOR.** Without the label the film stays accurate (F-10): the proof is created at the server with `KEY-RDP-PRIV` (E-06.1d), travels as its own object beside the certificate and the CA 1 copy (seen f1542–1550), and is checked at the client against `CERT-RDP` (E-06.1f). Nothing on screen says a certificate alone proves possession. It is weak, not misleading; B-06.1 stays ACCURATE. |
+| L2-R4 | **Focal-size residuals (10 `RESIDUAL_PX` entries) accepted for v1.2.0.** The plan's "at most 6" was a target, not a gate. All entries were raised or kept; the three beats that could not move (B-02.2, B-05.3, B-08.3) are blocked by camera and sign checks (L1-R4). No entry was lowered and no check was relaxed. |
+| L2-R5 | **V1-CIN-03 closed; release as the public latest.** With 0 BLOCKER and 0 MAJOR open and V1-CIN-03 closed, v1.2.0 is a full release (plan Section 6). The charter film gate (scores ≥ 8, two clean discriminator rounds) is still not met. That is recorded, and it does not affect the release decision in lean mode. |
+
+Scores (Chief of Staff estimate, not a discriminator score): **PKI 9, legibility 8, cinema 7** (v1.1.0: 9, 8, 5). PKI beats: 33 of 33 ACCURATE (B-06.1 weak, unlabelled proof).
+
+### L2-CIN-01 fix for v1.3 (MINOR; Sonnet 5.5, medium; partial re-render)
+
+1. `blender\lighting.py`, `build_lights`: after computing `rim_pos` (and `key_pos`), push it out of every actor's keep-out cylinder: for each anchor in `lo.CLIENT, RDP, WEB, AD, CA1, CA2, ROOT` with a keep-out radius `RIG_KEEP_OUT_M` (new constant in `cff\theme\look.py`; start at 3.5, the root complex's drum radius plus 0.5 m), if the horizontal distance is below the radius and `z` is below the actor's top plus 1 m, move the light radially to the radius. Apply it per frame **before** keying, so the Bezier keys stay smooth.
+2. New pure-Python test `test_L2_CIN_01_rig_lights_stay_out_of_actors`: rebuild the rig positions from `CameraPlan` (as in the L2 scratch check) for every frame and assert none is inside a keep-out cylinder.
+3. Re-render only the beats whose rim keys changed (expected B-04.1, B-05.2, B-06.1; delete just those frames in `renders\final\beauty`), then `tools encode`, `tools verify`, and `tools\luma.py`: no step above 4.0 at f746, f1376 or f1534–1535.

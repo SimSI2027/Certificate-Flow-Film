@@ -62,7 +62,7 @@ li {{ margin:.2rem 0; }}
 Your browser cannot play this video. <a href="{release}">Download the full MP4</a>.
 </video>
 <p id="watch-note" class="muted">This is the 720p preview with captions. <a href="{release}">Full 1080p MP4 (release asset)</a>.</p>
-<p class="muted"><strong>Status: v1.1.0 pre-release.</strong> The PKI content and the on-screen text have been audited and corrected. The look is still a stylised grey-box, the final wide shot is dark, and some objects are small on screen; a look pass is planned for v1.2.</p>
+<p class="muted"><strong>Status: v1.2.0 is the current release.</strong> Audited on the rendered film: the PKI content and the on-screen text are accurate, and the look pass adds haze, pools of light, materials and a brighter closing wide shot. Some objects are still small on screen and two brief lighting pops remain; see the changelog.</p>
 </section>
 
 <section aria-labelledby="what">
@@ -93,7 +93,7 @@ Your browser cannot play this video. <a href="{release}">Download the full MP4</
 <li><a href="{repo}">Repository</a></li>
 <li><a href="{repo}/blob/main/docs/PKI-TECHNICAL-NOTES.md">PKI technical notes</a></li>
 <li><a href="{repo}/blob/main/docs/STORYBOARD.md">Storyboard</a></li>
-<li><a href="{release}">v1.1.0 pre-release (Final MP4, preview, poster, contact sheet, captions)</a></li>
+<li><a href="{release}">v1.2.0 current release (Final MP4, preview, poster, contact sheet, captions)</a></li>
 <li><a href="{repo}/blob/main/CHANGELOG.md">Changelog and known limitations</a></li>
 <li>Related: <a href="{lab}">Certificate-Flow-Lab</a> (<a href="{lab_pages}">demo</a>)</li>
 </ul>
@@ -132,4 +132,4 @@ def main(release_url: str) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else f"{REPO}/releases/tag/v1.1.0"))
+    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else f"{REPO}/releases/tag/v1.2.0"))

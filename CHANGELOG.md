@@ -1,6 +1,28 @@
 # Changelog
 
-## v1.1.0 (2026-11-14, current release)
+## v1.2.0 (2026-11-14, current release)
+
+The look release. Session L1 applied `docs\LOOK-PLAN-v1.2.md` and rendered the film once at the final tier; session L2 re-audited the rendered film: 0 BLOCKER, 0 MAJOR, every v1.1.0 fix intact, 33 of 33 PKI beats accurate. V1-CIN-03 (grey-box look) is closed. v1.1.0 is superseded.
+
+Final MP4 SHA-256: `84097e10311daafa6b9d6b72bb94a31380357a82aee3006cf56536ad25093f44`.
+
+Changed:
+- **Look (V1-CIN-03).** A night-time machine hall: thin blue haze with depth, a horizon glow instead of a black upper frame, a static pool of light over each actor in a pale tint of its identity colour, softer key and rim shadows, a dark slightly reflective floor, metallic neutrals, stronger bloom on the role colours. No pool light uses a state colour, and none animates.
+- **Hero shot (V1-CIN-02).** Mean luma of the closing wide shot 51.3, was 38.4 (target 50). Film mean 57.7, was 50.3.
+- **The white flash at 90 s and the step at 81 s (V1-CIN-06).** The web template badge rests at a low glow before the camera flies over it: steps 3.7 and 0.3, were 7.7 and 6.4.
+- **Focal size (V1-CIN-01).** Longer lenses (within 24–50 mm) in six beats and a larger AIA tag: B-01.2 84 px (was 78), B-02.3 103 (96), B-04.2 81 (65), B-05.2 75 (55), B-06.3 80 (53), B-07.4 73 (64).
+- **F3 MINORs.** The flashback marker ends at the cut (F3-LEG-01). AAC true peak −1.2 dBFS, was −0.6, and `verify` now fails above −1.0 (F3-AUD-01). `render-metadata.json` carries a `dirty` flag and `verify` rejects a dirty encode (F3-PIPE-02).
+- **Film grain** at encode (fixed seed), to hide banding in the haze.
+
+Known limitations:
+- **Shapes stay simple.** No bevels, textures or set dressing; the server interior (14–24 s) still reads mostly grey. Cinema estimate 7 of 10, so the charter's film gate (8) is not met.
+- **Lighting pops (L2-CIN-01, MINOR, new).** The camera-following rim light passes through the AD tower at 24.83 s (f746, luma step 8.0) and out of the Root CA complex at 45.83 s (f1376, step 10.6); its haze glow comes out from behind the root at 51.1 s (f1534–1535, 4.4 and 6.7). The step at 81.8 s (f2454–2455) is the camera passing the CA 2 doorway, not a defect.
+- **Focal size (V1-CIN-01 residuals).** Ten beats are still under the 150 px target (39–103 px); B-02.2, B-05.3 and B-08.3 cannot take a longer lens without breaking a camera or sign check.
+- **Hero timing (V1-CIN-02 residual).** The whole topology is in frame from about 101 s, not for most of the beat.
+- **Handshake proof unlabelled (F3-PKI-01, MINOR).** The label could hold only 36 of the 45 frames needed to read it, so it was removed; the proof is still shown as its own object.
+- **Process.** Lean mode: no discriminator round judged this film. Gate: `python -m tools verify` (pytest 200, 15 in-Blender checks) plus the L2 re-audit. Nobody has reviewed the audio by ear.
+
+## v1.1.0 (2026-11-14, superseded by v1.2.0)
 
 The audit-fix release. v1.0.0 was audited (`docs\AUDIT-v1.md`: 0 BLOCKER, 16 MAJOR, 10 MINOR); every finding except the look (V1-CIN-03) was fixed in sessions F1 and F2, the final tier was fully re-rendered, and session F3 re-checked each fix on the rendered film before this release. v1.1.0 is a pre-release because V1-CIN-03 is still open. v1.0.0 is superseded.
 

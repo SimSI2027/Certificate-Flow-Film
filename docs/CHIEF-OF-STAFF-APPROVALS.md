@@ -131,3 +131,13 @@ Lean mode (no discriminator round, no tag, no release). Details, rulings and sto
 - **Measured on the MP4:** B-09.2 mean YAVG 51.3 (was 38.4; target 50 met); film mean 57.7; f2431 step 0.3, f2695–2712 largest 3.7. f746 8.0 and f1376 10.6 (flashback entry and exit) are over 4.0 and not tuned.
 - **Shortfalls, recorded and not hidden:** F3-PKI-01 label tried and removed (36 of 45 frames), finding stays open; Item D left 10 `RESIDUAL_PX` entries (plan: at most 6) because three beats cannot take a longer lens; a soft glow near the rim light is left for L2 to rule on.
 - **Decision: LOOK PASS DELIVERED, release held for L2** — first attempt at this gate; not auto-approved as a release. L2 re-audits the Final MP4 and decides v1.2.0.
+
+## v1.2 targeted re-audit and release, session L2 (Opus 5.5, 2026-11-14)
+
+Lean mode (no subagents, no discriminator round). Details and rulings: `docs\GAN-LEDGER.md` "Session L2".
+
+- **Scope:** re-audit the L1 Final MP4 (`84097e10…3f44`) item by item; rule on the rim haze glow, the luma steps (f746, f1376, f1534–1535, f2454–2455), F3-PKI-01 and the 10 focal residuals; if no BLOCKER or MAJOR fails, release v1.2.0 as the public latest release.
+- **Review performed:** 7 images (step pairs, proof window, flash and hero strip, ten focal beats, cuts and trust store, contact sheet, poster); per-frame `signalstats` on the MP4; rig-light positions recomputed from the camera plan.
+- **Problems found and corrections:** new MINOR L2-CIN-01 (rim light passes through the AD tower and the Root CA complex: pops at 24.83 s and 45.83 s; cause found, exact fix written for v1.3). F3-PKI-01 stays an open MINOR (the film is accurate without the label). Focal residuals accepted. f2454–2455 is camera motion, not a defect. `scripts\build_site.py` still printed "v1.1.0 pre-release" (the housekeeping session had edited only `site\index.html`); it is now the source of the v1.2.0 text, and the V1-DOC-02 test checks v1.2.0 and that the page links no older release.
+- **Tests run (real results):** `python -m tools verify` VERIFY GREEN before the edits (pytest 200, 15 in-Blender checks, both tiers 3270/3270, MP4 on spec, true peak −1.2 dBFS, cut-frame steps 0.3 / 0.1) and `verify --skip-blender` GREEN after them (pytest 200).
+- **Decision: APPROVED as the public latest release v1.2.0** — 2026-11-14. 0 BLOCKER, 0 MAJOR open; V1-CIN-03 closed (cinema estimate 7). Not approved: the charter's film gate (scores ≥ 8, two clean discriminator rounds). Release, asset round-trip and Pages results are in PROJECT-STATE "Session L2".
