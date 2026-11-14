@@ -1,6 +1,12 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-14 (Session L2, `claude-opus-5-5`, no subagents, 7 of 10 images)
+Updated: 2026-11-14 (Session V3, `claude-opus-5-5`, no subagents)
+
+## SESSION V3 IN PROGRESS (2026-11-14, Opus 5.5, no subagents, 3 of 8 images so far) — v1.3 finishing pass, no release
+- Source done and pushed (9882cec, 63289f7, ab51778, 9d11993, 994e7ca): L2-CIN-01 rig keep-out (`cff\stage\rig.py`), interiors (`blender\dressing.py`), hero whole from 98.5 s (`Shot.lead_s/arrive/focus_pull`), proof tag `LBL-HS-RDP`. Tests `tests\test_v13.py`, in-Blender check `interior_dressing`, verify step `MP4 luma (L2-CIN-01, hero)`.
+- Preview gate passed (renders\preview): steps f746 0.2, f1376 0.3, f1534/1535 1.8/2.1; hero YAVG 57-58; interiors 44-68. f1381 (4.2 preview, 4.7 on the old final beauty) is pre-existing in the flashback, not caused by v1.3.
+- **Running:** final render (background). v1.2 beauty frames moved to `renders\final-v1.2-beauty`; the 399 changed sign frames to `renders\final-v1.2-signs-changed`. Beauty: full pass (practicals are visible in nearly every shot). Signs: only frames 1528-1598 and 2744-3119. Captions: all kept (bands unchanged). Audio: kept (event timing unchanged).
+- **If interrupted:** rerun the driver steps: `python -m tools build --tier final`, then `pipeline.render_layer("final", "beauty", all frames)` (resumable), then signs for the changed frames (see GAN-LEDGER "Session V3"), `python -m tools encode`, `python -m tools verify`.
 
 ## SESSION L2 DONE (2026-11-14, Opus 5.5, no subagents, 7 of 10 images) — v1.2.0 RELEASED as the PUBLIC LATEST release
 - Re-audit of the L1 Final MP4 `84097e10…3f44`: `python -m tools verify` GREEN (pytest 200, 15 in-Blender checks, both tiers 3270/3270, MP4 on spec, TP −1.2 dBFS, cut steps 0.3/0.1). ffprobe H.264 High 4.1, bt709, 3270 frames, 109.000 s. **0 BLOCKER, 0 MAJOR; V1-CIN-03 closed; scores PKI 9, legibility 8, cinema 7.** Per-item table and rulings: `docs\GAN-LEDGER.md` "Session L2".
