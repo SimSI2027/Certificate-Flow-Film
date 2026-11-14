@@ -4,8 +4,9 @@ Updated: 2026-11-13 22:20 (F3 second run, model `claude-fable-5-2`, High effort;
 
 ## SESSION F2 IN PROGRESS (2026-11-13, Opus 5.5 High)
 - Steps 1-2 DONE (all code fixes): commits 242c363 (camera), 107159a (signs), 60a60b3 (small fixes). Full `python -m tools verify` green before the renders (pytest 187, 14 in-Blender checks). Residuals in `docs\GAN-LEDGER.md` "Session F2".
-- Step 3 (animatic render + review) IN PROGRESS. Old animatic passes were deleted first (the renderer skips frames on disk).
-- If interrupted: resume at the first unfinished step of the Session F2 prompt (steps 3-7); `renders\final\{beauty,signs,captions}` must be deleted before the final render.
+- Step 3 DONE: animatic re-rendered and reviewed (contact sheet + strips 54/62/100 s); V1-CIN-06 bulge fix 13a7cde. Audio rebuilt (-15.9 LUFS, TP -1.2 dBFS).
+- Step 4 IN PROGRESS: old final passes deleted; `python -m tools render --tier final --rebuild` started 2026-11-14 (resumable 300-frame chunks, skips frames on disk).
+- If interrupted: re-run the same render command (it resumes), then `python -m tools encode`, `python scripts\build_site.py`, set `tools\verify.py` `MP4_PENDING_RERENDER = False`, `python -m tools verify`, review, commit, sync-check (Session F2 prompt steps 4-7).
 
 ## (superseded) NEXT SESSION: F2 (Opus 5.5, High). Paste the "Session F2" prompt from `docs\SESSION-PROMPTS.md`. Do NOT run F3 before F2 is finished.
 - **F3 second run (2026-11-13 22:15): GATE FAILED AGAIN, same cause.** F2 has still not run. The five local outputs have the same SHA-256 as the v1.0.0 release assets (Final `5470c46c…f193a`), `MP4_PENDING_RERENDER` is still True, `CROSSING_LIMIT` is still 0.045. Verify is GREEN only through that waiver (pytest 170, 14 in-Blender checks, final tier 3270/3270; MP4 level 50, transfer sRGB; cut-frame steps 14.3 and 30.1). Per-item results are in `docs\AUDIT-v1.md` under "F3 targeted re-audit, second run": 7 fixed MAJORs FAIL in the film, V1-DOC-01 PASSES.
