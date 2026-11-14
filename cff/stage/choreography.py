@@ -793,12 +793,18 @@ class Choreographer:
         self.travel("CERT-WEB", b0, b0 + 60, (self.current("CERT-WEB", LOCATION), *home, front, slot), "EASE_IN_OUT")
         self.travel("CERT-CA2-COPY-WEB", b0 + 6, b0 + 66, (self.current("CERT-CA2-COPY-WEB", LOCATION), *tuple(lo.at_z(p, TRAVEL_LIFT + 0.4) for p in lo.CHANNEL_WEB), lo.add(front, (0.0, 0.0, -0.3)), copy_slot), "EASE_IN_OUT")
         self.hide("SCREEN-WEB", b0 + 60)
+        # V1-CIN-02 step 4: the hero was the darkest shot (YAVG 38 < 50), so both green channels and the trust paths
+        # and links burn at GLOW_PEAK here (world and lamp energy stay as they are: that is V1-CIN-03).
+        peak_link = hex_glow(palette.TEXT_HEX, palette.GLOW_PEAK)
+        peak_green = glow_value(R.VALIDATED, palette.GLOW_PEAK)
         f0, f1 = self.event("E-09.2a")
-        self.grow("TP-RDP", f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_ACTIVE))  # hue from the link's gradient material
-        self.glow_to("TL-CA1", f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_ACTIVE), "EASE_OUT")  # the path lights up to the root
+        self.recolour_path("CH-RDP", len(lo.CHANNEL_RDP) - 1, f0, f1, peak_green)
+        self.recolour_path("CH-WEB", len(lo.CHANNEL_WEB) - 1, f0, f1, peak_green)
+        self.grow("TP-RDP", f0, f1, peak_link)  # hue from the link's gradient material
+        self.glow_to("TL-CA1", f0, f1, peak_link, "EASE_OUT")  # the path lights up to the root
         f0, f1 = self.event("E-09.2b")
-        self.grow("TP-WEB", f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_ACTIVE))
-        self.glow_to("TL-CA2", f0, f1, hex_glow(palette.TEXT_HEX, palette.GLOW_ACTIVE), "EASE_OUT")
+        self.grow("TP-WEB", f0, f1, peak_link)
+        self.glow_to("TL-CA2", f0, f1, peak_link, "EASE_OUT")
         # B-09.3: the world settles; the compositor fade-to-black is keyed from the same event (see compositor).
         self.event("E-09.3a")
 

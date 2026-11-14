@@ -103,9 +103,9 @@ CUT_FRAMES = (1246, 1396)  # 1-based frames of the two cuts (V1-CIN-04)
 CUT_LUMA_STEP_MAX = 3.0
 EXPECTED_VIDEO = {"codec_name": "h264", "width": 1920, "height": 1080, "r_frame_rate": "30/1", "color_transfer": "bt709", "level": 41}  # V1-ENC-01
 DURATION_TOLERANCE_S = 0.05
-# The v1.0.0 MP4 on disk predates the F1 fixes (blended cut frames, sRGB transfer tag, level 5.0). While this is True the two MP4
-# steps report those known problems but do not fail. Session F2 sets it to False right after the single final re-render.
-MP4_PENDING_RERENDER = True
+# The v1.0.0 MP4 predated the F1 fixes (blended cut frames, sRGB transfer tag, level 5.0). While this was True the two MP4 steps
+# reported those known problems without failing. Session F2 set it to False after the final re-render: the MP4 checks are binding.
+MP4_PENDING_RERENDER = False
 
 
 def step_frame_tiers() -> list[Step]:

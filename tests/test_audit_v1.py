@@ -265,6 +265,25 @@ def test_V1_CIN_02_hero_holds_the_whole_topology() -> None:  # noqa: N802
 HERO_ARRIVED_FRAMES = 60  # residual: the camera pulls back from the B-09.1 close-up, so the topology is whole from ~102 s
 
 
+@pytest.mark.covers("C-05")
+def test_V1_CIN_02_hero_paths_burn_at_peak() -> None:  # noqa: N802
+    """Step 4 (brightness): both green channels and the trust paths and links reach GLOW_PEAK by the end of B-09.2.
+
+    Residual (docs/GAN-LEDGER.md, session F2): the final-tier B-09.2 mean YAVG is 38.4 (target 50); more light needs
+    world or lamp energy, which belongs to V1-CIN-03."""
+    from cff.story.model import ColourRole  # noqa: PLC0415
+    from cff.theme import palette  # noqa: PLC0415
+
+    tl = choreography.build_timeline()
+    end = timing.seconds_to_frame(timing.beat_window("B-09.2")[1])
+    link = choreography.hex_glow(palette.TEXT_HEX, palette.GLOW_PEAK)
+    green = choreography.glow_value(ColourRole.VALIDATED, palette.GLOW_PEAK)
+    for obj_id in ("TL-CA1", "TL-CA2", "TP-RDP", "TP-WEB"):
+        assert tl.value_at(obj_id, GLOW, end) == link, obj_id
+    for obj_id in ("CH-RDP-S1", "CH-WEB-S1"):
+        assert tl.value_at(obj_id, GLOW, end) == green, obj_id
+
+
 # --- session F2: small fixes ----------------------------------------------------------------------------------------
 
 @pytest.mark.covers("AR-01", "B-05.1")
