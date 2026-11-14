@@ -11,7 +11,7 @@ import bpy
 from blender.animation import FCurveWriter
 from cff.story import model as m
 from cff.story import timing
-from cff.theme import palette, render
+from cff.theme import look, palette, render
 from cff.theme.render import Tier
 
 GRADE_NODE = "Grade"
@@ -21,9 +21,9 @@ VIGNETTE_BLUR = "VignetteBlur"
 VIGNETTE_MIX = "VignetteMix"
 VIGNETTE_SIZE = (1.15, 1.0)
 VIGNETTE_BLUR_PX = 160
-BLOOM_THRESHOLD = 1.0
+BLOOM_THRESHOLD = look.BLOOM_THRESHOLD
 BLOOM_SIZE = 6
-BLOOM_STRENGTH = 0.35
+BLOOM_STRENGTH = look.BLOOM_STRENGTH
 
 
 def _flashback_frames() -> tuple[int, int]:

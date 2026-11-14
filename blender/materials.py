@@ -11,7 +11,7 @@ import bpy
 from blender.common import linear4
 from cff.stage.objects import Kind
 from cff.story.model import ColourRole
-from cff.theme import palette
+from cff.theme import look, palette
 
 SOLID_ROUGHNESS = 0.55
 
@@ -43,7 +43,12 @@ def stage_material(role: ColourRole, glow_only: bool = False) -> bpy.types.Mater
     info = nt.nodes.new("ShaderNodeObjectInfo")
     base = palette.role_hex(ColourRole.NEUTRAL if glow_only else role)
     bsdf.inputs["Base Color"].default_value = linear4(base)
-    bsdf.inputs["Roughness"].default_value = SOLID_ROUGHNESS
+    if role is ColourRole.NEUTRAL and not glow_only:
+        bsdf.inputs["Roughness"].default_value = look.NEUTRAL_ROUGHNESS
+        bsdf.inputs["Metallic"].default_value = look.NEUTRAL_METALLIC
+    else:
+        bsdf.inputs["Roughness"].default_value = look.ROLE_ROUGHNESS
+        bsdf.inputs["Metallic"].default_value = 0.0
     bsdf.inputs["Emission Strength"].default_value = palette.EMISSION_STRENGTH
     nt.links.new(info.outputs["Color"], bsdf.inputs["Emission Color"])
     nt.links.new(info.outputs["Alpha"], bsdf.inputs["Alpha"])
@@ -70,7 +75,8 @@ def backdrop_material() -> bpy.types.Material:
     mat = bpy.data.materials.new("MAT-backdrop")
     _, bsdf = _principled(mat.node_tree)
     bsdf.inputs["Base Color"].default_value = linear4(palette.BACKDROP_HEX)
-    bsdf.inputs["Roughness"].default_value = 0.85
+    bsdf.inputs["Metallic"].default_value = look.BACKDROP_METALLIC
+    bsdf.inputs["Roughness"].default_value = look.BACKDROP_ROUGHNESS
     return mat
 
 
@@ -206,7 +212,7 @@ def floor_material() -> bpy.types.Material:
     mix.inputs["B"].default_value = linear4(palette.GRID_HEX)
     nt.links.new(add.outputs["Value"], mix.inputs["Factor"])
     nt.links.new(mix.outputs["Result"], bsdf.inputs["Base Color"])
-    bsdf.inputs["Roughness"].default_value = 0.8
+    bsdf.inputs["Roughness"].default_value = look.FLOOR_ROUGHNESS
     return mat
 
 

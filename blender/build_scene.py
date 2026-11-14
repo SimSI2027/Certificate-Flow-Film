@@ -42,7 +42,7 @@ def build(out_path: str, tier_name: str, timeline_hook: TimelineHook | None = No
     for collection in (stage, rig):
         scene.collection.children.link(collection)
 
-    world.build_world(scene)
+    world.build_world(scene, tier)
     world.build_floor(stage)
     backdrop = bpy.data.collections.new("BACKDROP")
     scene.collection.children.link(backdrop)

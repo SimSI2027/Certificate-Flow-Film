@@ -13,18 +13,70 @@ from blender import actors, materials
 from blender.common import PROP_ID, PROP_KIND, PROP_OWNER, PROP_ROLE, linear4, tag
 from cff.stage import layout as lo
 from cff.stage.objects import CATALOGUE, Kind, StageObject
-from cff.theme import motion, palette
+from cff.theme import look, motion, palette
+from cff.theme.render import Tier
 
 FLOOR_HALF_EXTENT_M = 200.0  # past the backdrop ring, so no floor edge shows in a wide shot
 FLOOR_CENTRE_Y_M = 20.0
 
 
-def build_world(scene: bpy.types.Scene) -> None:
+def _horizon(world: bpy.types.World) -> None:
+    """Camera-only glow near the horizon; lighting still sees the plain navy world, so ambient light is unchanged (C-05)."""
+    nt = world.node_tree
+    background = nt.nodes["Background"]
+    output = next(n for n in nt.nodes if n.type == "OUTPUT_WORLD")
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(coord.outputs["Generated"], sep.inputs["Vector"])
+    absz = nt.nodes.new("ShaderNodeMath")
+    absz.operation = "ABSOLUTE"
+    nt.links.new(sep.outputs["Z"], absz.inputs[0])
+    inv = nt.nodes.new("ShaderNodeMath")
+    inv.operation = "SUBTRACT"
+    inv.use_clamp = True
+    inv.inputs[0].default_value = 1.0
+    nt.links.new(absz.outputs["Value"], inv.inputs[1])
+    power = nt.nodes.new("ShaderNodeMath")
+    power.operation = "POWER"
+    power.inputs[1].default_value = look.HORIZON_POWER
+    nt.links.new(inv.outputs["Value"], power.inputs[0])
+    glow = nt.nodes.new("ShaderNodeBackground")
+    glow.inputs["Color"].default_value = linear4(palette.HORIZON_HEX)
+    scale = nt.nodes.new("ShaderNodeMath")
+    scale.operation = "MULTIPLY"
+    scale.inputs[1].default_value = look.HORIZON_STRENGTH
+    nt.links.new(power.outputs["Value"], scale.inputs[0])
+    nt.links.new(scale.outputs["Value"], glow.inputs["Strength"])
+    add = nt.nodes.new("ShaderNodeAddShader")
+    nt.links.new(background.outputs["Background"], add.inputs[0])
+    nt.links.new(glow.outputs["Background"], add.inputs[1])
+    path = nt.nodes.new("ShaderNodeLightPath")
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(path.outputs["Is Camera Ray"], mix.inputs["Fac"])
+    nt.links.new(background.outputs["Background"], mix.inputs[1])
+    nt.links.new(add.outputs["Shader"], mix.inputs[2])
+    nt.links.new(mix.outputs["Shader"], output.inputs["Surface"])
+
+
+def _haze(world: bpy.types.World) -> None:
+    nt = world.node_tree
+    output = next(n for n in nt.nodes if n.type == "OUTPUT_WORLD")
+    scatter = nt.nodes.new("ShaderNodeVolumeScatter")
+    scatter.inputs["Color"].default_value = linear4(palette.HAZE_HEX)
+    scatter.inputs["Density"].default_value = look.HAZE_DENSITY
+    scatter.inputs["Anisotropy"].default_value = look.HAZE_ANISOTROPY
+    nt.links.new(scatter.outputs["Volume"], output.inputs["Volume"])
+
+
+def build_world(scene: bpy.types.Scene, tier: Tier) -> None:
     world = bpy.data.worlds.new("WORLD")
     world.use_nodes = True
     background = world.node_tree.nodes["Background"]
     background.inputs["Color"].default_value = linear4(palette.WORLD_HEX)
     background.inputs["Strength"].default_value = palette.WORLD_STRENGTH * 10  # navy ambient, far below the key light
+    _horizon(world)
+    if tier.volumetrics:
+        _haze(world)
     scene.world = world
 
 

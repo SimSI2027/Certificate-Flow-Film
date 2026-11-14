@@ -30,7 +30,7 @@ from cff.stage.objects import CATALOGUE, Kind
 from cff.story import captions as story_captions
 from cff.story import model as m
 from cff.story import timing
-from cff.theme import motion, render, shots, typography
+from cff.theme import look, motion, render, shots, typography
 
 VISIBLE_SCALE = 0.05
 CONTAINMENT_TOLERANCE_M = 0.08
@@ -591,10 +591,25 @@ def check_provenance() -> Result:
     return r
 
 
+def check_pool_lights() -> Result:
+    """v1.2 look: exactly one static pool light per actor in ``look.POOLS``; none is animated (docs/LOOK-PLAN-v1.2.md, Item A7)."""
+    r = Result("pool_lights")
+    pools = [o for o in bpy.data.objects if o.name.startswith("LIGHT-pool-")]
+    if len(pools) != len(look.POOLS):
+        r.failures.append(f"{len(pools)} pool lights, expected {len(look.POOLS)}")
+    for ob in pools:
+        if ob.animation_data is not None and ob.animation_data.action is not None:
+            r.failures.append(f"{ob.name} is animated")
+        if ob.data.animation_data is not None and ob.data.animation_data.action is not None:
+            r.failures.append(f"{ob.name} light data is animated")
+    r.metrics["pool_lights"] = len(pools)
+    return r
+
+
 def run_all(scene: bpy.types.Scene) -> list[Result]:
     results = [check_provenance(), check_frame_range(scene), check_camera_count(scene), check_shape_vocabulary(scene), check_keyframes()]
     results += check_dynamic(scene)
     results.append(check_camera_motion(scene))
     results.append(check_captions())
-    results += [check_fonts(), check_text_materials(), check_signs(scene)]
+    results += [check_fonts(), check_text_materials(), check_signs(scene), check_pool_lights()]
     return results

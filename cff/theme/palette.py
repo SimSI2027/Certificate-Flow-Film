@@ -80,6 +80,12 @@ KEY_LIGHT_POWER_W = 900.0
 RIM_LIGHT_POWER_W = 1050.0  # a visible rim on every focal subject (CIN-S1R1-12)
 KEY_LIGHT_HEX = "#FFE9D2"
 RIM_LIGHT_HEX = "#9CC4FF"
+HAZE_HEX = "#9CC4FF"  # v1.2 look (docs/LOOK-PLAN-v1.2.md): haze, horizon glow and pool light tints; never a state colour (C-10)
+HORIZON_HEX = "#2B5C9E"
+POOL_NEUTRAL_HEX = "#CFE0FF"
+POOL_CA1_HEX = "#8CEBFF"
+POOL_CA2_HEX = "#C4B1FF"
+POOL_ROOT_HEX = "#FFE08A"
 AMBIENT_TO_KEY_MAX = 0.20
 
 
