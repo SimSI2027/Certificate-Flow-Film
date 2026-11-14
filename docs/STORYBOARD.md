@@ -71,6 +71,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Camera move:** a slow push-in through the opened panel
 - **Focal subject:** the new key pair (`KP-RDP`)
 - **Caption:** *The private key stays on the server* (`CAP-S3a`)
+- **Must-read text:** `Private key`, `Public key` (tags on the two key shapes; V1-PKI-03)
 
 ### B-03.2 — Private key anchored (16–18.5 s, frames 481–555)
 - **Shot:** the private key settles into the key container. The lid closes, the lock turns and anchor clamps engage the container to the chassis frame.
@@ -223,6 +224,7 @@ These coordinates are non-binding. They are metres, with Z up. The topology must
 - **Camera move:** a push-in through the panel, then a pull-out
 - **Focal subject:** the web request capsule (`REQ-WEB`)
 - **Caption:** none
+- **Must-read text:** `Private key`, `Public key` (tags on the two key shapes; V1-PKI-03)
 
 ### B-07.3 — Eligibility (76–79.5 s, frames 2281–2385)
 - **Shot:** the capsule waits at `WEB01`'s outbound port with the AD node behind it. A steel-blue query runs to AD and back. Both CA vaults come into view:

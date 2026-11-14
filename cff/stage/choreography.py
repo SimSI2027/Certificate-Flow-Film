@@ -284,6 +284,7 @@ class Choreographer:
         R = ColourRole
         for obj_id, value in (
             ("CERT-ROOT", glow_value(R.ROOT, 0.45)),
+            ("TS-CLIENT-ROOT", glow_value(R.ROOT, 0.25)),  # the root is already trusted: gold from frame 1 (V1-PKI-01)
             ("CERT-CA1", glow_value(R.ISSUING_CA1, DIM_LEVEL)),
             ("CERT-CA2", glow_value(R.ISSUING_CA2, DIM_LEVEL)),
             ("TRIM-CA1", glow_value(R.ISSUING_CA1, 0.25)),
@@ -596,7 +597,7 @@ class Choreographer:
         self.go("CERT-CA1-COPY-RDP", f0b, f1b, lo.STACK_INTERMEDIATE, "SETTLE")
         f0c, f1c = self.event("E-06.2c")  # "installed earlier by policy": a shimmer in place; nothing travels
         self.glow_pulse("CERT-ROOT", f0c, f1c, glow_value(R.ROOT, palette.GLOW_PEAK), rest=glow_value(R.ROOT, 0.45))
-        self.glow_to("TS-CLIENT-ROOT", f0c, f1c, glow_value(R.ROOT, 0.25))
+        self.glow_pulse("TS-CLIENT-ROOT", f0c, f1c, glow_value(R.ROOT, 0.6), rest=glow_value(R.ROOT, 0.25))  # shimmer returns to the same state
         # B-06.3: the AIA indicator on the server card glows softly; the kiosk is passively highlighted; nothing travels.
         f0, f1 = self.event("E-06.3a")
         self.show("AIA-RDP", f0, 12, rise=(0.0, 0.0, 0.0), glow=hex_glow(palette.TEXT_HEX, 0.6), at=lo.add(lo.STACK_CERT, (0.42, 0.0, 0.0)))

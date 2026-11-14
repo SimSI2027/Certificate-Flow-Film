@@ -87,6 +87,9 @@ def exists(timeline: Timeline, placement: Placement, frame: int) -> bool:
     if placement.window is not None:
         first, last = labels.window_frames(placement.window)
         return first <= frame < last + round(motion.LABEL_LINGER_S * timing.FPS)
+    beats_allowed = labels.PLATE_BEATS.get(placement.label_id)
+    if beats_allowed is not None and beat_of_frame().get(frame) not in beats_allowed:
+        return False  # V1-LEG-04: a persistent plate shows only in the beats where it is read
     return placement.parent is None or is_visible(timeline, placement.parent, frame)
 
 
@@ -167,6 +170,10 @@ def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, b
         if not exists(timeline, placement, frame):
             hidden.add(placement.label_id)
             continue
+        if placement.screen_px is not None:  # fixed on-screen place (V1-PKI-02): never moved or cleared
+            rect, origin = _rect_for(placement, *placement.screen_px)
+            out.append(_Candidate(placement, index, origin, state.focus_distance, rect, True))
+            continue
         px, py, depth = camera.project(state, anchor(timeline, placement, frame))
         if depth < ty.SIGN_NEAR_M or not math.isfinite(px):
             hidden.add(placement.label_id)
@@ -195,12 +202,14 @@ def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, b
             min_top = prev.rect[3] + ty.SIGN_GAP_PX
             if cur.rect[1] < min_top:
                 _shift(cur, 0.0, min_top - cur.rect[1])
-        if any(c.placement.window is not None for c in members):
-            if protected is None:
-                protected = _protected_rects(timeline, plan, beat, frame)
-            # tags and check lists stand beside the focal subject and every visible capsule, card and private key, never
-            # across them (CIN-S1R1-04, LEG-S1R2-03, LEG-S1R2-04, CIN-S1R2-02)
-            _clear_of(members, protected)
+        if members[0].placement.screen_px is not None:
+            kept.extend(members)  # a fixed-position sign is never nudged or cleared
+            continue
+        if protected is None:
+            protected = _protected_rects(timeline, plan, beat, frame)
+        # every sign (V1-LEG-04: plates too) stands beside the focal subject and every visible capsule, card and private key,
+        # never across them (CIN-S1R1-04, LEG-S1R2-03, LEG-S1R2-04, CIN-S1R2-02)
+        _clear_of(members, protected)
         if _nudge_block(members, blocked):
             kept.extend(members)
         else:

@@ -28,6 +28,30 @@ CAP_FIELD = 0.05
 TEXT_TO_EM = 1.0 / 0.72  # Blender font size (em) per metre of cap height, for the bundled font
 PLATE_MARGIN_EM = 0.45  # plate padding around the text, in cap heights
 APPEAR_LEAD_FRAMES = 3  # staggering between consecutive windowed labels
+FLASHBACK_SCREEN_PX = (960.0, 975.0)  # centre of the "Earlier" marker: inside title-safe, below the flashback caption (top band)
+
+# V1-LEG-04: persistent plates show only in the beats where they are read, so names never appear before their object is
+# introduced or label the wrong object. Every label's must_read_beats lies inside its row (a test enforces it).
+PLATE_BEATS: dict[str, tuple[str, ...]] = {
+    "LBL-HOST-CLIENT": ("B-01.1", "B-02.2", "B-06.2", "B-09.1", "B-09.2"),
+    "LBL-HOST-RDP": ("B-02.1", "B-02.3", "B-04.5", "B-06.1", "B-09.2"),
+    "LBL-HOST-WEB": ("B-07.1", "B-08.2", "B-09.2"),
+    "LBL-SITE-WEB": ("B-07.1", "B-09.1"),
+    "LBL-AD": ("B-02.3", "B-04.1", "B-07.3"),
+    "LBL-DC": ("B-02.3", "B-04.1"),
+    "LBL-PKI": ("B-06.3", "B-06.5"),
+    "LBL-ROOT": ("B-05.1", "B-05.2", "B-05.3", "B-08.3", "B-09.2"),
+    "LBL-CA1": ("B-04.1", "B-04.2", "B-04.3", "B-04.4", "B-05.2", "B-05.3", "B-07.3", "B-09.2"),
+    "LBL-CA2": ("B-07.3", "B-07.4", "B-08.1", "B-08.2", "B-08.3", "B-09.2"),
+    "LBL-TPL-RDP": ("B-02.3", "B-04.1"),
+    "LBL-TPL-WEB": ("B-07.1", "B-07.3"),
+    "LBL-SELF": ("B-02.2",),
+    "LBL-CERT-RDP-SAN": ("B-04.4", "B-04.5", "B-06.4"),
+    "LBL-CERT-RDP-EKU": ("B-04.4", "B-04.5", "B-06.4"),
+    "LBL-CERT-WEB-SAN": ("B-08.2", "B-09.1"),
+    "LBL-CERT-WEB-EKU": ("B-08.2", "B-09.1"),
+    "LBL-REQ-CA1": ("B-05.2",),
+}
 
 
 @dataclass(frozen=True)
@@ -46,6 +70,7 @@ class Placement:
     cap_m: float
     align: str = "CENTER"
     window: Window | None = None  # None: persistent with its parent
+    screen_px: tuple[float, float] | None = None  # fixed centre on the 1080p frame; the sign then ignores the 3D anchor
 
     @property
     def text(self) -> str:
@@ -114,7 +139,12 @@ def _build() -> tuple[Placement, ...]:
         # --- windowed tags ---------------------------------------------------------------------------
         Placement("LBL-CONNECT", "SCREEN-IDLE", (0.0, 0.0, 0.35), CAP_TAG, window=Window("B-01.1", 0.3)),  # on the client's screen (PKI-S1R1-07)
         Placement("LBL-UNVERIFIED", m.CLIENT, (0.0, 0.0, 1.0), CAP_TAG * 1.2, window=Window("B-02.2", 0.7)),
-        Placement("LBL-FLASHBACK", "CARTRIDGE", (0.0, 0.0, 0.7), CAP_TAG * 1.4, window=Window("B-05.2", 0.1, 4.9)),
+        # fixed screen position for the whole flashback so the "earlier" marker is never hidden or moved (V1-PKI-02)
+        Placement("LBL-FLASHBACK", None, (0.0, 0.0, 0.0), CAP_TAG * 1.4, window=Window("B-05.2", 0.1, 4.9), screen_px=FLASHBACK_SCREEN_PX),
+        Placement("LBL-KEY-RDP-PRIV", "KEY-RDP-PRIV", (-0.45, -0.12, 0.34), CAP_TAG, window=Window("B-03.1", 0.4, until="B-03.4")),
+        Placement("LBL-KEY-RDP-PUB", "KEY-RDP-PUB", (0.45, -0.12, 0.34), CAP_TAG, window=Window("B-03.1", 0.1, until="B-03.3")),
+        Placement("LBL-KEY-WEB-PRIV", "KEY-WEB-PRIV", (0.0, -0.12, -0.34), CAP_TAG, window=Window("B-07.2", 0.2)),
+        Placement("LBL-KEY-WEB-PUB", "KEY-WEB-PUB", (0.0, -0.12, 0.34), CAP_TAG, window=Window("B-07.2", 0.2)),
         Placement("LBL-ROOT-STORE", "TS-CLIENT-ROOT", (0.0, 0.0, 0.55), CAP_TAG, window=Window("B-06.2", 1.6)),
         Placement("LBL-AIA-1", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.45)), CAP_TAG, window=Window("B-06.3", 0.1)),
         Placement("LBL-AIA-2", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.12)), CAP_TAG, window=Window("B-06.3", 0.2)),

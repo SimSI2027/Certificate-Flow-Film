@@ -162,6 +162,12 @@ def test_LEG_S1R1_02_the_public_key_has_no_key_silhouette() -> None:  # noqa: N8
     assert "cylinder(bm, s * 0.42, s * 0.08, 6" in body, "the public key is a notched hexagonal token"
 
 
+# V1-LEG-04 asks for 0.02 counting every sign. Achieved after the plate-beat table: 297 of 7120 sign frames (4.2%); 258 of them are the
+# two CA check lists and the CA 2 note (f932-990, f2503-2565), which only V1-LEG-03 (fixed list places, F2) can move. Set to 0.045 for
+# F1 (was 0.1 and counted only windowed tags); F2 must lower it to 0.02.
+CROSSING_LIMIT = 0.045
+
+
 @pytest.mark.covers("C-09", "L-06")
 def test_CIN_S1R1_04_tag_and_check_lists_stand_beside_the_focal_subject() -> None:  # noqa: N802
     tl = _timeline()
@@ -169,13 +175,11 @@ def test_CIN_S1R1_04_tag_and_check_lists_stand_beside_the_focal_subject() -> Non
     beats = beat_of_frame()
     crossing = 0
     shown = 0
-    for label_id, sign in signs.plan_signs().items():
-        if labels.BY_ID[label_id].window is None:
-            continue
+    for sign in signs.plan_signs().values():  # V1-LEG-04: every sign counts, plates included
         for frame, f in sign.frames.items():
             if f.alpha < 1.0 or frame not in beats:
                 continue
             focal = caption_layout.focal_rect(tl, plan, beats[frame], frame)
             shown += 1
             crossing += focal is not None and signs._intersects(f.rect, focal)
-    assert shown and crossing / shown <= 0.1, f"{crossing} of {shown} tag frames cross the focal subject"
+    assert shown and crossing / shown <= CROSSING_LIMIT, f"{crossing} of {shown} tag frames cross the focal subject"

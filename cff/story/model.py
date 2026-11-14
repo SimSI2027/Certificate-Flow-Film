@@ -829,6 +829,10 @@ def _labels(chains: tuple[Chain, ...]) -> tuple[Label, ...]:
         Label("LBL-CERT-WEB-SAN", LabelKind.CARD_FIELD, n.WEB_SITE_DNS_NAME, "CERT-WEB", ("B-08.2",)),
         Label("LBL-CERT-WEB-EKU", LabelKind.CARD_FIELD, n.EKU_SERVER_AUTH_NAME, "CERT-WEB", ("B-08.2",)),
         Label("LBL-FLASHBACK", LabelKind.TAG, "Earlier: offline signing ceremony", ROOT_CA, ("B-05.2",)),
+        Label("LBL-KEY-RDP-PRIV", LabelKind.TAG, "Private key", "KEY-RDP-PRIV", ("B-03.1", "B-03.2")),  # V1-PKI-03: name both keys
+        Label("LBL-KEY-RDP-PUB", LabelKind.TAG, "Public key", "KEY-RDP-PUB", ("B-03.1",)),
+        Label("LBL-KEY-WEB-PRIV", LabelKind.TAG, "Private key", "KEY-WEB-PRIV", ("B-07.2",)),
+        Label("LBL-KEY-WEB-PUB", LabelKind.TAG, "Public key", "KEY-WEB-PUB", ("B-07.2",)),
         Label("LBL-REQ-CA1", LabelKind.TAG, f"{n.ISSUING_CA1_ROLE}'s own CA request", "REQ-CA1", ("B-05.2",)),
         Label("LBL-ROOT-STORE", LabelKind.TAG, "Installed earlier by policy", "TS-CLIENT-ROOT", ("B-06.2",)),
         Label("LBL-AIA-1", LabelKind.TAG, "Missing intermediate? AIA can fetch it", "SVC-AIA", ("B-06.3",)),
