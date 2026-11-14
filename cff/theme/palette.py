@@ -68,6 +68,7 @@ TRUST_LINK_SEGMENTS = 24
 # --- glow and light levels ---------------------------------------------------------------
 GLOW_OFF = 0.0
 GLOW_SOFT = 0.35
+BADGE_REST_GLOW = 0.25  # the web template badge once it has been read: no flare under the 81 s and 90 s fly-overs (V1-CIN-06 residual)
 GLOW_ACTIVE = 1.0
 GLOW_PEAK = 1.6
 EMISSION_STRENGTH = 1.8  # emission strength at glow level 1.0 (3.0 -> 2.4: CIN-S1R1-12; 2.4 -> 1.8: role hues held at distance, V1-COL-01)

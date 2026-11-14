@@ -683,6 +683,8 @@ class Choreographer:
             start = f0b + 24 + (i - 1) * span
             self.glow_to(f"ROUTE-CA2-S{i}", start, start + 6, glow_value(R.ISSUING_CA2, palette.GLOW_ACTIVE), "EASE_OUT")
         # B-07.4: the capsule travels only along the violet route, into Issuing CA 2's vault.
+        b = self.beat("B-07.4")
+        self.glow_to("TPL-WEBTLS", b, b + 30, hex_glow(palette.TEXT_HEX, palette.BADGE_REST_GLOW))  # read in B-07.1 and B-07.3; rests before the fly-overs
         f0, f1 = self.event("E-07.4a")
         cradle = lo.add(lo.CA2, lo.CA_CRADLE)
         route = tuple(lo.at_z(p, 0.55) for p in lo.ROUTE_CA2)

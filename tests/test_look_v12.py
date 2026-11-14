@@ -59,3 +59,16 @@ def test_LOOK_A_haze_density_stays_in_its_tuning_range() -> None:
     assert look.HAZE_DENSITY_MIN <= look.HAZE_DENSITY <= look.HAZE_DENSITY_MAX
 
 
+def test_LOOK_C_web_badge_rests_before_the_flyovers() -> None:
+    from cff.stage import choreography  # noqa: PLC0415
+    from cff.stage.tracks import GLOW  # noqa: PLC0415
+    from cff.story import timing  # noqa: PLC0415
+
+    tl = choreography.build_timeline()
+    rest = choreography.hex_glow(palette.TEXT_HEX, palette.BADGE_REST_GLOW)
+    start = timing.seconds_to_frame(timing.beat_window("B-07.4")[0]) + 30
+    assert start <= 2416
+    for frame in (start, start + 30, timing.frame_end()):
+        assert tl.value_at("TPL-WEBTLS", GLOW, frame) == rest, frame
+
+
