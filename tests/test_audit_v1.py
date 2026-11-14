@@ -435,9 +435,9 @@ def test_V1_DOC_01_caption_track_is_opt_in() -> None:  # noqa: N802
 @pytest.mark.covers("L-05")
 def test_V1_DOC_02_wording_matches_the_film_and_its_status() -> None:  # noqa: N802
     readme, site = _text("README.md"), _text("site/index.html")
-    assert "v1.1.0 pre-release" in readme and "released" not in readme.lower()  # v1.1.0 is a pre-release too (V1-CIN-03 open)
+    assert "v1.1.0 is the current release" in readme and "pre-release" not in readme.lower()  # v1.1.0 is the current public release
     assert "one continuous camera move, with a single flashback" in readme
     assert "continuous shot" not in readme and "continuous shot" not in site
     assert "whose CA certificate was signed offline by the" in site
     assert "the request carries only the public key" in site
-    assert "pre-release" in site and "Release v1.0.0" not in site
+    assert "v1.1.0 is the current release" in site and "pre-release" not in site.lower() and "Release v1.0.0" not in site

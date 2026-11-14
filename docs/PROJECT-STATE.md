@@ -11,7 +11,7 @@ Updated: 2026-11-14 (Session L1, `claude-sonnet-5-5`, no subagents, 5 of 6 image
 - **Next session: L2 (Fable 5.2, High): re-audit the Final MP4 (SHA-256 `84097e10…3f44`) and release v1.2.0 (Plan Section 6).** Do not re-render unless the audit demands it. On a pass: publish v1.2.0 as latest, rebuild site from v1.2 assets (`git checkout 1a20816 -- site/poster.png site/preview.mp4`), update README, CHANGELOG, Pages, verify the live page.
 
 ## L2 pre-flight (2026-11-14, Sonnet 5.5, no code changes)
-- `tools verify`: **FAIL** (1 step). All stages pass except pytest: 1 failed, 199 passed. Failing test: `tests/test_audit_v1.py::test_V1_DOC_02_wording_matches_the_film_and_its_status`. It still asserts the README says "v1.1.0 pre-release" and never "released". v1.1.0 is now the public latest release, so the test is stale. Fix the test (not the README) before L2 gates on verify.
+- `tools verify`: was FAIL on stale `test_V1_DOC_02_wording_matches_the_film_and_its_status`. **FIXED (2026-11-14, Sonnet 5.5):** the test now expects README and site to say "v1.1.0 is the current release" and no "pre-release". `tools verify` is **GREEN** (200 passed). L2 can gate on verify.
 - Final MP4 SHA-256 `84097e10311daafa6b9d6b72bb94a31380357a82aee3006cf56536ad25093f44`: this is the **L1 render**, not v1.1.0 (`2b56cee7…`).
 - `site\poster.png` (`f9d07ca7…`) and `site\preview.mp4` (`7c66720a…`) match the v1.1.0 release assets Poster and Preview.
 
