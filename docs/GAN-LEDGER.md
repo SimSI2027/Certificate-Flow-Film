@@ -268,3 +268,23 @@ K7 side findings (PKI-K7-07..10: no visible handshake proof or B-09.1 CRL fetche
 
 Hard tests named after these IDs are listed with the R2 candidate.
 
+
+## Session F2 (2026-11-13, Opus 5.5 High; lean mode, no discriminator round): v1 audit fixes, residuals and rulings
+
+Chief of Staff rulings (no REFERENCE-SPEC change, no amendment, spec hash unchanged):
+- V1-LEG-03: check lines appear with their own check, at one fixed place per list, each with its own tick on the sign plate; the 3D tick slots are not rendered. Ticks still resolve one by one and check 6 (revocation) still waits pending until E-06.5d.
+- V1-PKI-03: "Private key" / "Public key" tags (glossary terms; the spec does not enumerate labels).
+- RDP check lines are must-read in B-06.4 and B-06.5 (the list is held through B-06.5). This adds must-read frames; it removes none.
+- V1-CIN-02: the hero moved to az -45 / el 30 / dist 42 looking at a single centre (-0.5, 4, 6.5); el and dist alone (the audit's search grid) never fitted the user and the root at >= 110 px from az -105.
+- V1-LEG-02: layout moves glide at SIGN_JUMP_PX (48 px) per frame instead of fading out and in; a run ends (or dips to alpha 0.3 for 4 frames) only at a forced step larger than the C-06 pop limit (96 px). The audit's split-at-48-px rule cost must-read labels up to 30 frames each.
+
+Residuals (targets not reached with every camera audit green; tests hold the achieved values):
+| Finding | Target | Achieved | Why |
+|---|---|---|---|
+| V1-CIN-01 | 150 px (90 travel, 80 trust links) | B-01.2 78, B-02.2 99, B-02.3 96, B-04.2 65, B-05.2 55, B-05.3 39, B-06.1 63, B-06.3 53, B-07.4 64 | each further `dist` step failed C-02/C-03, or (B-01.2) started B-02.1 too near the RDP plate. Fixed: B-04.5 155, B-08.3 84; 9 of 11 still short |
+| V1-CIN-05 | session window 220 px | 188 px (dist 8.5, 50 mm) | dist <= 8.0 breaks C-02 on the move into B-07.1 (f2091+) |
+| V1-CIN-02 | topology whole on 90% of the B-09.2 hold | 16% of the hold; 100% of the last 2 s of B-09.2 and of B-09.3; root 112 px | the camera pulls back from the B-09.1 close-up and arrives at the end of the beat |
+| V1-LEG-03 | 0 blocked frames per list | CA 1 0, web 0, CA 2 42, RDP 21 | Appendix A.3 search with the F2 camera |
+| V1-LEG-04 | crossing <= 2% | 1.55% (107 of 6899) | met; CROSSING_LIMIT now 0.02 |
+| V1-PKI-04 | HS-RDP >= 60, HS-WEB >= 45 px | met (85, 55) | |
+| V1-PKI-05 | CRL >= 60 px | met (78, 73) | |

@@ -2,7 +2,12 @@
 
 Updated: 2026-11-13 22:20 (F3 second run, model `claude-fable-5-2`, High effort; before it: F3 first run, Opus 5.5)
 
-## NEXT SESSION: F2 (Opus 5.5, High). Paste the "Session F2" prompt from `docs\SESSION-PROMPTS.md`. Do NOT run F3 before F2 is finished.
+## SESSION F2 IN PROGRESS (2026-11-13, Opus 5.5 High)
+- Steps 1-2 DONE (all code fixes): commits 242c363 (camera), 107159a (signs), 60a60b3 (small fixes). Full `python -m tools verify` green before the renders (pytest 187, 14 in-Blender checks). Residuals in `docs\GAN-LEDGER.md` "Session F2".
+- Step 3 (animatic render + review) IN PROGRESS. Old animatic passes were deleted first (the renderer skips frames on disk).
+- If interrupted: resume at the first unfinished step of the Session F2 prompt (steps 3-7); `renders\final\{beauty,signs,captions}` must be deleted before the final render.
+
+## (superseded) NEXT SESSION: F2 (Opus 5.5, High). Paste the "Session F2" prompt from `docs\SESSION-PROMPTS.md`. Do NOT run F3 before F2 is finished.
 - **F3 second run (2026-11-13 22:15): GATE FAILED AGAIN, same cause.** F2 has still not run. The five local outputs have the same SHA-256 as the v1.0.0 release assets (Final `5470c46c…f193a`), `MP4_PENDING_RERENDER` is still True, `CROSSING_LIMIT` is still 0.045. Verify is GREEN only through that waiver (pytest 170, 14 in-Blender checks, final tier 3270/3270; MP4 level 50, transfer sRGB; cut-frame steps 14.3 and 30.1). Per-item results are in `docs\AUDIT-v1.md` under "F3 targeted re-audit, second run": 7 fixed MAJORs FAIL in the film, V1-DOC-01 PASSES.
 - No tag, release, README, CHANGELOG or Pages change. v1.0.0 stays a pre-release. The only source change in this session: the F2 prompt was added to `docs\SESSION-PROMPTS.md` (it did not exist, which is why F3 was run twice).
 - **F2 is finished when all four are true:** the Final MP4 is newer than the last source commit; its SHA-256 is not `5470c46c…f193a`; `tools\verify.py` has `MP4_PENDING_RERENDER = False`; `python -m tools verify` prints no PENDING line. Only then run F3.
