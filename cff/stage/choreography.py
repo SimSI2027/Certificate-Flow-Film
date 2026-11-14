@@ -18,7 +18,7 @@ from collections.abc import Callable, Sequence
 
 from cff.stage import layout as lo
 from cff.stage.layout import Vec3
-from cff.stage.objects import BY_ID, CATALOGUE
+from cff.stage.objects import BY_ID, CATALOGUE, Kind
 from cff.stage.tracks import GLOW, LOCATION, ROTATION, SCALE, Timeline, Value
 from cff.story import model as m
 from cff.story import timing
@@ -167,9 +167,14 @@ class Choreographer:
         self.glow_to(obj_id, f1 + settle, f1 + 3 * settle, hex_glow(palette.TEXT_HEX, palette.TRUST_LINK_REST), "EASE_IN_OUT")
 
     def grow(self, obj_id: str, f0: int, f1: int, glow: Value) -> None:
-        """A beam or trust link extends along its own axis while it lights up."""
-        full = BY_ID[obj_id].full
-        thin = (motion.HIDDEN_SCALE if full[0] != 1.0 else 1.0, 1.0, motion.HIDDEN_SCALE if full[2] != 1.0 else 1.0)
+        """A beam or trust link extends along its own axis while it lights up.
+
+        A trust link is bowed in local Z, so it grows from nothing on every axis: its bow rises with its length. Starting
+        it at full width with only X collapsed left the bow standing as a grey vertical rod (CIN-S1R2-05)."""
+        o = BY_ID[obj_id]
+        full = o.full
+        axis_thin = (motion.HIDDEN_SCALE if full[0] != 1.0 else 1.0, 1.0, motion.HIDDEN_SCALE if full[2] != 1.0 else 1.0)
+        thin = HIDDEN if o.kind is Kind.TRUST_LINK else axis_thin
         self._hold(obj_id, SCALE, f0)
         self._set(obj_id, SCALE, f0, thin, "EASE_OUT")
         self._set(obj_id, SCALE, f1, full, HOLD_EASE)

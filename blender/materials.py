@@ -101,13 +101,13 @@ SIGN_PLATE = "MAT-sign-plate"
 
 
 def sign_plate_material() -> bpy.types.Material:
-    """Sign plates: fully opaque while held, so they are drawn in the opaque pass and the blended glyphs always land on
-    top. (Blended plates could sort over left-aligned text and grey it out.) Dithering shows only during the short fades."""
+    """Sign plates: blended like the glyphs, so fades are smooth (a dithered plate stippled while fading: LEG-S1R2-02).
+    Plates render in their own view layer under the text (``blender.signs_scene``), so sorting never matters."""
     if SIGN_PLATE in bpy.data.materials:
         return bpy.data.materials[SIGN_PLATE]
     mat = caption_material("plate").copy()
     mat.name = SIGN_PLATE
-    mat.surface_render_method = "DITHERED"
+    mat.surface_render_method = TEXT_RENDER_METHOD
     for node in mat.node_tree.nodes:
         if node.type == "MATH":  # the plate opacity factor
             node.inputs[1].default_value = palette.SIGN_PLATE_OPACITY

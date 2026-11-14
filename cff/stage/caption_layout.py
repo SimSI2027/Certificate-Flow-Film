@@ -60,10 +60,15 @@ def _corners(obj_id: str, centre: lo.Vec3, scale: tuple[float, ...]) -> list[lo.
 def focal_rect(timeline: Timeline, plan: camera.CameraPlan, beat_id: str, frame: int) -> Rect | None:
     """Projected bounds (1080p pixels) of the beat's focal objects on ``frame``; None if none is visible or in front."""
     beat = next(b for b in m.MODEL.beats if b.id == beat_id)
+    return objects_rect(timeline, plan, shots.focal_objects(beat_id, beat.focal), frame)
+
+
+def objects_rect(timeline: Timeline, plan: camera.CameraPlan, obj_ids: tuple[str, ...] | list[str], frame: int) -> Rect | None:
+    """Projected bounds (1080p pixels) of the visible objects among ``obj_ids`` on ``frame``; None if none is visible."""
     state = plan.state(frame)
     xs: list[float] = []
     ys: list[float] = []
-    for obj_id in shots.focal_objects(beat_id, beat.focal):
+    for obj_id in obj_ids:
         if obj_id not in BY_OBJECT or not is_visible(timeline, obj_id, frame):
             continue
         scale = timeline.value_at(obj_id, SCALE, frame) or (1.0, 1.0, 1.0)

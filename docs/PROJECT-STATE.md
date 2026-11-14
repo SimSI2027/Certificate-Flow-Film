@@ -1,17 +1,14 @@
 # PROJECT STATE
 
-Updated: 2026-11-07 (Session 4 part 3, in progress: R1 triaged and fixed, R2 candidate rendering)
+Updated: 2026-11-13 (LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 
-## Session 4 part 3 (current)
-- Model Opus 5.5, **effort High** (the user started Session 5 and approved finishing the Phase 4 gate first in the same session; recorded deviation from the planned Medium).
-- **Triage done** (ledger, stage1-R1): all 43 findings ACCEPTED, root causes verified. Commits 2c2f7c5 (triage), e902b0d (fixes part 1), ad5890b (fixes part 2), 08e69fe (regressions.json, 63 entries).
-- **What changed:** captions and signs use `BLENDED` materials (dithered alpha stippled text); type sizes from measured glyph ratios (`cff\theme\typography.py`); in-world labels are 3D signs in a separate **SIGNS** scene planned per frame by `cff\stage\signs.py` (fixed 22 px cap, title-safe nudging, list stacking, beside the focal subject, clear of captions, never near the lens); captions take a top or bottom band (`cff\stage\caption_layout.py`, L-05); seal ring rides with its capsule; public key is a notched hexagonal token; CA check slots leave before the flashback; issuer links are bowed gold-to-CA gradients; packet carries `legibility.json`; reframed B-02.2/B-04.1/B-06.1/B-06.5; backdrop ring; rim 1050 W; emission 2.4; MINORs fixed (B-06.5/B-06.6 retimed within S6).
-- **New tools:** `python -m tools legibility` (L-06 holds, L-05 caption vs focal); `render --scene SIGNS`; composite = beauty, then signs, then captions. New in-Blender checks: `fonts`, `text_materials`, `signs` (15 checks).
-- **R2 candidate is built and packaged:** candidate `0b46b8e` (VERIFY GREEN: pytest 155, 14 in-Blender checks, 3270/3270 frames, 0 blank); packet `qa\rounds\stage1-R2` committed in `7eb7650`. Two defects found on inspection were fixed before packaging: dim left-aligned sign text (plates now solid, opaque pass) and signs over the title card (signs leave before the closing fade).
-- **R2 judgement interrupted twice by the account usage limit** (all three discriminators stopped with HTTP 429; limit resets 6:40am America/New_York, 2026-11-08). No reply has been received or saved.
-- **Session 4 part 4 (2026-11-08, Opus 5.5, High):** SYNC OK, spec hash matches. `tools verify` re-run on HEAD 71b6915: VERIFY GREEN (pytest 155, 14 in-Blender checks, 3270/3270 frames, 0 blank). Three fresh R2 discriminators spawned; they were stopped by the usage limit twice more (HTTP 429, resets 12:30pm and 5:30pm America/New_York) and resumed in place with SendMessage each time. Still no reply saved.
-- **Exact next action (resume here):** run the three R2 discriminators (pki opus, cinema and legibility sonnet), each pointed only at `qa\rounds\stage1-R2` with the same prompt as R1 ("Judge round stage1-R2 ... return only the JSON report"). In the same session, resume the interrupted instances with SendMessage; in a new session, spawn three fresh ones. Save each reply verbatim as `qa\rounds\stage1-R2\{pki,cinema,legibility}-discriminator.json`, write the ledger entry (note the usage-limit interruption), triage, fix, and repeat until the gate passes. Gate: 0 BLOCKER, 0 MAJOR, scores >= 8, PKI beats ACCURATE. Rounds used 2 of 5.
-- After the Phase 4 gate is APPROVED, Session 5 (vertical slice, Opus 5.5, High) follows.
+## LEAN FINISH MODE (current; overrides the charter governance)
+- The user switched to lean finish: no subagents, no GAN rounds, `python -m tools verify` is the quality gate, at most 2 contact-sheet reviews, one final-quality render, a simple Pages page and v1.0.0 release.
+- Review agents archived to `docsrchivegents\` (not auto-invoked). The R2 discriminator replies in `qaounds\stage1-R2` are partial/unjudged and are not used.
+- Step 1 DONE: the pending R2 fixes (signs as parallel-to-image plates, blended plates in a PLATES/TEXT view-layer split, sign clearance of capsules/cards/private keys, trust-link grow-from-nothing) were completed; build bug fixed (`view_layer.update()`), tag-crossing fallback to focal-only. VERIFY GREEN (pytest 155, 14 in-Blender checks, 3270/3270 animatic frames).
+- **Remaining, in order:** 2 final look (bloom/grain/volumetrics via the `final` tier), 3 render final 1920x1080 + captions + audio (`cffudio` is empty: synth, cue sheet, mix needed), encode, 4 one contact sheet review, 5 outputs, 6 Pages + v1.0.0.
+- **Next action:** Step 2: preview-render a few frames at the `final` tier to check the look and time per frame; then start the background final render.
+
 
 ## Session 4 part 2 handoff (historical)
 - **Exact next action (done in part 3):**

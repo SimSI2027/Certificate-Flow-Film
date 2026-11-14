@@ -22,7 +22,6 @@ import bpy
 from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Matrix, Vector
 
-from blender import materials
 from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, bundled_font, glyph_cap_ratio
 from cff.stage import camera as stage_camera
 from cff.stage import labels as stage_labels
@@ -31,7 +30,7 @@ from cff.stage.objects import CATALOGUE, Kind
 from cff.story import captions as story_captions
 from cff.story import model as m
 from cff.story import timing
-from cff.theme import motion, palette, render, shots, typography
+from cff.theme import motion, render, shots, typography
 
 VISIBLE_SCALE = 0.05
 CONTAINMENT_TOLERANCE_M = 0.08
@@ -469,10 +468,7 @@ def check_text_materials() -> Result:
             continue
         for ob in scene.objects:
             for slot in getattr(ob.data, "materials", []) or []:
-                if slot is None or slot.surface_render_method != "DITHERED":
-                    continue
-                solid = slot.name == materials.SIGN_PLATE and palette.SIGN_PLATE_OPACITY == 1.0 and ob.type == "MESH"
-                if not solid:  # only a fully opaque sign plate may dither (during its fade); glyphs never
+                if slot is not None and slot.surface_render_method == "DITHERED":  # plates too: they fade (LEG-S1R2-02)
                     r.failures.append(f"{scene_name}/{ob.name}: material {slot.name} is DITHERED")
     beauty_text = [ob.name for ob in bpy.data.scenes["BEAUTY"].objects if ob.type == "FONT"]
     if beauty_text:
@@ -537,6 +533,10 @@ def check_signs(scene: bpy.types.Scene) -> Result:
                 r.failures.append(f"{label_id}: frame {frame}: cap height {cap_px:.1f} px < {LABEL_MIN_CAP_PX}")
             if x0 < TITLE_SAFE[0] or y0 < TITLE_SAFE[1] or x1 > TITLE_SAFE[2] or y1 > TITLE_SAFE[3]:
                 r.failures.append(f"{label_id}: frame {frame}: plate leaves title-safe")
+            # LEG-S1R2-05: the plate as drawn (its corners, in the sign's real orientation), not the planned rectangle
+            px0, py0, px1, py1 = _drawn_plate_px(scene, camera, root, loc, scale)
+            if px0 < TITLE_SAFE[0] - 1.0 or py0 < TITLE_SAFE[1] - 1.0 or px1 > TITLE_SAFE[2] + 1.0 or py1 > TITLE_SAFE[3] + 1.0:
+                r.failures.append(f"{label_id}: frame {frame}: drawn plate ({px0:.0f},{py0:.0f})-({px1:.0f},{py1:.0f}) leaves title-safe")
             checked += 1
     for placement in stage_labels.PLACEMENTS:
         must = stage_labels.must_read_frames(placement.label_id)
@@ -551,6 +551,25 @@ def check_signs(scene: bpy.types.Scene) -> Result:
         r.failures = [*r.failures[:40], f"... and {len(r.failures) - 40} more"]
     r.metrics = {"signs": len(roots), "checked_sign_frames": checked, "smallest_cap_px": round(worst_cap, 1) if checked else None}
     return r
+
+
+def _drawn_plate_px(scene: bpy.types.Scene, camera: bpy.types.Object, root: bpy.types.Object, loc: Vector, scale: float) -> tuple[float, float, float, float]:
+    """Screen bounds (1080p) of a sign's plate corners, with the root's orientation taken from its rotation constraint.
+
+    The SIGNS scene is not evaluated here, so the constraint is applied by hand: COPY_ROTATION takes the beauty camera's
+    world rotation (the sign camera is its twin); anything else fails the check rather than guessing."""
+    kinds = [c.type for c in root.constraints]
+    if kinds != ["COPY_ROTATION"]:
+        return (-math.inf, -math.inf, math.inf, math.inf)
+    rot = camera.matrix_world.to_quaternion().to_matrix()
+    plate = next(c for c in root.children if c.name.startswith("PLATE-"))
+    xs, ys = [], []
+    for v in plate.data.vertices:
+        world = loc + rot @ (v.co * scale)
+        view = world_to_camera_view(scene, camera, world)
+        xs.append(view.x * render.CAPTION_REFERENCE_WIDTH_PX)
+        ys.append((1 - view.y) * render.CAPTION_REFERENCE_HEIGHT_PX)
+    return min(xs), min(ys), max(xs), max(ys)
 
 
 def parent_chain_visible(ob: bpy.types.Object) -> bool:

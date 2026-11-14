@@ -28,6 +28,7 @@ from cff.stage.audit import beat_of_frame, is_visible
 from cff.stage.labels import Placement
 from cff.stage.layout import Vec3
 from cff.stage.objects import BY_ID as BY_OBJECT
+from cff.stage.objects import CATALOGUE, Kind
 from cff.stage.tracks import LOCATION, Timeline
 from cff.story import captions, timing
 from cff.story import model as m
@@ -186,7 +187,7 @@ def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, b
     for c in out:
         by_list.setdefault(family(c.placement.label_id), []).append(c)
     blocked = caption_rects(frame)
-    focal = caption_layout.focal_rect(timeline, plan, beat, frame) if beat else None
+    protected: list[Rect] | None = None
     kept: list[_Candidate] = []
     for members in by_list.values():
         members.sort(key=lambda c: (_list_key(c.placement.label_id)[1], c.index))
@@ -194,8 +195,12 @@ def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, b
             min_top = prev.rect[3] + ty.SIGN_GAP_PX
             if cur.rect[1] < min_top:
                 _shift(cur, 0.0, min_top - cur.rect[1])
-        if focal is not None and any(c.placement.window is not None for c in members):
-            _beside(members, focal)  # tags and check lists stand beside the focal subject, never across it (CIN-S1R1-04)
+        if any(c.placement.window is not None for c in members):
+            if protected is None:
+                protected = _protected_rects(timeline, plan, beat, frame)
+            # tags and check lists stand beside the focal subject and every visible capsule, card and private key, never
+            # across them (CIN-S1R1-04, LEG-S1R2-03, LEG-S1R2-04, CIN-S1R2-02)
+            _clear_of(members, protected)
         if _nudge_block(members, blocked):
             kept.extend(members)
         else:
@@ -203,19 +208,56 @@ def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, b
     return kept, hidden
 
 
-def _beside(members: list[_Candidate], focal: Rect) -> None:
-    """Slide a list sideways off the focal subject's bounds, to whichever side is nearer and fits inside title-safe."""
-    x0, y0 = min(c.rect[0] for c in members), min(c.rect[1] for c in members)
-    x1, y1 = max(c.rect[2] for c in members), max(c.rect[3] for c in members)
-    if not _intersects((x0, y0, x1, y1), focal):
-        return
+PROTECTED_KINDS = (Kind.CAPSULE, Kind.CARD, Kind.KEY_PRIVATE)  # what a tag or check list must never cover
+PROTECTED_OBJECTS = tuple(o.id for o in CATALOGUE if o.kind in PROTECTED_KINDS)
+
+
+def _protected_rects(timeline: Timeline, plan: camera.CameraPlan, beat: str, frame: int) -> list[Rect]:
+    """Screen bounds of the beat's focal subject and of every visible capsule, card and private key on ``frame``."""
+    out: list[Rect] = []
+    focal = caption_layout.focal_rect(timeline, plan, beat, frame) if beat else None
+    if focal is not None:
+        out.append(focal)
+    for obj in PROTECTED_OBJECTS:
+        rect = caption_layout.objects_rect(timeline, plan, (obj,), frame)
+        if rect is not None:
+            out.append(rect)
+    return out
+
+
+def _block(members: list[_Candidate]) -> Rect:
+    return (min(c.rect[0] for c in members), min(c.rect[1] for c in members), max(c.rect[2] for c in members), max(c.rect[3] for c in members))
+
+
+def _clear_of(members: list[_Candidate], protected: list[Rect]) -> None:
+    """Move a list, as one block, the shortest way off every protected rect it covers, staying inside title-safe.
+
+    Candidate moves put the block just right of, left of, above or below each rect it crosses; the shortest move that
+    leaves the block inside title-safe and clear of all protected rects wins. If none exists the list stays (and the
+    caption and title-safe rules still apply)."""
+    gap = ty.SIGN_GAP_PX * 2
+    x0, y0, x1, y1 = _block(members)
     m = ty.SIGN_SAFE_MARGIN_PX
-    options = [focal[2] + ty.SIGN_GAP_PX * 2 - x0, focal[0] - ty.SIGN_GAP_PX * 2 - x1]
-    fits = [dx for dx in options if ty.TITLE_SAFE_PX[0] + m <= x0 + dx and x1 + dx <= ty.TITLE_SAFE_PX[2] - m]
-    if fits:
-        dx = min(fits, key=abs)
-        for c in members:
-            _shift(c, dx, 0.0)
+    sx0, sy0, sx1, sy1 = ty.TITLE_SAFE_PX[0] + m, ty.TITLE_SAFE_PX[1] + m, ty.TITLE_SAFE_PX[2] - m, ty.TITLE_SAFE_PX[3] - m
+    # try to clear everything; if the frame is too crowded for that, clear the focal subject alone (the first rect)
+    for rects in (protected, protected[:1]):
+        hit = [p for p in rects if _intersects((x0, y0, x1, y1), p, gap)]
+        if not hit:
+            return
+        options: list[tuple[float, float]] = []
+        for p in hit:
+            options += [(p[2] + gap - x0, 0.0), (p[0] - gap - x1, 0.0), (0.0, p[1] - gap - y1), (0.0, p[3] + gap - y0)]
+        good = []
+        for dx, dy in options:
+            moved = (x0 + dx, y0 + dy, x1 + dx, y1 + dy)
+            inside = sx0 <= moved[0] and sy0 <= moved[1] and moved[2] <= sx1 and moved[3] <= sy1
+            if inside and not any(_intersects(moved, p) for p in rects):
+                good.append((dx, dy))
+        if good:
+            dx, dy = min(good, key=lambda d: math.hypot(*d))
+            for c in members:
+                _shift(c, dx, dy)
+            return
 
 
 def _shift(c: _Candidate, dx: float, dy: float) -> None:
