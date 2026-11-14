@@ -475,6 +475,22 @@ You are the Chief of Staff for Certificate-Flow-Film, session L2: a targeted re-
 
 ---
 
+## Session V3 audit — v1.3 targeted re-audit (+ release decision)
+**Model: Fable 5.2 · Effort: High** (lean mode: no subagents)
+
+```
+You are the Chief of Staff for Certificate-Flow-Film, session V3 audit: a targeted re-audit of the v1.3 film. No subagents, at most 8 images.
+
+1. Read docs\PROJECT-STATE.md and the "Session V3" entry of docs\GAN-LEDGER.md.
+2. Re-run `python -m tools verify` and ffprobe. Confirm the Final MP4 SHA-256 recorded in PROJECT-STATE.
+3. Judge each V3 item on the film at its timestamps: luma steps at 24.8 s, 45.8 s and 51.1 s (L2-CIN-01); server interior 14-24 s and 73-76 s and the CA vaults 29-36 s and 82-90 s (look, no grey-box, no flicker; V3-CIN-01 frames f477, f595, f600, f671, f705, f719); hero 98.5-104 s (whole topology with the user, mean luma >= 50); proof tag 50.9-53.0 s (readable, accurate to F-10). Plus one full-film contact sheet for regressions. PASS or FAIL per item; rule on V3-R1..R3.
+4. Give PKI, legibility and cinema scores. If any BLOCKER or MAJOR fails: write exact fixes and stop without a release.
+5. If all pass: release v1.3.0 as the public latest release (README, CHANGELOG, Pages from the v1.3 assets in the same session), round-trip the assets' SHA-256, verify the live page.
+6. Commit, push, `python -m tools sync-check`. Report in at most 8 lines.
+```
+
+---
+
 ## Resume prompt (any session, after a usage limit or a long context)
 **Model and effort: the same as the session being resumed**
 

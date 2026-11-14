@@ -412,3 +412,36 @@ Scores (Chief of Staff estimate, not a discriminator score): **PKI 9, legibility
 1. `blender\lighting.py`, `build_lights`: after computing `rim_pos` (and `key_pos`), push it out of every actor's keep-out cylinder: for each anchor in `lo.CLIENT, RDP, WEB, AD, CA1, CA2, ROOT` with a keep-out radius `RIG_KEEP_OUT_M` (new constant in `cff\theme\look.py`; start at 3.5, the root complex's drum radius plus 0.5 m), if the horizontal distance is below the radius and `z` is below the actor's top plus 1 m, move the light radially to the radius. Apply it per frame **before** keying, so the Bezier keys stay smooth.
 2. New pure-Python test `test_L2_CIN_01_rig_lights_stay_out_of_actors`: rebuild the rig positions from `CameraPlan` (as in the L2 scratch check) for every frame and assert none is inside a keep-out cylinder.
 3. Re-render only the beats whose rim keys changed (expected B-04.1, B-05.2, B-06.1; delete just those frames in `renders\final\beauty`), then `tools encode`, `tools verify`, and `tools\luma.py`: no step above 4.0 at f746, f1376 or f1534–1535.
+
+## Session V3 (2026-11-14, `claude-opus-5-5`; lean mode, no subagents, 5 of 8 images): v1.3 finishing pass, no release
+
+- **Scope:** four items set by the owner: (1) L2-CIN-01, (2) interiors to the v1.2 look, (3) the whole topology in frame from 98.5 s with B-09.2 mean luma ≥ 50, (4) F3-PKI-01 proof of possession readable at 50.9–52.7 s. No release; Pages stays on v1.2.0. Spec hash unchanged; no amendment.
+- **Commits:** 9882cec (rig keep-out), 63289f7 (interiors), ab51778 (hero), 9d11993 (proof tag), 994e7ca (tests, MP4 luma gate), 9b84da2 and fb4e1f1 (V3-CIN-01), state commits 32e222b, 0d50b4d, 3260ec4.
+- **Final MP4:** SHA-256 `e5050765e7633399b04b3c3014fd811da7ccff6d3871d36216015001bfd330b6`, 70.3 MB, render commit 3260ec4, `dirty: false`. ffprobe: H.264 High level 41, bt709, 1920x1080, 3270 frames, 109.000 s; AAC LC. `python -m tools verify` VERIFY GREEN: ruff, mypy 68 files, pytest 205, traceability, palette 87/0, planned-film audits 0 hard (1 advisory, B-05.1), 16 in-Blender checks, both tiers 3270/3270, MP4 on spec, true peak −1.2 dBFS, cut steps 0.4 / 0.1, new step `MP4 luma (L2-CIN-01, hero)` PASS.
+
+### Per item
+
+| Item | Change | Result on the Final MP4 | Regression |
+|---|---|---|---|
+| 1 L2-CIN-01 | Rig positions planned in `cff\stage\rig.py`. A light inside an actor's keep-out cylinder (footprint half-diagonal + 0.5 m, up to top + 1 m) is **lifted**, with a 4 m linear ramp outside. The rim is also lifted over a solid that stands between the subject and it (not over the solid that holds the subject). | Steps f746 **0.1** (was 8.0), f1376 **0.6** (10.6), f1534 **1.4** (4.4), f1535 **2.0** (6.7). | `test_L2_CIN_01_rig_lights_stay_out_of_actors`; verify `step_mp4_luma`. |
+| 2 Interiors | `blender\dressing.py`: per chassis, rack ribs and rails, two pale strips, a lamp bar, five status LEDs, a ceiling area light (3 W, `POOL_NEUTRAL_HEX`) and a back rim (1 W, `RIM_LIGHT_HEX`); per CA vault, ribs, tinted strips (`POOL_CA1/CA2_HEX`) and a ceiling light (12 W). Brushed-metal chassis material (noise roughness 0.3–0.6). Static, parented, no state colour. | Beat means B-03.1 50.9, B-03.2 63.4, B-03.3 59.3, B-03.4 65.3, B-07.2 63.4, B-04.3 63.5, B-04.4 66.9, B-08.1 53.9, B-08.2 62.0 (v1.2: 48.4, 57.8, 54.4, 60.6, 61.9, 61.0, 68.7, 51.7, 61.0). No beat rises more than 1.6x the beat before. | `test_V13_interiors_are_dressed_with_static_practicals`; in-Blender `interior_dressing`. |
+| 3 Hero | `Shot` gains `lead_s`, `arrive`, `focus_pull`. Hero: the pull-back starts 0.8 s before B-09.2, reaches the pose in 27% of its move, follow 0.7, focus racks to the root in 8% (C-02 is relative to the focus distance). No cut. | Every frame from f2956 (98.5 s) to the end of B-09.2 and the B-09.3 hold has all seven actors, the user included, inside x 96–1824, y 200–1026. B-09.2 mean YAVG **56.3**; f2956–3120 mean **56.1**. B-09.2 now passes C-03 and left `C03_OPEN_BEATS`. | `test_V13_hero_holds_the_whole_topology_from_98_5_s`; verify `step_mp4_luma`. |
+| 4 F3-PKI-01 | Tag `LBL-HS-RDP` "Proof: private-key signature" on `HS-RDP`, window 50.9 s to the beat end; the matched proof rests by the card until 53.0 s, then dissolves (STORYBOARD B-06.1 updated). | Legibility audit: shown 45 of 45 full frames (L1: 36). F-10 holds: the proof is made at the server with `KEY-RDP-PRIV` (E-06.1d), the key never moves, and the client checks it against `CERT-RDP`. | `test_F3_PKI_01_handshake_proof_is_labelled_and_readable`. |
+
+### New finding found and fixed in this session
+
+| ID | Severity | Finding | Fix |
+|---|---|---|---|
+| V3-CIN-01 | MINOR (fixed) | The first v1.3 render popped inside the chassis at f477 (5.0), f595 (4.3) and f600 (4.4). Dimming the emitters looked like the fix on a short test, but the second render popped at f671, f705 and f719 instead, and the same build re-rendered f671 smoothly: the interior toggled between two levels about 4.7 apart. Cause: EEVEE shadow-pool overflow from the four close-range shadowed dressing lights. | `data.use_shadow = False` on dressing lights (their spill outside a shell is under 10% of a pool light); emitters kept dim. A full 300-frame chunk f421–720 then had no step above 3.5; the final film has none above 1.8 at those six frames. All six are in the MP4 gate. |
+
+### Rulings
+
+| ID | Ruling |
+|---|---|
+| V3-R1 | **Lift instead of the ledger's radial push.** A radial push swings a light round a cylinder's axis when its path passes near it (2.4 m in one frame at f1372, a new pop), and pushing along the view direction jumps by a chord length on entry. The lift is continuous; the test bounds the extra per-frame movement at 0.5 m (measured 0.43). Per-actor radii instead of one 3.5 m radius, so the camera-side key in the server close-ups is not moved. The fix changes the rim in 1255 frames, not only B-04.1, B-05.2 and B-06.1. |
+| V3-R2 | **Full beauty re-render, partial overlays.** The practicals are on screen in 3025 of 3270 frames, so the whole beauty pass changed. Signs were re-rendered only where the sign plan changed (442 frames: f1528–1598, f2744–3119; diffed against cee6245); captions (bands unchanged) and audio (event timing unchanged) were kept. |
+| V3-R3 | **Remaining steps above 4.0 are not findings.** f2454–2455 (5.9 / 5.1): camera through the CA 2 doorway (L2-R2). f1254 (4.1): one frame of the designed flashback brighten-up ramp (f1252–1258); the v1.2 beauty frames step 4.1 there too. f641 (beam event, 3.5) and f1381 (flashback, below 4 on the MP4) are pre-existing. |
+
+Images viewed: baseline sheet (v1.2 final frames), preview strips (found the white-rib bug: dressing objects glowed through `Object Info > Color`; fixed and checked in `interior_dressing`), preview contact sheet, difference sheet for V3-CIN-01, final contact sheet. Not heard: the audio (unchanged). Not run: a discriminator round (lean mode).
+
+Next: V3 audit (Fable 5.2, High): re-audit this Final MP4 and decide whether v1.3.0 is released.

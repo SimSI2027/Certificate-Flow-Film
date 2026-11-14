@@ -2,7 +2,14 @@
 
 Updated: 2026-11-14 (Session V3, `claude-opus-5-5`, no subagents)
 
-## SESSION V3 IN PROGRESS (2026-11-14, Opus 5.5, no subagents, 3 of 8 images so far) — v1.3 finishing pass, no release
+## SESSION V3 DONE (2026-11-14, Opus 5.5, no subagents, 5 of 8 images) — v1.3 finishing pass, NO release (Pages stays on v1.2.0)
+- **Final MP4 SHA-256 `e5050765e7633399b04b3c3014fd811da7ccff6d3871d36216015001bfd330b6`**, 70.3 MB, render commit 3260ec4, `dirty: false`; H.264 High 4.1, bt709, 3270 frames, 109.000 s. Gitignored (release asset). Poster, contact sheet and metadata in `output\` are committed; `site\` is untouched (still v1.2.0).
+- `python -m tools verify` VERIFY GREEN: pytest 205, 16 in-Blender checks, both tiers 3270/3270, MP4 on spec, true peak −1.2 dBFS, cut steps 0.4 / 0.1, new MP4 luma gate PASS (f746 0.1, f1376 0.6, f1534 1.4, f1535 2.0; V3-CIN-01 frames ≤ 1.8; B-09.2 mean 56.3, from 98.5 s 56.1).
+- Items: (1) L2-CIN-01 fixed by a continuous rig-light lift; (2) chassis and vault interiors dressed and lit; (3) hero whole from 98.5 s (B-09.2 also left `C03_OPEN_BEATS`); (4) proof tag "Proof: private-key signature", 45 of 45 full frames. New MINOR V3-CIN-01 (interior flicker from EEVEE shadow-pool overflow) found and fixed. Remaining steps above 4.0 (f1254 4.1, f2454–2455) are ruled not findings (V3-R3). Details: `docs\GAN-LEDGER.md` "Session V3".
+- Kept on disk (gitignored) for the audit: `renders\final-v1.2-beauty` (v1.2 beauty frames) and `renders\final-v1.2-signs-changed`. `renders\preview` holds the preview-gate frames.
+- **Next session: V3 audit on Fable 5.2, High** — prompt "Session V3 audit" in `docs\SESSION-PROMPTS.md`: re-audit this Final MP4, then release v1.3.0 only if it passes.
+
+### V3 progress log (history)
 - Source done and pushed (9882cec, 63289f7, ab51778, 9d11993, 994e7ca): L2-CIN-01 rig keep-out (`cff\stage\rig.py`), interiors (`blender\dressing.py`), hero whole from 98.5 s (`Shot.lead_s/arrive/focus_pull`), proof tag `LBL-HS-RDP`. Tests `tests\test_v13.py`, in-Blender check `interior_dressing`, verify step `MP4 luma (L2-CIN-01, hero)`.
 - Preview gate passed (renders\preview): steps f746 0.2, f1376 0.3, f1534/1535 1.8/2.1; hero YAVG 57-58; interiors 44-68. f1381 (4.2 preview, 4.7 on the old final beauty) is pre-existing in the flashback, not caused by v1.3.
 - Second render + encode (`a42e8c8e…9b1f`): verify GREEN, but a full scan showed the chassis interior toggling at other frames (f671 4.8, f705 4.7, f719 4.6), and the same build re-rendered f671 smoothly. Cause: EEVEE shadow-pool overflow from the close-range dressing lights. Fixed in fb4e1f1 (no shadows on dressing lights); a full 300-frame chunk f421-720 then had no step above 3.5. **Running: third beauty pass** (`python -m tools render --tier final --scene BEAUTY --rebuild`, resumable); the second pass is in `renders\final-v1.3a-beauty`.

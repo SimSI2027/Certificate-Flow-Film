@@ -1,5 +1,5 @@
 {
-  "commit": "51a87aa17d43ab53c40bf2ee54928e7b7921dbdd",
+  "commit": "3260ec42f73ade26186697262e60ca0f2d686515",
   "dirty": false,
   "tier": "final",
   "blender": "5.2.3 LTS",
@@ -10,11 +10,11 @@
   "beats": 33,
   "spec_sha256": "7cf45afa01572b7e9d30a6fb376807fb10a4f6a693af41ffed1d96bce2686d23",
   "last_render_progress": {
-    "layer": "captions",
+    "layer": "beauty",
     "status": "complete",
-    "present": 1933,
-    "of": 1933,
-    "elapsed_s": 373.4
+    "present": 3270,
+    "of": 3270,
+    "elapsed_s": 2460.7
   },
   "loudness": {
     "first_pass": {
@@ -110,7 +110,7 @@
         "start_time": "0.000000",
         "duration_ts": 1674240,
         "duration": "109.000000",
-        "bit_rate": "4956564",
+        "bit_rate": "4956952",
         "bits_per_raw_sample": "8",
         "nb_frames": "3270",
         "extradata_size": 51,
@@ -203,8 +203,8 @@
       "format_long_name": "QuickTime / MOV",
       "start_time": "0.000000",
       "duration": "109.000000",
-      "size": "70288611",
-      "bit_rate": "5158797",
+      "size": "70293590",
+      "bit_rate": "5159162",
       "probe_score": 100,
       "tags": {
         "major_brand": "isom",
@@ -250,7 +250,7 @@
         "start_time": "0.000000",
         "duration_ts": 1674240,
         "duration": "109.000000",
-        "bit_rate": "609070",
+        "bit_rate": "616857",
         "bits_per_raw_sample": "8",
         "nb_frames": "3270",
         "extradata_size": 49,
@@ -343,8 +343,8 @@
       "format_long_name": "QuickTime / MOV",
       "start_time": "0.000000",
       "duration": "109.000000",
-      "size": "9746321",
-      "bit_rate": "715326",
+      "size": "9852550",
+      "bit_rate": "723122",
       "probe_score": 100,
       "tags": {
         "major_brand": "isom",
