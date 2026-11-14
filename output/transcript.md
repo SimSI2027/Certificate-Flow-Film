@@ -8,11 +8,11 @@ Generated from `cff/story/captions.py`. Times are the full-opacity hold of each 
 
 ## S2 — An identity the client can't verify
 
-- 00:00:08.000–00:00:12.500 — The RDP server needs a trusted identity
+- 00:00:08.200–00:00:12.500 — The RDP server needs a trusted identity
 
 ## S3 — Keys born locally, request sealed
 
-- 00:00:15.000–00:00:19.500 — The private key stays on the server
+- 00:00:15.000–00:00:18.200 — The private key stays on the server
 - 00:00:20.700–00:00:23.700 — The request is signed, not the key sent
 
 ## S4 — Finding the right CA, then evaluation
@@ -35,7 +35,7 @@ Generated from `cff/story/captions.py`. Times are the full-opacity hold of each 
 
 ## S8 — Issuing CA 2 signs
 
-- 00:01:25.500–00:01:29.500 — Issuing CA 2 signs the TLS certificate
+- 00:01:25.500–00:01:29.100 — Issuing CA 2 signs the TLS certificate
 
 ## S9 — Full picture and close
 

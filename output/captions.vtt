@@ -5,11 +5,11 @@ CAP-S1
 Secure RDP connection
 
 CAP-S2
-00:00:08.000 --> 00:00:12.500
+00:00:08.200 --> 00:00:12.500
 The RDP server needs a trusted identity
 
 CAP-S3a
-00:00:15.000 --> 00:00:19.500
+00:00:15.000 --> 00:00:18.200
 The private key stays on the server
 
 CAP-S3b
@@ -41,7 +41,7 @@ CAP-S7
 Different templates can use different issuing CAs
 
 CAP-S8
-00:01:25.500 --> 00:01:29.500
+00:01:25.500 --> 00:01:29.100
 Issuing CA 2 signs the TLS certificate
 
 CAP-S9a

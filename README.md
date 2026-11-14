@@ -2,7 +2,25 @@
 
 A 100–120 s, 1920x1080, 30 FPS film (Approach B) that explains an Active Directory Certificate Services PKI flow as one continuous shot through a stylized 3D world. It is built with scripted Blender (`bpy`), rendered headless, and checked by a staged production pipeline and a GAN-style adversarial review loop.
 
-> **Status: under construction (Session 1 of 9 done: environment and repository).** The full README (all sections listed in `docs\BUILD-CHARTER.md`, Section 13) is written in Session 8. See `docs\PROJECT-STATE.md` for current status.
+> **Status: v1.0.0 released** (lean finish: the automated checks in `python -m tools verify` are the quality gate; the later adversarial review rounds were not run, see `CHANGELOG.md`).
+
+## The film
+
+109 s, 1920x1080, 30 FPS, H.264 + AAC, captions only (no narration), synthesised sound cues. It shows two certificates issued under one root: an RDP server (`RDPAuth` template, Issuing CA 1) and a web server (`WebServer-TLS` template, Issuing CA 2), both chaining to the single trusted Root CA. The private key never leaves its owner; the request is signed, not the key sent.
+
+Outputs (`output\`; the Final MP4 is a release asset, not committed): `Certificate-Flow-Film-Final.mp4`, `-Preview.mp4` (720p), `-Poster.png`, `-Contact-Sheet.png`, `captions.vtt`, `transcript.md`, `render-metadata.json`, `audio\loudness.json` (-16.0 LUFS).
+
+## Rebuild
+
+```
+.venv\Scripts\python.exe -m tools verify          # ruff, mypy, pytest, audits, in-Blender checks
+.venv\Scripts\python.exe -m tools render --tier final   # background, resumable, ~1 h on an RTX 4090
+.venv\Scripts\python.exe -m tools audio
+.venv\Scripts\python.exe -m tools encode
+.venv\Scripts\python.exe scripts\build_site.py
+```
+
+Requires Blender 5.2.x LTS, FFmpeg and Python 3.12 (paths in `config\toolchain.local.json`, see `docs\TOOLCHAIN.md`). Pipeline details: `docs\PIPELINE.md`.
 
 ## Licensing split
 
@@ -20,6 +38,6 @@ Fallbacks currently in use (owner may replace them later): `DC01`, `CLIENT01`, `
 ## Links
 
 - Repository: https://github.com/SimSI2027/Certificate-Flow-Film
-- Demo (GitHub Pages): not yet published
-- Release: not yet published
+- Demo (GitHub Pages): https://simsi2027.github.io/Certificate-Flow-Film/
+- Release: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.0.0
 - Related: [Certificate-Flow-Lab](https://github.com/SimSI2027/Certificate-Flow-Lab) ([Pages](https://simsi2027.github.io/Certificate-Flow-Lab/)). Approach A (`Certificate-Flow-Animation`) was not found under SimSI2027 (HTTP 404), so it is not linked.
