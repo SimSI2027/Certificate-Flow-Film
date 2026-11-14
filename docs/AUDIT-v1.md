@@ -186,6 +186,65 @@ Still open and untouched, MAJOR: V1-LEG-02, V1-LEG-03, V1-PKI-04, V1-PKI-05, V1-
 - Per-frame luma on the MP4 (Appendix A.4): film mean 50.3; steps > 4.0 outside the cuts at f746 5.6, f1376 4.6, f2431 6.4, f2709 7.7; B-09.2 mean 38.4. Both recorded as residuals in `docs\GAN-LEDGER.md` "Session F2".
 - Inspected: the final contact sheet (every beat lit, captions and signs placed, no blank frame); a cut strip f1245-1247 / f1395-1397 (each cut frame is one clean shot, no double exposure); a sign strip f1625-1645 / f1955-1975 (no motion blur on any sign; the RDP check list holds one place with its own ticks, revocation amber then green); the poster (hero topology with root, both CAs, both servers; the user sits at the left edge, per the V1-CIN-02 residual).
 
+### F3 targeted re-audit, third run (2026-11-14, `claude-fable-5-2`; no subagents; 8 of 12 images) — RESULT: GATE PASSED, v1.1.0 released as a pre-release
+
+Subject: `output\Certificate-Flow-Film-Final.mp4`, 55 401 782 bytes, SHA-256 `2b56cee7b030528d6bf21cf864c74ced521cbc9c18ba170e7229704fd9d7f78e` (computed in this session; equal to the F2 record). Nothing from F2 was trusted: every number below was measured again.
+
+Re-run evidence:
+- `python -m tools verify`: **VERIFY GREEN, no PENDING line.** ruff; mypy --strict (62 files); pytest 189; traceability; palette 87 pairs; planned-film audits 0 hard / 3 advisory; 14 in-Blender checks; animatic and final tiers 3270/3270, 0 blank; final MP4 matches the delivery spec; cut-frame luma steps 0.4 and 0.0.
+- ffprobe: H.264 High, level 41, 1920x1080, yuv420p, 30/1, 3270 frames (decoded), bt709 primaries/transfer/space, range tv; AAC LC 48 kHz stereo; 109.000 s.
+- `scdet=threshold=6`: exactly two scene changes, 41.5 s and 46.5 s. No frozen or black frame before the closing fade (black from 107.57 s).
+- Luma (A.4): film mean 50.3. Steps over 4.0 outside the cuts: f746 5.6, f1376 4.6, f2431 6.4, f2709 7.7. B-09.2 mean 38.4, B-09.3 27.9. Largest beat-to-beat ratio outside the flashback: 1.42x (B-04.3; limit 1.6x).
+- Audio: −15.9 LUFS, LRA 4.8 LU; L−R RMS −27.8 dBFS (stereo). True peak of the AAC track −0.6 dBFS (WAV mix −1.2 dBFS).
+- `python -m tools focal`: 0 beats under their recorded target. `python -m tools legibility`: 0 labels short, 0 captions over the focal subject.
+- Images (all cut from the Final MP4, 56 distinct frames): one contact sheet of 33 tiles (60% into each beat); six 2x2 sheets (f451/601/690/1200; f1246/1290/1396/1397; f1545/1561/1621/1700; f946/1861/1975/2539; f1964/2071/2836/2703; f2970/3030/3075/3105); one full-resolution crop sheet of the two handshake proofs (f1545/1552, f2836/2847).
+- Limits: I cannot listen. V1-LEG-02 was judged on the plan tests only (no motion strip was viewed). Frames not listed were not viewed.
+
+| ID | Sev | Checked at | Result | What the frame or measurement shows |
+|---|---|---|---|---|
+| V1-LEG-01 | MAJOR | 51.5, 52.0, 54.0, 56.6, 62.0, 65.4, 65.8 s | **PASS** | Every sign is sharp on f1545, f1561, f1621, f1700, f1861, f1964, f1975, including during fast camera moves. |
+| V1-PIPE-01 | MAJOR | gate | **PASS** | Verify checks both tiers, the MP4 and the cut frames, with no waiver. |
+| V1-LEG-03 | MAJOR | 31.5, 62.0, 65.4, 65.8, 84.6 s | **PASS** | f946: four CA 1 lines, each with its tick, capsule clear. f1861: only lines 1–4 are up at 62.0 s. f1964: "Revocation OK" has an amber pending ring; f1975: green tick. f2539: the note row sits under the Enroll line. Residual: the capsule touches the end of the last CA 2 line. |
+| V1-LEG-02 | MAJOR | plan | **PASS (plan only)** | Tests: 0 jumps over 96 px, 0 runs under 24 frames. At most 9 signs on a frame. |
+| V1-LEG-04 | MAJOR | 54.0, 56.6, 69.0 s | **PASS** | `CLIENT01` sits beside the laptop and the stack, not on them (f1621, f1700); no plate in B-06.6 (f2071). Crossing 1.55%. |
+| V1-PKI-01 | MAJOR | 51.5–56.6 s | **PASS** | The trust-store cradle is gold on f1545 and f1561 (before docking), f1621 (during) and f1700 (after). |
+| V1-PKI-02 | MAJOR | 41.5, 43.0 s | **PASS** | f1290 shows the marker. Plan: alpha above 0 from f1250, full on 138 of 150 frames. See F3-LEG-01 for its tail after the cut. |
+| V1-PKI-03 | MAJOR | 15.0, 15.2, 17.5, 20.0, 23.0, 74.8 s | **PASS** | "Private key" and "Public key" tags on f451, f457, f526, f601, f690, f2245; the private-key tag stays at the container. |
+| V1-PKI-04 | MAJOR | 51.7, 94.9 s | **PASS** | Full-resolution crops: a white proof card about 130x75 px on f1552 and about 50x60 px on f2847 (plan medians 85 and 55 px). It is visible but unlabelled. |
+| V1-PKI-05 | MAJOR | 65.4, 65.8 s | **PASS** | f1964, f1975: two separate scrolls beside the stack, below the gold root card. Small in a wide shot. |
+| V1-CIN-01 | MAJOR | contact sheet | **PASS (residuals)** | Ten beats under target, at the values in the ledger; `tools focal` confirms each. |
+| V1-CIN-02 | MAJOR | 99.0, 101.0, 102.5, 103.5 s | **PASS (residuals)** | f3075, f3105: user, laptop, both servers, both CAs and the root are all in frame and labelled; root 114 px. f2970 is nearly empty; f3030 cuts the user off. Mean luma 38.4. |
+| V1-CIN-04 | MAJOR | f1246, f1396, f1397 | **PASS** | Each cut frame is one clean shot. Luma steps 0.4 and 0.0. |
+| V1-CIN-05 | MAJOR | 69.0 s | **PASS (residual)** | f2071: the session window is the largest bright object in frame (188 px); no sign over it; the channel is green. |
+| V1-DOC-01 | MAJOR | live Pages | **PASS** | The live `<track>` has no `default`; the live page is identical to `site\index.html`. |
+| V1-CIN-03 | MAJOR | whole film | **OPEN (deferred)** | Step 1 holds (B-04.3 62.6, B-08.1 50.3). The grey-box look is unchanged. Known limitation. |
+| V1-LEG-05 | MINOR | plan, 58.2 s | PASS | Legibility audit: 0 short. Both AIA tags sharp on f1747. |
+| V1-PKI-06 | MINOR | 40.0 s | PASS | f1200: double-ring seal on the vault face, 120 px. |
+| V1-CIN-06 | MINOR | 90.0–90.3 s | PASS (residual) | f2703: the white object is now a thin bar. Step 7.7 at f2709 (v1.0.0: 12.2). |
+| V1-CIN-07 | MINOR | 23.0 s | PASS | f690: the sealed capsule carries a visible ring. |
+| V1-COL-01 | MINOR | f163, f2058 | PASS | Pending channel `#E6A28B`, 21.1 dE2000 from its token; validated channel `#8DC2AC`, 12.4 (limit 25). |
+| V1-AUD-01 | MINOR | file | PASS | L−R RMS −27.8 dBFS (limit −40). |
+| V1-AUD-02 | MINOR | file | PASS | −15.9 LUFS; loudnorm still dynamic (accepted by the finding). See F3-AUD-01. |
+| V1-ENC-01 | MINOR | file | PASS | Level 41, transfer bt709. |
+| V1-DOC-02, -03 | MINOR | README, Pages, PROJECT-STATE | PASS | Updated again in this session for v1.1.0. |
+
+Regression check on the contact sheet: all 33 beats are lit, captions and signs are in place, no blank or broken frame.
+
+New findings in this run (all MINOR; none blocks v1.1.0):
+
+| ID | Sev | Where | What | Exact fix (v1.2) |
+|---|---|---|---|---|
+| F3-LEG-01 | MINOR | f1396–1398 (46.50–46.57 s) | "Earlier: offline signing ceremony" is still fading out on the first three frames of the present-day shot after the cut (alpha 0.58, 0.30, 0.13). It is a side effect of the V1-PKI-02 fix (a fixed screen position, window to 4.9 s plus a 0.3 s linger). | `cff\stage\labels.py`: `LBL-FLASHBACK` window `Window("B-05.2", 0.1, 4.7)`. New test: the sign has no frame after f1395. Signs pass only. |
+| F3-AUD-01 | MINOR | file | The AAC track's true peak is −0.6 dBFS; the limit of −1 dBFS was checked on the WAV only. | `tools\film.py`: after the encode, measure `ebur128=peak=true` on the MP4 and fail verify above −1.0 dBFS; lower the loudnorm TP aim to −2.0. |
+| F3-PIPE-02 | MINOR | `render-metadata.json` | It records commit `5cdae70`. The hero frames were re-rendered with the glow change that was committed afterwards as `407243a`, so the encode ran on an uncommitted tree. | `tools\film.py`: add `"dirty": bool` from `git status --porcelain` to the metadata, and make `tools verify` report it. |
+| F3-PKI-01 | MINOR | 51.7, 94.9 s | The handshake proof is a plain white card with no label; a viewer cannot tell that it is proof of possession. | Add tags "Proof: signed with the private key" on `HS-RDP` (B-06.1) and `HS-WEB` (B-09.1). Signs pass only. |
+
+PKI beat verdicts on the frames viewed: 33 of 33 ACCURATE (v1.0.0: 2 MISLEADING, 2 NOT READABLE). B-06.1, B-06.5 and B-09.1 are readable but weak (small subjects, unlabelled proof).
+
+My scores on the charter's 10-point scale: PKI 9, legibility 8, cinema 5. The charter's film gate (8 on each, no open MAJOR) is **not** met, because of V1-CIN-03. This is why v1.1.0 is a pre-release.
+
+**Decision (Chief of Staff): the F3 gate passes.** No fixed BLOCKER or MAJOR fails. v1.1.0 is released as a pre-release. Known limitations (V1-CIN-03, the F2 residuals and the four F3 MINORs) are recorded in `CHANGELOG.md`, `README.md` and `docs\GAN-LEDGER.md` "Session F3". The release, asset round-trip and Pages results are in `docs\CHIEF-OF-STAFF-APPROVALS.md`. The next step is the look pass in `docs\LOOK-PLAN-v1.2.md`.
+
 ## 4. Findings in detail
 
 ### V1-LEG-01 (MAJOR) Signs are motion-blurred in the final tier

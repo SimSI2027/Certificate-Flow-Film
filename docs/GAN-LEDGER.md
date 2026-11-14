@@ -291,3 +291,28 @@ Residuals (targets not reached with every camera audit green; tests hold the ach
 | V1-CIN-06 | no luma step > 4.0 in f2695-2710 | 4.2 (v1.0.0 12.2) on the F2 animatic; bulge 4.8 (5.8 gives 4.8) | costs B-08.3 its 80 px target: 69 px (residual 65) |
 | V1-CIN-06 (final tier) | as above, on the Final MP4 | f2709 7.7 (v1.0.0 12.2); other steps > 4.0 outside the cuts: f746 5.6, f1376 4.6, f2431 6.4 (v1.0.0 had f641, f746, f1253, f1376, f2440, f2701-2705) | bloom in the final tier sharpens the passing highlight; the bulge search ran on the animatic as the finding prescribes |
 | V1-CIN-02 step 4 | B-09.2 mean YAVG >= 50 | 38.4 (38.1 before step 4; v1.0.0 40.0); B-09.3 27.9 (fade to black) | the prescribed fix (both green channels and the trust paths/links at GLOW_PEAK) was applied and adds only 0.3: the wider hero is mostly dark floor. More light needs world or lamp energy, which the finding reserves for V1-CIN-03 (deferred to v2.0) |
+
+## Session F3 (2026-11-14, `claude-fable-5-2`; lean mode, no discriminator round): targeted re-audit and v1.1.0 pre-release
+
+- **Subject:** the Final MP4 from the F2 final render, SHA-256 `2b56cee7b030528d6bf21cf864c74ced521cbc9c18ba170e7229704fd9d7f78e`. Spec hash unchanged (`7cf45afa…6d23`); no amendment.
+- **Hard discriminators:** `python -m tools verify` VERIFY GREEN (pytest 189, 14 in-Blender checks, both tiers 3270/3270, final MP4 on spec, cut-frame steps 0.4 / 0.0).
+- **Review:** Chief of Staff only, 8 images (56 distinct frames) cut from the Final MP4. Per-item table: `docs\AUDIT-v1.md`, "F3 targeted re-audit, third run".
+- **Result:** every FIXED finding passes on the rendered film (15 MAJOR, 10 MINOR). 33 of 33 PKI beats ACCURATE on the frames viewed. Scores (Chief of Staff estimate, not a discriminator score): PKI 9, legibility 8, cinema 5.
+- **Gate decision:** the F3 release gate passes; the charter film gate does **not** (V1-CIN-03 open, cinema below 8). v1.1.0 ships as a pre-release.
+
+Known limitations accepted for v1.1.0 (Chief of Staff ruling: each is recorded, none is hidden by a relaxed test):
+
+| ID | Sev | Limitation | Measured |
+|---|---|---|---|
+| V1-CIN-03 | MAJOR, open | grey-box look; no material or light design | cinema estimate 5 of 10 |
+| V1-CIN-02 residual | (MAJOR, fixed with residual) | hero: whole topology only from about 102 s; dark | 16% of the hold; B-09.2 mean YAVG 38.4 (target 50) |
+| V1-CIN-01 residual | (MAJOR, fixed with residual) | 10 beats under the focal size target | B-01.2 78, B-02.2 99, B-02.3 96, B-04.2 65, B-05.2 55, B-05.3 39, B-06.1 63, B-06.3 53, B-07.4 64, B-08.3 69 px |
+| V1-CIN-05 residual | (MAJOR, fixed with residual) | session window under target | 188 px (target 220) |
+| V1-CIN-06 residual | MINOR | luma steps over 4.0 on the Final MP4 | f2709 7.7, f2431 6.4, f746 5.6, f1376 4.6 |
+| V1-LEG-03 residual | (MAJOR, fixed with residual) | check lists over a protected object | CA 2 list 42 frames, RDP list 21 frames |
+| F3-LEG-01 | MINOR, new | flashback marker fades out after the cut | f1396–1398, alpha 0.58 / 0.30 / 0.13 |
+| F3-AUD-01 | MINOR, new | AAC true peak above −1 dBFS | −0.6 dBFS (WAV −1.2) |
+| F3-PIPE-02 | MINOR, new | metadata commit is one commit behind the encoded tree | `5cdae70` recorded; glow change in `407243a` |
+| F3-PKI-01 | MINOR, new | handshake proof visible but unlabelled | 85 px (RDP), 55 px (web) |
+
+Next: `docs\LOOK-PLAN-v1.2.md` (materials and lighting, hero brightness, the 90 s flash, focal sizes, and the four F3 MINORs).
