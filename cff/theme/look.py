@@ -64,10 +64,13 @@ FLOOR_ROUGHNESS = 0.4
 # Nothing here animates. Powers are Blender watts for area lights.
 CHASSIS_RIB_COUNT = 8
 CHASSIS_RIB_Z = (0.3, 2.0)
-CHASSIS_STRIP_EMISSION = 0.8
-CHASSIS_LAMP_EMISSION = 3.0
+# Emitters stay dim: EEVEE's screen-space ray tracing lets an on-screen emitter light the interior, so a bright lamp bar at the
+# frame edge made the whole interior pop as it left or entered the frame (v1.3 first render: f477 5.0, f595 4.3, f600 4.4 at lamp 3.0,
+# strips 0.8, LEDs 2.5). The area lights carry the interior light.
+CHASSIS_STRIP_EMISSION = 0.5
+CHASSIS_LAMP_EMISSION = 1.0
 CHASSIS_LED_COUNT = 5
-CHASSIS_LED_EMISSION = 2.5
+CHASSIS_LED_EMISSION = 1.5
 CHASSIS_TOP_W = 3.0
 CHASSIS_RIM_W = 1.0
 CHASSIS_ROUGHNESS_RANGE = (0.3, 0.6)  # brushed-metal variation on the chassis shell (noise-driven)

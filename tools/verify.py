@@ -185,7 +185,9 @@ def step_cut_frames() -> Step:
     return Step("cut frames", ok, "luma steps " + ", ".join(f"{s:.1f}" for s in steps), lines=[] if ok else [f"limit {CUT_LUMA_STEP_MAX}"])
 
 
-L2_CIN_01_FRAMES = (746, 1376, 1534, 1535)  # 1-based frames of the rig-light pops (L2-CIN-01): each step to the previous frame <= STEP_LIMIT
+# 1-based frames whose step to the previous frame must stay <= STEP_LIMIT: the rig-light pops (L2-CIN-01) and the interior
+# pops of the first v1.3 render, when an on-screen lamp bar lit the chassis through screen-space ray tracing (V3-CIN-01).
+L2_CIN_01_FRAMES = (746, 1376, 1534, 1535, 477, 595, 600)
 HERO_LUMA_MIN = 50.0  # V1-CIN-02 / v1.3: mean YAVG of B-09.2, and of the hold from HERO_WHOLE_FROM_S to the beat end
 HERO_WHOLE_FROM_S = 98.5
 
