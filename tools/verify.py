@@ -186,8 +186,8 @@ def step_cut_frames() -> Step:
 
 
 # 1-based frames whose step to the previous frame must stay <= STEP_LIMIT: the rig-light pops (L2-CIN-01) and the interior
-# pops of the first v1.3 render, when an on-screen lamp bar lit the chassis through screen-space ray tracing (V3-CIN-01).
-L2_CIN_01_FRAMES = (746, 1376, 1534, 1535, 477, 595, 600)
+# pops of the first two v1.3 renders, when the chassis interior toggled with EEVEE's shadow pool (V3-CIN-01).
+L2_CIN_01_FRAMES = (746, 1376, 1534, 1535, 477, 595, 600, 671, 705, 719)
 HERO_LUMA_MIN = 50.0  # V1-CIN-02 / v1.3: mean YAVG of B-09.2, and of the hold from HERO_WHOLE_FROM_S to the beat end
 HERO_WHOLE_FROM_S = 98.5
 

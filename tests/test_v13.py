@@ -93,13 +93,15 @@ def test_V13_interiors_are_dressed_with_static_practicals() -> None:  # noqa: N8
 
 @pytest.mark.covers("C-06")
 def test_V3_CIN_01_interior_emitters_stay_dim() -> None:  # noqa: N802
-    """V3-CIN-01: at lamp 3.0 / strips 0.8 / LEDs 2.5 the chassis interior popped by 4.3-5.0 (f477, f595, f600) whenever the lamp
-    bar crossed the frame edge (screen-space ray tracing). The MP4 gate checks those frames; this pins the emitter levels."""
+    """V3-CIN-01: the chassis interior toggled between two levels about 4.7 apart (f477, f595, f600 in the first v1.3 render;
+    f671, f705, f719 in the second): shadow-pool overflow from the close-range dressing lights. They cast no shadows now, the
+    emitters stay dim, and the MP4 gate checks all six frames."""
     from tools import verify  # noqa: PLC0415
 
+    assert "data.use_shadow = False" in _text("blender/dressing.py")
     assert look.CHASSIS_LAMP_EMISSION <= 1.0 and look.CHASSIS_STRIP_EMISSION <= 0.5 and look.CHASSIS_LED_EMISSION <= 1.5
     assert look.VAULT_STRIP_EMISSION <= 0.6
-    assert {477, 595, 600} <= set(verify.L2_CIN_01_FRAMES)
+    assert {477, 595, 600, 671, 705, 719} <= set(verify.L2_CIN_01_FRAMES)
 
 
 # --- 3. hero ------------------------------------------------------------------------------------------------------------------------------

@@ -65,6 +65,9 @@ def _area_light(name: str, hex_colour: str, watts: float, size: tuple[float, flo
     data.size, data.size_y = size
     data.energy = watts
     data.color = linear(hex_colour)
+    # V3-CIN-01: no shadow pages. With shadows, these close-range lights pushed EEVEE's shadow pool into overflow and the chassis
+    # interior toggled between two levels about 4.7 apart (f477, f595, f600 in one render; f671, f705, f719 in the next).
+    data.use_shadow = False
     ob = bpy.data.objects.new(name, data)
     collection.objects.link(ob)
     ob.parent = shell

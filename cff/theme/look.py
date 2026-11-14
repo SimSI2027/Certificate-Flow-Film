@@ -64,9 +64,9 @@ FLOOR_ROUGHNESS = 0.4
 # Nothing here animates. Powers are Blender watts for area lights.
 CHASSIS_RIB_COUNT = 8
 CHASSIS_RIB_Z = (0.3, 2.0)
-# Emitters stay dim: EEVEE's screen-space ray tracing lets an on-screen emitter light the interior, so a bright lamp bar at the
-# frame edge made the whole interior pop as it left or entered the frame (v1.3 first render: f477 5.0, f595 4.3, f600 4.4 at lamp 3.0,
-# strips 0.8, LEDs 2.5). The area lights carry the interior light.
+# Emitters stay dim, so the practicals read as detail and the area lights carry the interior light. V3-CIN-01: the interior pops
+# of the first v1.3 render (f477 5.0, f595 4.3, f600 4.4) were first blamed on these emitters (lamp 3.0, strips 0.8, LEDs 2.5); the
+# next render popped at other frames (f671, f705, f719). The cause is shadow-pool overflow, fixed in blender/dressing.py.
 CHASSIS_STRIP_EMISSION = 0.5
 CHASSIS_LAMP_EMISSION = 1.0
 CHASSIS_LED_COUNT = 5
