@@ -1,8 +1,16 @@
 # PROJECT STATE
 
-Updated: 2026-11-13 (LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
+Updated: 2026-11-13 (v1 AUDIT session, read-only, model `claude-fable-5-2`; before it: LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 
-## LEAN FINISH MODE (current; overrides the charter governance)
+## v1 AUDIT (current) — v1.0.0 is a provisional pre-release
+- **v1.0.0 is a provisional pre-release pending the v1 audit.** `gh release edit v1.0.0 --prerelease` was run on 2026-11-13; GitHub reports `isPrerelease=true`. README, CHANGELOG and the Pages page still say "released" (audit finding V1-DOC-02; this session was allowed to change only this file and the audit file).
+- Audit report: `docs\AUDIT-v1.md`. Result: 0 BLOCKER, 16 MAJOR, 10 MINOR. Verdict: **ship as v1.1.0 after fixes**; the grey-box look (V1-CIN-03) stays open and is the "bigger rework" for a later v2.0.
+- Re-verified in the audit: `python -m tools verify` VERIFY GREEN (pytest 158, 14 in-Blender checks, 3270/3270 **animatic** frames; the final tier is not checked by verify, finding V1-PIPE-01); Final MP4 is H.264/AAC, 1920x1080, 30 FPS, 3270 frames, 109.000 s, −16.1 LUFS; spec hash unchanged; live Pages page identical to `site\index.html`.
+- Top findings: signs motion-blurred in the final tier (one-line bug in `apply_tier`), check lists printed before the checks, sign jumps, signs over the focal subject on 34.8% of frames, trust store turns gold on docking, late flashback marker, unnamed keys, tiny focal subjects, hero shot without the user, blended cut frames, doubled captions on the Pages page.
+- **Next session (F1 in `docs\AUDIT-v1.md` Section 7):** Sonnet, medium effort, no subagents. Read only `docs\AUDIT-v1.md`, this file and the files named in each finding. Do, in order: README status line; V1-LEG-01, V1-CIN-04, V1-PIPE-01, V1-ENC-01; V1-PKI-01, V1-PKI-02, V1-PKI-03, V1-LEG-04, V1-LEG-05; V1-DOC-01..03; add `tests\test_audit_v1.py` from Appendix A; verify green; commit per finding; push; sync-check. Session F2 (iterative camera and sign fixes, one animatic render, one final render, release v1.1.0) follows.
+- No source, test, render or site file was changed in the audit session. `tools verify` rebuilt `renders\film.blend` (gitignored).
+
+## LEAN FINISH MODE (history; overrode the charter governance)
 - The user switched to lean finish: no subagents, no GAN rounds, `python -m tools verify` is the quality gate, at most 2 contact-sheet reviews, one final-quality render, a simple Pages page and v1.0.0 release.
 - Review agents archived to `docs\archive\agents\` (not auto-invoked). The R2 discriminator replies in `qa\rounds\stage1-R2` are partial/unjudged and are not used.
 - Step 1 DONE: the pending R2 fixes (signs parallel to the image plane, blended plates in a PLATES/TEXT view-layer split, sign clearance of capsules/cards/private keys, trust links grow from nothing) were completed; build bug fixed (`view_layer.update()`), tag crossing falls back to focal-only. VERIFY GREEN (pytest 155, 14 in-Blender checks, 3270/3270 animatic frames).
@@ -11,7 +19,7 @@ Updated: 2026-11-13 (LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 - Audio DONE: `cff\audio\{cues,synth}.py` (88 cues from the story events, stdlib synth, seeds 5101-5103) + `python -m tools audio` -> `output\audio\mix.wav` (-16.0 LUFS, true peak -3.7 dBFS; `loudness.json`). Tests in `tests\test_audio.py`.
 - Encode tooling DONE: `python -m tools encode` (Final MP4, 720p Preview, poster, contact sheet, `render-metadata.json`); site builder `scripts\build_site.py`; Pages workflow `.github\workflows\pages.yml`.
 - Final render DONE (3270 beauty, 2788 sign, 1933 caption frames; 0 blank); encoded (Final 59 MB, Preview 11 MB, 109 s, 1080p30 H.264/AAC); contact-sheet review 2 of 2 accepted. Pages live: https://simsi2027.github.io/Certificate-Flow-Film/ (verified 200 for page, preview, poster, captions). Release v1.0.0 created with the Final MP4.
-- **Next action:** none; project complete (lean finish). Optional later: re-run the adversarial rounds, polish the look.
+- **Next action:** superseded by the v1 AUDIT section above (the project is not complete; v1.0.0 is a pre-release).
 
 
 ## Session 4 part 2 handoff (historical)
