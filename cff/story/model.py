@@ -846,8 +846,9 @@ def _labels(chains: tuple[Chain, ...]) -> tuple[Label, ...]:
     for ca_actor, beat in ((ISSUING_CA1, "B-04.3"), (ISSUING_CA2, "B-08.1")):
         for ca_check, text in CA_CHECK_TEXT.items():
             labels.append(Label(f"LBL-{ca_actor}-{ca_check.name}", LabelKind.CHECK, text, ca_actor, (beat,)))
-    rdp_beats: dict[ValidationCheck, tuple[str, ...]] = {v: ("B-06.4",) for v in ValidationCheck}
-    rdp_beats[ValidationCheck.REVOCATION] = ("B-06.4", "B-06.5")
+    # every RDP check line is held through B-06.5 while revocation resolves, and is read there too (V1-LEG-03: a line
+    # now appears with its own check, so a late check's line would otherwise be readable for under 1.5 s)
+    rdp_beats: dict[ValidationCheck, tuple[str, ...]] = {v: ("B-06.4", "B-06.5") for v in ValidationCheck}
     web_on_screen = (ValidationCheck.NAME_MATCH, ValidationCheck.EKU, ValidationCheck.VALIDITY, ValidationCheck.REVOCATION)
     for chain in chains:
         for v_check in ValidationCheck:

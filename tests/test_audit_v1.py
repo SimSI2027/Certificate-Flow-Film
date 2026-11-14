@@ -265,6 +265,92 @@ def test_V1_CIN_02_hero_holds_the_whole_topology() -> None:  # noqa: N802
 HERO_ARRIVED_FRAMES = 60  # residual: the camera pulls back from the B-09.1 close-up, so the topology is whole from ~102 s
 
 
+# --- session F2: signs ----------------------------------------------------------------------------------------------
+
+def _check_lines() -> list[str]:
+    return [i for ids in labels.CHECK_LISTS for i in ids if i in labels.CHECK_TICK_ROLES]
+
+
+@pytest.mark.covers("F-06", "F-12")
+def test_V1_LEG_03_no_check_line_before_its_check() -> None:  # noqa: N802
+    lines = _check_lines()
+    assert len(lines) == 18
+    plan_signs = signs.plan_signs()
+    by_event = {p.label_id: p for p in labels.PLACEMENTS}
+    for label_id in lines:
+        window = by_event[label_id].window
+        assert window is not None
+        event_frame = labels.window_frames(window)[0]
+        first = min(plan_signs[label_id].frames)
+        assert first >= event_frame, (label_id, first, event_frame)
+    # every line's window opens at its own check event (not at a shared list start)
+    from cff.story import model  # noqa: PLC0415
+
+    events = {e.id: e for e in model.MODEL.events}
+    ca1 = [i for i in labels.CHECK_LISTS[0] if i in labels.CHECK_TICK_ROLES]
+    for letter, label_id in zip("abcd", ca1, strict=True):
+        start = labels.window_frames(by_event[label_id].window)[0]  # type: ignore[arg-type]
+        assert start >= timing.seconds_to_frame(events[f"E-04.3{letter}"].start_s), label_id
+
+
+@pytest.mark.covers("L-06")
+def test_V1_LEG_03_check_lines_never_move() -> None:  # noqa: N802
+    plan_signs = signs.plan_signs()
+    fixed = signs.fixed_list_positions()
+    for ids in labels.CHECK_LISTS:
+        for label_id in ids:
+            rects = {f.rect for f in plan_signs[label_id].frames.values()}
+            assert len(rects) == 1, (label_id, len(rects))
+            assert label_id in fixed
+        xs = {fixed[i][0] for i in ids}
+        assert len(xs) == 1  # one left edge per list
+
+
+@pytest.mark.covers("F-13", "B-06.4")
+def test_V1_LEG_03_revocation_ok_after_fetches() -> None:  # noqa: N802
+    resolve = labels.tick_resolve_frame("LBL-CHAIN-RDP-REVOCATION")
+    assert resolve == timing.seconds_to_frame(_event_start_s("E-06.5d"))
+    assert resolve > timing.seconds_to_frame(_event_start_s("E-06.5b"))
+    source = _text("blender/signs_scene.py")
+    assert "tick_resolve_frame" in source and '"pending"' in source and '"resolved"' in source
+    assert "ob.hide_render = True" in _text("blender/world.py")
+
+
+@pytest.mark.covers("C-06", "L-06")
+def test_V1_LEG_02_no_sign_jumps() -> None:  # noqa: N802
+    import math  # noqa: PLC0415
+
+    out = []
+    for label_id, sign in signs.plan_signs().items():
+        for f in sorted(sign.frames):
+            a, b = sign.frames.get(f - 1), sign.frames[f]
+            if a and min(a.alpha, b.alpha) >= 0.5 and math.hypot(b.rect[0] - a.rect[0], b.rect[1] - a.rect[1]) > 96.0:
+                out.append((f, label_id))
+    assert out == []  # v1.0.0: 51 frames
+
+
+@pytest.mark.covers("C-06", "L-06")
+def test_V1_LEG_02_no_sign_flashes() -> None:  # noqa: N802
+    for label_id, sign in signs.plan_signs().items():
+        frames = sorted(sign.frames)
+        runs: list[list[int]] = []
+        for f in frames:
+            if runs and f == runs[-1][1] + 1:
+                runs[-1][1] = f
+            else:
+                runs.append([f, f])
+        short = [r for r in runs if r[1] - r[0] + 1 < 24]
+        assert short == [], (label_id, short)
+
+
+@pytest.mark.covers("L-06")
+def test_V1_LEG_05_aia_tags_hold_long_enough() -> None:  # noqa: N802
+    plan_signs = signs.plan_signs()
+    for label_id in ("LBL-AIA-1", "LBL-AIA-2", "LBL-CA2-NOTE"):
+        full = sum(1 for f in plan_signs[label_id].frames.values() if f.alpha >= 1.0)
+        assert full >= round(2.1 * FPS), (label_id, full)  # 6 words at 0.35 s per word
+
+
 @pytest.mark.covers("L-05")
 def test_V1_DOC_01_caption_track_is_opt_in() -> None:  # noqa: N802
     import importlib.util  # noqa: PLC0415

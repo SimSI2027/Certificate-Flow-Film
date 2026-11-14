@@ -15,6 +15,8 @@ The pass renders with a transparent film and the Standard view transform, like t
 
 from __future__ import annotations
 
+import math
+
 import bpy
 
 from blender import camera_rig, materials
@@ -23,7 +25,8 @@ from blender.common import PROP_CAP, PROP_ID, PROP_KIND, PROP_LABEL, bundled_fon
 from blender.render_settings import apply_tier
 from cff.stage import labels, signs
 from cff.stage.camera import CameraPlan
-from cff.theme import motion
+from cff.story.model import ColourRole
+from cff.theme import motion, palette
 from cff.theme import typography as ty
 from cff.theme.render import Tier
 
@@ -47,6 +50,66 @@ def _plate(name: str, width: float, height: float, centre_x: float, collection: 
     return ob
 
 
+PROP_TICK_PHASE = "cff_tick_phase"  # "pending" parts show until the tick resolves, "resolved" parts from then on
+# Tick geometry in sign units (1 unit = cap height; text origin at x = 0), V1-LEG-03.
+TICK_CENTRE = (-1.1, 0.0)
+TICK_RING_RADII = (0.42, 0.55)
+TICK_RING_SEGMENTS = 24
+TICK_MARK_WIDTH = 0.12
+TICK_MARK_STROKES = (((-1.35, 0.02), (-1.15, -0.22)), ((-1.15, -0.22), (-0.80, 0.26)))
+TICK_DOT_RADIUS = 0.14
+
+
+def _tick_part(name: str, kind: str, hex_colour: str, phase: str, parent: bpy.types.Object, collection: bpy.types.Collection) -> None:
+    cx, cy = TICK_CENTRE
+    verts: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+    if kind == "ring":
+        r0, r1 = TICK_RING_RADII
+        for i in range(TICK_RING_SEGMENTS):
+            a = 2 * math.pi * i / TICK_RING_SEGMENTS
+            verts += [(cx + r0 * math.cos(a), cy + r0 * math.sin(a), 0.0), (cx + r1 * math.cos(a), cy + r1 * math.sin(a), 0.0)]
+        n = TICK_RING_SEGMENTS
+        faces = [(2 * i, 2 * ((i + 1) % n), 2 * ((i + 1) % n) + 1, 2 * i + 1) for i in range(n)]
+    elif kind == "dot":
+        verts = [(cx + TICK_DOT_RADIUS * math.cos(2 * math.pi * i / TICK_RING_SEGMENTS), cy + TICK_DOT_RADIUS * math.sin(2 * math.pi * i / TICK_RING_SEGMENTS), 0.0)
+                 for i in range(TICK_RING_SEGMENTS)]
+        faces = [tuple(range(TICK_RING_SEGMENTS))]
+    else:  # the check mark: two flat strokes
+        for (x0, y0), (x1, y1) in TICK_MARK_STROKES:
+            length = math.hypot(x1 - x0, y1 - y0)
+            nx, ny = -(y1 - y0) / length * TICK_MARK_WIDTH / 2, (x1 - x0) / length * TICK_MARK_WIDTH / 2
+            base = len(verts)
+            verts += [(x0 + nx, y0 + ny, 0.0), (x0 - nx, y0 - ny, 0.0), (x1 - nx, y1 - ny, 0.0), (x1 + nx, y1 + ny, 0.0)]
+            faces.append((base, base + 1, base + 2, base + 3))
+    mesh = bpy.data.meshes.new(f"MESH-{name}")
+    mesh.from_pydata(verts, [], faces)
+    mesh.materials.append(materials.sign_tick_material(hex_colour))
+    ob = bpy.data.objects.new(name, mesh)
+    collection.objects.link(ob)
+    ob.parent = parent
+    ob.location = (0.0, 0.0, TEXT_LIFT_CAPS)
+    ob[PROP_TICK_PHASE] = phase
+
+
+def _ticks(placement: labels.Placement, root: bpy.types.Object, collection: bpy.types.Collection) -> None:
+    """The tick that belongs to a check line, on the line's plate (V1-LEG-03)."""
+    role = labels.CHECK_TICK_ROLES.get(placement.label_id)
+    if role is None:
+        return
+    colour = palette.role_hex(role)
+    lid = placement.label_id
+    if lid in labels.PENDING_TICKS:  # waits in pending amber with a dot, then resolves green
+        pending = palette.role_hex(ColourRole.PENDING)
+        _tick_part(f"TICK-RING-P-{lid}", "ring", pending, "pending", root, collection)
+        _tick_part(f"TICK-DOT-{lid}", "dot", pending, "pending", root, collection)
+        _tick_part(f"TICK-RING-{lid}", "ring", colour, "resolved", root, collection)
+        _tick_part(f"TICK-MARK-{lid}", "mark", colour, "resolved", root, collection)
+        return
+    _tick_part(f"TICK-RING-{lid}", "ring", colour, "always", root, collection)
+    _tick_part(f"TICK-MARK-{lid}", "mark", colour, "always", root, collection)
+
+
 def _sign(placement: labels.Placement, board: dict[str, bpy.types.Collection], camera: bpy.types.Object) -> bpy.types.Object:
     """A sign built at a cap height of 1 m: the root's scale is the cap height in metres."""
     root = bpy.data.objects.new(placement.label_id, None)
@@ -67,8 +130,11 @@ def _sign(placement: labels.Placement, board: dict[str, bpy.types.Collection], c
     text.location = (0.0, 0.0, TEXT_LIFT_CAPS)
     width, height = ty.sign_plate_size_px(placement.text, 1.0)
     margin = ty.SIGN_PLATE_MARGIN_CAPS
-    plate = _plate(f"PLATE-{placement.label_id}", width, height, width / 2 - margin if placement.align == "LEFT" else 0.0, board[PLATES_COLLECTION])
+    tick = labels.TICK_WIDTH_CAPS if placement.label_id in labels.CHECK_TICK_ROLES else 0.0  # the plate widens left for the tick
+    centre = width / 2 - margin - tick / 2 if placement.align == "LEFT" else 0.0
+    plate = _plate(f"PLATE-{placement.label_id}", width + tick, height, centre, board[PLATES_COLLECTION])
     plate.parent = root
+    _ticks(placement, root, board[TEXT_COLLECTION])
     tag(root, **{PROP_ID: placement.label_id, PROP_KIND: "sign", PROP_LABEL: placement.text, PROP_CAP: 1.0})
     tag(text, **{PROP_ID: f"TXT-{placement.label_id}", PROP_KIND: "sign_text", PROP_LABEL: placement.text})
     return root
@@ -82,13 +148,20 @@ def _key_sign(root: bpy.types.Object, plan: signs.SignPlan) -> int:
         for child in root.children:
             child.color = (1.0, 1.0, 1.0, 0.0)
         return 0
+    resolve = labels.tick_resolve_frame(plan.label_id)
     for frame in sorted(plan.frames):
         f = plan.frames[frame]
         grow = motion.LABEL_ENTRANCE_SCALE + (1.0 - motion.LABEL_ENTRANCE_SCALE) * f.alpha  # entrances grow and fade (C-06)
         loc.key("location", frame, f.origin, smooth=True)
         loc.key("scale", frame, (f.cap_m * grow,) * 3, smooth=True)
-        for writer in fades:
-            writer.key("color", frame, (1.0, 1.0, 1.0, f.alpha), smooth=True)
+        for child, writer in zip(root.children, fades, strict=True):
+            phase = child.get(PROP_TICK_PHASE, "always")
+            gate = 1.0
+            if resolve is not None and phase == "pending":
+                gate = 1.0 if frame < resolve else 0.0
+            elif resolve is not None and phase == "resolved":
+                gate = 1.0 if frame >= resolve else 0.0
+            writer.key("color", frame, (1.0, 1.0, 1.0, f.alpha * gate), smooth=True)
     loc.finish()
     for writer in fades:
         writer.finish()

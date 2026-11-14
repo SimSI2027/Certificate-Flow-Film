@@ -114,6 +114,19 @@ def sign_plate_material() -> bpy.types.Material:
     return mat
 
 
+def sign_tick_material(hex_colour: str) -> bpy.types.Material:
+    """A check line's tick (V1-LEG-03): the sign text material in a role colour, faded by ``Object Info > Alpha``."""
+    name = f"MAT-sign-tick-{hex_colour.lstrip('#')}"
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+    mat = caption_material("text").copy()
+    mat.name = name
+    for node in mat.node_tree.nodes:
+        if node.type == "EMISSION":
+            node.inputs["Color"].default_value = linear4(hex_colour)
+    return mat
+
+
 def caption_material(kind: str) -> bpy.types.Material:
     """Text-pass materials (captions and signs): exact colours under the Standard view transform, faded by ``Object Info > Alpha``."""
     name = f"MAT-caption-{kind}"

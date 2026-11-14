@@ -28,6 +28,8 @@ CAP_FIELD = 0.05
 TEXT_TO_EM = 1.0 / 0.72  # Blender font size (em) per metre of cap height, for the bundled font
 PLATE_MARGIN_EM = 0.45  # plate padding around the text, in cap heights
 APPEAR_LEAD_FRAMES = 3  # staggering between consecutive windowed labels
+AIA_TAG_END_S = 3.0  # the two AIA tags close this long after B-06.3 starts (V1-LEG-05)
+CA2_NOTE_START_S = 1.1  # the CA 2 note opens with the Enroll check, E-08.1c (V1-LEG-03, V1-LEG-05)
 FLASHBACK_SCREEN_PX = (960.0, 975.0)  # centre of the "Earlier" marker: inside title-safe, below the flashback caption (top band)
 
 # V1-LEG-04: persistent plates show only in the beats where they are read, so names never appear before their object is
@@ -82,36 +84,65 @@ LABELS: dict[str, m.Label] = {label.id: label for label in m.MODEL.labels}
 _CA_CHECK_ORDER = tuple(c.name for c in m.CaCheck)
 
 
-# A check list is written out as soon as its first check begins, so every line is readable while the ticks resolve one by
-# one (L-06: each line holds >= 1.5 s); the list closes with its last beat (never left over into the flashback: PKI-S1R1-04).
-LIST_LEAD_S = 0.3  # the list appears this long before its first check event
+# V1-LEG-03: each check line appears when its own check starts (never a result before its check), and the list closes with
+# its last beat (never left over into the flashback: PKI-S1R1-04). Each line carries its own tick (drawn by
+# ``blender.signs_scene`` on the sign's plate, in the list's role colour); the 3D tick slots are not rendered.
+TICK_WIDTH_CAPS = 1.6  # a check line's plate is this much wider on the left, for its tick
+_EVENTS = {e.id: e for e in m.MODEL.events}
 
 
-def _list_window(beat: str, first_event: str, until: str | None = None) -> Window:
-    start = next(e.start_s for e in m.MODEL.events if e.id == first_event) - timing.beat_window(beat)[0] - LIST_LEAD_S
+def _check_window(beat: str, event_id: str, until: str | None = None) -> Window:
+    start = _EVENTS[event_id].start_s - timing.beat_window(beat)[0]
     return Window(beat, max(0.1, round(start * timing.FPS) / timing.FPS), until=until)
 
 
-def _check_placements() -> list[Placement]:
-    """Check lines hang to the right of their tick slot."""
+def _check_lists() -> tuple[list[Placement], tuple[tuple[str, ...], ...], dict[str, m.ColourRole]]:
+    """Check lines hang to the right of their tick slot. Returns the placements, the lists in row order and the tick roles."""
     out: list[Placement] = []
+    lists: list[tuple[str, ...]] = []
+    roles: dict[str, m.ColourRole] = {}
     right = (0.2, 0.0, 0.0)
-    for ca_actor, tag, beat, first in ((m.ISSUING_CA1, "CA1", "B-04.3", "E-04.3a"), (m.ISSUING_CA2, "CA2", "B-08.1", "E-08.1a")):
-        window = _list_window(beat, first)
+    for ca_actor, tag, beat, prefix, role in ((m.ISSUING_CA1, "CA1", "B-04.3", "E-04.3", m.ColourRole.ISSUING_CA1),
+                                              (m.ISSUING_CA2, "CA2", "B-08.1", "E-08.1", m.ColourRole.ISSUING_CA2)):
+        rows: list[str] = []
         for index, check in enumerate(_CA_CHECK_ORDER):
-            out.append(Placement(f"LBL-{ca_actor}-{check}", f"TICK-{tag}-{'abcd'[index]}", right, CAP_CHECK, "LEFT", window))
-    rdp_checks = [e.check.name for e in m.MODEL.events if e.id.startswith("E-06.4") and e.check is not None]
-    rdp_window = _list_window("B-06.4", "E-06.4a", until="B-06.5")
-    for index, rdp_check in enumerate(rdp_checks):
-        out.append(Placement(f"LBL-CHAIN-RDP-{rdp_check}", f"TICK-RDP-{'abcdef'[index]}", right, CAP_CHECK, "LEFT", rdp_window))
-    web_events = ("E-09.1j", "E-09.1k", "E-09.1l", "E-09.1o")
-    by_id = {e.id: e for e in m.MODEL.events}
-    web_window = _list_window("B-09.1", "E-09.1j")
-    for index, event_id in enumerate(web_events):
-        web_check = by_id[event_id].check
+            label_id = f"LBL-{ca_actor}-{check}"
+            out.append(Placement(label_id, f"TICK-{tag}-{'abcd'[index]}", right, CAP_CHECK, "LEFT", _check_window(beat, f"{prefix}{'abcd'[index]}")))
+            rows.append(label_id)
+            roles[label_id] = role
+            if tag == "CA2" and check == "ENROLL_PERMISSION":
+                rows.append("LBL-CA2-NOTE")
+        lists.append(tuple(rows))
+    rdp_events = [e for e in m.MODEL.events if e.id.startswith("E-06.4") and e.check is not None]
+    rows = []
+    for index, event in enumerate(rdp_events):
+        assert event.check is not None
+        label_id = f"LBL-CHAIN-RDP-{event.check.name}"
+        out.append(Placement(label_id, f"TICK-RDP-{'abcdef'[index]}", right, CAP_CHECK, "LEFT", _check_window("B-06.4", event.id, until="B-06.5")))
+        rows.append(label_id)
+        roles[label_id] = m.ColourRole.VALIDATED
+    lists.append((*rows, "LBL-OCSP"))
+    rows = []
+    for index, event_id in enumerate(("E-09.1j", "E-09.1k", "E-09.1l", "E-09.1o")):
+        web_check = _EVENTS[event_id].check
         assert web_check is not None
-        out.append(Placement(f"LBL-CHAIN-WEB-{web_check.name}", f"TICK-WEB-{'abcd'[index]}", right, CAP_CHECK, "LEFT", web_window))
-    return out
+        label_id = f"LBL-CHAIN-WEB-{web_check.name}"
+        out.append(Placement(label_id, f"TICK-WEB-{'abcd'[index]}", right, CAP_CHECK, "LEFT", _check_window("B-09.1", event_id)))
+        rows.append(label_id)
+        roles[label_id] = m.ColourRole.VALIDATED
+    lists.append(tuple(rows))
+    return out, tuple(lists), roles
+
+
+_CHECK_PLACEMENTS, CHECK_LISTS, CHECK_TICK_ROLES = _check_lists()
+# A tick that waits: pending amber ring and dot from the line's first frame, resolved green at this event (F-12, B-06.4).
+PENDING_TICKS: dict[str, str] = {"LBL-CHAIN-RDP-REVOCATION": "E-06.5d"}
+
+
+def tick_resolve_frame(label_id: str) -> int | None:
+    """First frame on which a pending tick shows its check mark; None for a tick that resolves with its line."""
+    event_id = PENDING_TICKS.get(label_id)
+    return None if event_id is None else timing.seconds_to_frame(_EVENTS[event_id].start_s)
 
 
 def _build() -> tuple[Placement, ...]:
@@ -146,16 +177,17 @@ def _build() -> tuple[Placement, ...]:
         Placement("LBL-KEY-WEB-PRIV", "KEY-WEB-PRIV", (0.0, -0.12, -0.34), CAP_TAG, window=Window("B-07.2", 0.2)),
         Placement("LBL-KEY-WEB-PUB", "KEY-WEB-PUB", (0.0, -0.12, 0.34), CAP_TAG, window=Window("B-07.2", 0.2)),
         Placement("LBL-ROOT-STORE", "TS-CLIENT-ROOT", (0.0, 0.0, 0.55), CAP_TAG, window=Window("B-06.2", 1.6)),
-        Placement("LBL-AIA-1", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.45)), CAP_TAG, window=Window("B-06.3", 0.1)),
-        Placement("LBL-AIA-2", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.12)), CAP_TAG, window=Window("B-06.3", 0.2)),
+        # held 1 s into B-06.4, while only its first check line is up (V1-LEG-05: 0.35 s per word)
+        Placement("LBL-AIA-1", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.45)), CAP_TAG, window=Window("B-06.3", 0.1, AIA_TAG_END_S, until="B-06.4")),
+        Placement("LBL-AIA-2", None, lo.add(lo.STACK_CERT, (1.15, -0.2, 0.12)), CAP_TAG, window=Window("B-06.3", 0.2, AIA_TAG_END_S, until="B-06.4")),
         Placement("LBL-OCSP", "TICK-RDP-f", (0.2, 0.0, -0.3), CAP_TAG, "LEFT", Window("B-06.5", 0.3, 2.4)),
         Placement("LBL-CA1-INELIGIBLE", "EVAL-CA1", (0.0, -0.15, 0.95), CAP_WIDE_TAG, window=Window("B-07.3", 0.6)),  # under CA 1's nameplate
-        Placement("LBL-CA2-NOTE", "TICK-CA2-c", (0.2, 0.0, -0.32), CAP_CHECK, "LEFT", Window("B-08.1", 1.4)),
+        Placement("LBL-CA2-NOTE", "TICK-CA2-c", (0.2, 0.0, -0.32), CAP_CHECK, "LEFT", Window("B-08.1", CA2_NOTE_START_S)),  # with the Enroll check
     ]
     elig = ("LBL-ELIG-TEMPLATE_PUBLISHED", "LBL-ELIG-ENROLLMENT_POLICY", "LBL-ELIG-PERMISSIONS", "LBL-ELIG-CA_AVAILABLE")
     for index, label_id in enumerate(elig):  # stacked under CA 2's nameplate (cff.stage.signs.LISTS keeps the order)
         placements.append(Placement(label_id, "EVAL-CA2", (0.0, -0.15, 0.95), CAP_WIDE_TAG, "CENTER", Window("B-07.3", 0.5 + 0.1 * index)))
-    placements += _check_placements()
+    placements += _CHECK_PLACEMENTS
     return tuple(placements)
 
 

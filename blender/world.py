@@ -76,6 +76,8 @@ def build_actor(o: StageObject, collection: bpy.types.Collection) -> bpy.types.O
     ob.scale = o.full if o.on_stage else (motion.HIDDEN_SCALE,) * 3
     ob.color = (0.0, 0.0, 0.0, 1.0)  # unlit until the glow channel says otherwise
     tag(ob, **{PROP_ID: o.id, PROP_KIND: o.kind.value, PROP_ROLE: o.role.value, PROP_OWNER: o.owner or ""})
+    if o.kind is Kind.TICK:
+        ob.hide_render = True  # V1-LEG-03: each check line draws its own tick in the SIGNS pass; the 3D slots stay for the plan only
     return ob
 
 

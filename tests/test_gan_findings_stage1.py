@@ -93,7 +93,7 @@ def test_LEG_S1R1_12_no_caption_plate_crosses_the_focal_subject() -> None:  # no
 @pytest.mark.covers("C-03", "C-09")
 def test_CIN_S1R1_01_no_sign_is_near_the_lens_or_larger_than_its_fixed_size() -> None:  # noqa: N802
     for label_id, plan in signs.plan_signs().items():
-        w, h = ty.sign_plate_size_px(labels.BY_ID[label_id].text)
+        w, h = signs.plate_size_px(labels.BY_ID[label_id])  # check lines are wider by their tick (V1-LEG-03)
         for frame, f in plan.frames.items():
             r = f.rect
             assert abs((r[2] - r[0]) - w) < 1e-6 and abs((r[3] - r[1]) - h) < 1e-6, (label_id, frame)
@@ -162,10 +162,9 @@ def test_LEG_S1R1_02_the_public_key_has_no_key_silhouette() -> None:  # noqa: N8
     assert "cylinder(bm, s * 0.42, s * 0.08, 6" in body, "the public key is a notched hexagonal token"
 
 
-# V1-LEG-04 asks for 0.02 counting every sign. Achieved after the plate-beat table: 297 of 7120 sign frames (4.2%); 258 of them are the
-# two CA check lists and the CA 2 note (f932-990, f2503-2565), which only V1-LEG-03 (fixed list places, F2) can move. Set to 0.045 for
-# F1 (was 0.1 and counted only windowed tags); F2 must lower it to 0.02.
-CROSSING_LIMIT = 0.045
+# V1-LEG-04 asks for 0.02 counting every sign (F1 reached 0.042 with the plate-beat table). After V1-LEG-03's fixed list places (F2):
+# 85 of 6748 sign frames (1.3%).
+CROSSING_LIMIT = 0.02
 
 
 @pytest.mark.covers("C-09", "L-06")

@@ -24,7 +24,7 @@ from functools import cache
 
 from cff.stage import camera, caption_layout, choreography, labels
 from cff.stage import layout as lo
-from cff.stage.audit import beat_of_frame, is_visible
+from cff.stage.audit import POP_FRAME_WIDTH_FRACTION, beat_of_frame, is_visible
 from cff.stage.labels import Placement
 from cff.stage.layout import Vec3
 from cff.stage.objects import BY_ID as BY_OBJECT
@@ -93,9 +93,13 @@ def exists(timeline: Timeline, placement: Placement, frame: int) -> bool:
     return placement.parent is None or is_visible(timeline, placement.parent, frame)
 
 
-def caption_rects(frame: int) -> list[Rect]:
-    """Plates of the captions that have any opacity on ``frame``."""
-    return [caption_layout.plate_rect(c.id) for c in captions.CAPTIONS if frame in caption_layout.caption_frames(c.id)]
+def caption_rects(frame: int, ahead: int = 0) -> list[Rect]:
+    """Plates of the captions that have any opacity on ``frame`` (or will within ``ahead`` frames)."""
+    return [caption_layout.plate_rect(c.id) for c in captions.CAPTIONS
+            if any(f in caption_layout.caption_frames(c.id) for f in (frame, frame + ahead))]
+
+
+CAPTION_LOOKAHEAD_FRAMES = 8  # the layout clears a caption's band this early, so a sign glides aside before it appears (V1-LEG-02)
 
 
 def _unproject(state: camera.CamState, x_px: float, y_px: float, depth: float) -> Vec3:
@@ -112,11 +116,10 @@ def cap_m_at(state: camera.CamState, depth: float, cap_px: float = ty.SIGN_CAP_P
 
 # Signs that are read together form a list: shown members keep this order, one line below the other, and the list
 # moves as one block when it has to be nudged inside title-safe or above a caption. A member ending in "-" is a prefix.
+# The four check lists are not here: each has one fixed place on screen (``fixed_list_positions``, V1-LEG-03).
 LISTS: tuple[tuple[str, ...], ...] = (
-    ("LBL-CA1", "LBL-CA1-INELIGIBLE", "LBL-ISSUING_CA1-"),
-    ("LBL-CA2", "LBL-ELIG-", "LBL-ISSUING_CA2-", "LBL-CA2-NOTE"),
-    ("LBL-CHAIN-RDP-", "LBL-OCSP"),
-    ("LBL-CHAIN-WEB-",),
+    ("LBL-CA1", "LBL-CA1-INELIGIBLE"),
+    ("LBL-CA2", "LBL-ELIG-"),
     ("LBL-HOST-WEB", "LBL-SITE-WEB", "LBL-TPL-WEB"),
     ("LBL-HOST-RDP", "LBL-TPL-RDP"),
     ("LBL-SELF", "LBL-UNVERIFIED"),
@@ -152,26 +155,134 @@ class _Candidate:
     depth: float
     rect: Rect
     must: bool
+    anchor_px: tuple[float, float] = (0.0, 0.0)  # where the anchor projects, before any layout move (V1-LEG-02)
+
+    def __post_init__(self) -> None:
+        if self.anchor_px == (0.0, 0.0):
+            self.anchor_px = self.origin_px
+
+    @property
+    def offset_px(self) -> tuple[float, float]:
+        """The layout move applied to the sign (nudges, clearing, list pitch): a change in it is a pop, not motion."""
+        return (self.origin_px[0] - self.anchor_px[0], self.origin_px[1] - self.anchor_px[1])
+
+
+def tick_width_px(label_id: str) -> float:
+    """Extra plate width on the left of a check line, for its tick (V1-LEG-03); 0 for every other sign."""
+    return labels.TICK_WIDTH_CAPS * ty.SIGN_CAP_PX if label_id in labels.CHECK_TICK_ROLES else 0.0
+
+
+def plate_size_px(placement: Placement) -> tuple[float, float]:
+    w, h = ty.sign_plate_size_px(placement.text)
+    return w + tick_width_px(placement.label_id), h
 
 
 def _rect_for(placement: Placement, x: float, y: float) -> tuple[Rect, tuple[float, float]]:
-    w, h = ty.sign_plate_size_px(placement.text)
+    w, h = plate_size_px(placement)
     margin = ty.SIGN_CAP_PX * ty.SIGN_PLATE_MARGIN_CAPS
     if placement.align == "LEFT":
-        return (x, y - h / 2, x + w, y + h / 2), (x + margin, y)
+        return (x, y - h / 2, x + w, y + h / 2), (x + margin + tick_width_px(placement.label_id), y)
     return (x - w / 2, y - h / 2, x + w / 2, y + h / 2), (x, y)
 
 
-def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, beat: str) -> tuple[list[_Candidate], set[str]]:
+LIST_PITCH_EPSILON_PX = 1.0  # rows of a fixed list sit this much more than one gap apart (no rounding-edge overlap)
+
+
+def _list_span(ids: tuple[str, ...]) -> tuple[int, int]:
+    """(first entrance frame, last exit frame) over a check list's windowed rows."""
+    spans = [labels.window_frames(w) for i in ids if (w := labels.BY_ID[i].window) is not None]
+    return min(s[0] for s in spans), max(s[1] for s in spans)
+
+
+@cache
+def fixed_list_positions() -> dict[str, tuple[float, float]]:
+    """Check-list row -> (left x, centre y) on the 1080p frame, one fixed place per list for its whole life (V1-LEG-03).
+
+    Appendix A.3 of docs/AUDIT-v1.md: a deterministic grid search over title-safe for the block that is blocked (by the
+    focal subject, a capsule, card or private key, or a caption band) on the fewest frames, nearest the mean screen
+    position of the list's first tick slot. Rows keep their slot even while earlier rows are not yet shown."""
+    timeline = choreography.build_timeline()
+    plan = camera.CameraPlan(timeline)
+    beats = beat_of_frame()
+    out: dict[str, tuple[float, float]] = {}
+    pad, step = ty.SIGN_LIST_PAD_PX, ty.SIGN_LIST_STEP_PX
+    m_px = ty.SIGN_SAFE_MARGIN_PX
+    sx0, sy0, sx1, sy1 = ty.TITLE_SAFE_PX[0] + m_px, ty.TITLE_SAFE_PX[1] + m_px, ty.TITLE_SAFE_PX[2] - m_px, ty.TITLE_SAFE_PX[3] - m_px
+    for ids in labels.CHECK_LISTS:
+        sizes = [plate_size_px(labels.BY_ID[i]) for i in ids]
+        w, row_h = max(s[0] for s in sizes), max(s[1] for s in sizes)
+        h = len(ids) * row_h + (len(ids) - 1) * (ty.SIGN_GAP_PX + LIST_PITCH_EPSILON_PX)
+        first, last = _list_span(ids)
+        last += round(motion.LABEL_LINGER_S * timing.FPS)
+        frames = [f for f in range(first, last + 1) if f in beats]
+        forbidden: list[list[Rect]] = []
+        ax = ay = 0.0
+        for f in frames:
+            rects = [(r[0] - pad, r[1] - pad, r[2] + pad, r[3] + pad) for r in _protected_rects(timeline, plan, beats[f], f)]
+            c = ty.CAPTION_BAND_CLEARANCE_PX
+            rects += [(0.0, r[1] - c, float(ty.FRAME_W_PX), r[3] + c) for r in caption_rects(f)]
+            forbidden.append(rects)
+            px, py, _ = camera.project(plan.state(f), anchor(timeline, labels.BY_ID[ids[0]], f))
+            if math.isfinite(px):
+                ax += px * ty.FRAME_W_PX / len(frames)
+                ay += py * ty.FRAME_H_PX / len(frames)
+        best: tuple[int, float, float, float] | None = None
+        x = sx0
+        while x + w <= sx1:
+            y = sy0
+            while y + h <= sy1:
+                block = (x, y, x + w, y + h)
+                blocked = sum(any(_intersects(block, r) for r in rects) for rects in forbidden)
+                key = (blocked, math.hypot(x + w / 2 - ax, y + h / 2 - ay), y, x)
+                if best is None or key < best:
+                    best = key
+                y += step
+            x += step
+        assert best is not None, ids
+        x0, y0 = best[3], best[2]
+        for row, label_id in enumerate(ids):
+            out[label_id] = (x0, y0 + row_h / 2 + row * (row_h + ty.SIGN_GAP_PX + LIST_PITCH_EPSILON_PX))
+    return out
+
+
+def list_blocked_frames() -> dict[str, int]:
+    """First row of each check list -> frames on which its fixed place is blocked (recorded in the ledger)."""
+    timeline = choreography.build_timeline()
+    plan = camera.CameraPlan(timeline)
+    beats = beat_of_frame()
+    pos = fixed_list_positions()
+    out: dict[str, int] = {}
+    for ids in labels.CHECK_LISTS:
+        rects = [_rect_for(labels.BY_ID[i], *pos[i])[0] for i in ids]
+        block = (min(r[0] for r in rects), min(r[1] for r in rects), max(r[2] for r in rects), max(r[3] for r in rects))
+        first, last = _list_span(ids)
+        pad = ty.SIGN_LIST_PAD_PX
+        n = 0
+        for f in range(first, last + 1):
+            if f not in beats:
+                continue
+            prot = [(r[0] - pad, r[1] - pad, r[2] + pad, r[3] + pad) for r in _protected_rects(timeline, plan, beats[f], f)]
+            n += any(_intersects(block, r) for r in prot)
+        out[ids[0]] = n
+    return out
+
+
+def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, beat: str,
+                      memory: dict[int, tuple[float, float]] | None = None) -> tuple[list[_Candidate], set[str]]:
     state = plan.state(frame)
     out: list[_Candidate] = []
     hidden: set[str] = set()
+    fixed = fixed_list_positions()
     for index, placement in enumerate(labels.PLACEMENTS):
         if not exists(timeline, placement, frame):
             hidden.add(placement.label_id)
             continue
         if placement.screen_px is not None:  # fixed on-screen place (V1-PKI-02): never moved or cleared
             rect, origin = _rect_for(placement, *placement.screen_px)
+            out.append(_Candidate(placement, index, origin, state.focus_distance, rect, True))
+            continue
+        if placement.label_id in fixed:  # a check-list row: one fixed place for the list's whole life (V1-LEG-03)
+            rect, origin = _rect_for(placement, *fixed[placement.label_id])
             out.append(_Candidate(placement, index, origin, state.focus_distance, rect, True))
             continue
         px, py, depth = camera.project(state, anchor(timeline, placement, frame))
@@ -193,25 +304,29 @@ def _frame_candidates(timeline: Timeline, plan: camera.CameraPlan, frame: int, b
     by_list: dict[int, list[_Candidate]] = {}
     for c in out:
         by_list.setdefault(family(c.placement.label_id), []).append(c)
-    blocked = caption_rects(frame)
+    blocked = caption_rects(frame, CAPTION_LOOKAHEAD_FRAMES)
     protected: list[Rect] | None = None
     kept: list[_Candidate] = []
-    for members in by_list.values():
+    # families in layout priority; a kept family that must be read now is protected from the families after it, so a
+    # second list steps around it instead of being hidden by it (V1-LEG-02)
+    for members in sorted(by_list.values(), key=lambda ms: min(_priority(c) for c in ms)):
         members.sort(key=lambda c: (_list_key(c.placement.label_id)[1], c.index))
         for prev, cur in zip(members, members[1:], strict=False):
             min_top = prev.rect[3] + ty.SIGN_GAP_PX
             if cur.rect[1] < min_top:
                 _shift(cur, 0.0, min_top - cur.rect[1])
-        if members[0].placement.screen_px is not None:
+        if members[0].placement.screen_px is not None or members[0].placement.label_id in fixed:
             kept.extend(members)  # a fixed-position sign is never nudged or cleared
             continue
-        if protected is None:
-            protected = _protected_rects(timeline, plan, beat, frame)
+        if protected is None:  # names keep off the check lists' fixed places too (V1-LEG-03)
+            protected = _protected_rects(timeline, plan, beat, frame) + [c.rect for c in out if c.placement.label_id in fixed]
         # every sign (V1-LEG-04: plates too) stands beside the focal subject and every visible capsule, card and private key,
         # never across them (CIN-S1R1-04, LEG-S1R2-03, LEG-S1R2-04, CIN-S1R2-02)
-        _clear_of(members, protected)
+        _clear_of(members, protected, memory, family(members[0].placement.label_id))
         if _nudge_block(members, blocked):
             kept.extend(members)
+            if any(c.must for c in members):
+                protected.extend(c.rect for c in members)
         else:
             hidden.update(c.placement.label_id for c in members)
     return kept, hidden
@@ -238,20 +353,40 @@ def _block(members: list[_Candidate]) -> Rect:
     return (min(c.rect[0] for c in members), min(c.rect[1] for c in members), max(c.rect[2] for c in members), max(c.rect[3] for c in members))
 
 
-def _clear_of(members: list[_Candidate], protected: list[Rect]) -> None:
+GLIDE_BACK_SCALES = (0.0, 0.25, 0.5, 0.75, 0.9, 1.0)  # fractions of the last move tried, nearest the anchor first
+
+
+def _clear_of(members: list[_Candidate], protected: list[Rect], memory: dict[int, tuple[float, float]] | None = None, key: int = 0) -> None:
     """Move a list, as one block, the shortest way off every protected rect it covers, staying inside title-safe.
 
     Candidate moves put the block just right of, left of, above or below each rect it crosses; the shortest move that
     leaves the block inside title-safe and clear of all protected rects wins. If none exists the list stays (and the
-    caption and title-safe rules still apply)."""
+    caption and title-safe rules still apply). With ``memory`` (one dict per pass, frames in ascending order) the move
+    nearest the family's previous move wins instead, so the choice does not flip sides from frame to frame (V1-LEG-02)."""
     gap = ty.SIGN_GAP_PX * 2
     x0, y0, x1, y1 = _block(members)
     m = ty.SIGN_SAFE_MARGIN_PX
     sx0, sy0, sx1, sy1 = ty.TITLE_SAFE_PX[0] + m, ty.TITLE_SAFE_PX[1] + m, ty.TITLE_SAFE_PX[2] - m, ty.TITLE_SAFE_PX[3] - m
+    previous = memory.get(key) if memory is not None else None
+    if memory is not None and previous is not None:
+        # sticky: keep the last move, easing it back toward the anchor, while the block stays clear and inside title-safe
+        for scale in GLIDE_BACK_SCALES:
+            dx, dy = previous[0] * scale, previous[1] * scale
+            if math.hypot(dx - previous[0], dy - previous[1]) > ty.SIGN_JUMP_PX:
+                continue
+            moved = (x0 + dx, y0 + dy, x1 + dx, y1 + dy)
+            inside = sx0 <= moved[0] and sy0 <= moved[1] and moved[2] <= sx1 and moved[3] <= sy1
+            if inside and not any(_intersects(moved, p, gap) for p in protected):
+                memory[key] = (dx, dy)
+                for c in members:
+                    _shift(c, dx, dy)
+                return
     # try to clear everything; if the frame is too crowded for that, clear the focal subject alone (the first rect)
     for rects in (protected, protected[:1]):
         hit = [p for p in rects if _intersects((x0, y0, x1, y1), p, gap)]
         if not hit:
+            if memory is not None:
+                memory.pop(key, None)
             return
         options: list[tuple[float, float]] = []
         for p in hit:
@@ -263,7 +398,13 @@ def _clear_of(members: list[_Candidate], protected: list[Rect]) -> None:
             if inside and not any(_intersects(moved, p) for p in rects):
                 good.append((dx, dy))
         if good:
-            dx, dy = min(good, key=lambda d: math.hypot(*d))
+            if previous is not None:
+                pdx, pdy = previous
+                dx, dy = min(good, key=lambda d: math.hypot(d[0] - pdx, d[1] - pdy))
+            else:
+                dx, dy = min(good, key=lambda d: math.hypot(*d))
+            if memory is not None:
+                memory[key] = (dx, dy)
             for c in members:
                 _shift(c, dx, dy)
             return
@@ -296,11 +437,12 @@ def _nudge_block(members: list[_Candidate], blocked: list[Rect]) -> bool:
     return True
 
 
-def _visible_set(timeline: Timeline, plan: camera.CameraPlan, frame: int, beat: str, why: dict[str, str] | None = None) -> dict[str, _Candidate]:
-    candidates, _ = _frame_candidates(timeline, plan, frame, beat)
-    blocked = caption_rects(frame)
+def _visible_set(timeline: Timeline, plan: camera.CameraPlan, frame: int, beat: str, why: dict[str, str] | None = None,
+                 memory: dict[int, tuple[float, float]] | None = None) -> dict[str, _Candidate]:
+    candidates, _ = _frame_candidates(timeline, plan, frame, beat, memory)
+    blocked = caption_rects(frame, CAPTION_LOOKAHEAD_FRAMES)
     accepted: dict[str, _Candidate] = {}
-    for c in sorted(candidates, key=lambda c: (not c.must, _list_key(c.placement.label_id), c.index)):
+    for c in sorted(candidates, key=_priority):  # check-list rows hold their fixed place first; names step aside (V1-LEG-03)
         label_id = c.placement.label_id
         if not _inside_safe(c.rect):
             if why is not None:
@@ -344,6 +486,10 @@ def hidden_reasons(label_id: str, frames: list[int]) -> dict[str, int]:
     return out
 
 
+def _pop_px() -> float:
+    return POP_FRAME_WIDTH_FRACTION * ty.FRAME_W_PX * GLIDE_STEP_FRACTION
+
+
 def _runs(frames: list[int]) -> list[tuple[int, int]]:
     out: list[tuple[int, int]] = []
     for f in frames:
@@ -354,6 +500,80 @@ def _runs(frames: list[int]) -> list[tuple[int, int]]:
     return out
 
 
+def _hops(by_frame: dict[int, _Candidate]) -> list[int]:
+    """Frames on which a sign steps farther than the C-06 pop limit from the frame before (Appendix A.2, V1-LEG-02).
+    Layout moves glide at ``SIGN_JUMP_PX`` per frame (``_glide_all``); only a forced step is left (a caption or a sign
+    of higher priority leaves no gliding path, or the list rides a fast card)."""
+    return [f for f in sorted(by_frame) if (p := by_frame.get(f - 1)) is not None
+            and math.hypot(by_frame[f].rect[0] - p.rect[0], by_frame[f].rect[1] - p.rect[1]) > _pop_px()]
+
+
+GLIDE_STEP_FRACTION = 0.99  # glide and pop limits are kept just under their thresholds, so rounding never crosses them
+GLIDE_BACKOFF = 0.05  # the glide step shrinks in these fractions until the whole on-screen step is under the pop limit
+
+
+def _glide_step(c: _Candidate, prev: _Candidate) -> _Candidate:
+    """``c`` with its layout move rate-limited to ``SIGN_JUMP_PX`` from ``prev`` (the sign as shown on the frame before),
+    the whole on-screen step kept under the pop limit when the anchor allows, and the plate kept inside title-safe."""
+    pop = _pop_px()
+    shown = prev.offset_px
+    ddx, ddy = c.offset_px[0] - shown[0], c.offset_px[1] - shown[1]
+    step = math.hypot(ddx, ddy)
+    k = min(1.0, GLIDE_STEP_FRACTION * ty.SIGN_JUMP_PX / step) if step > 0 else 1.0
+    ax, ay = c.anchor_px[0] - prev.anchor_px[0], c.anchor_px[1] - prev.anchor_px[1]
+    while k > 0 and math.hypot(ax + ddx * k, ay + ddy * k) > pop and math.hypot(ax, ay) <= pop:
+        k = max(0.0, k - GLIDE_BACKOFF)
+    g = _Candidate(c.placement, c.index, c.origin_px, c.depth, c.rect, c.must, c.anchor_px)
+    dx, dy = shown[0] + ddx * k - c.offset_px[0], shown[1] + ddy * k - c.offset_px[1]
+    if dx or dy:
+        _shift(g, dx, dy)
+        m_px = ty.SIGN_SAFE_MARGIN_PX
+        sx0, sy0, sx1, sy1 = ty.TITLE_SAFE_PX[0] + m_px, ty.TITLE_SAFE_PX[1] + m_px, ty.TITLE_SAFE_PX[2] - m_px, ty.TITLE_SAFE_PX[3] - m_px
+        cx = (sx0 - g.rect[0]) if g.rect[0] < sx0 else (sx1 - g.rect[2]) if g.rect[2] > sx1 else 0.0
+        cy = (sy0 - g.rect[1]) if g.rect[1] < sy0 else (sy1 - g.rect[3]) if g.rect[3] > sy1 else 0.0
+        if cx or cy:
+            _shift(g, cx, cy)
+    return g
+
+
+def _priority(c: _Candidate) -> tuple[bool, bool, tuple[int, int], int]:
+    return (not c.must, c.placement.label_id not in fixed_list_positions(), _list_key(c.placement.label_id), c.index)
+
+
+def _glide_all(per_label: dict[str, dict[int, _Candidate]], frames: list[int]) -> dict[str, dict[int, _Candidate]]:
+    """One pass, frames ascending, signs in layout priority (V1-LEG-02). Each sign tries its glided place (a layout move
+    slides at ``SIGN_JUMP_PX`` per frame instead of popping), then its laid-out place; the first that is inside
+    title-safe, clear of captions and of every sign already placed wins. Otherwise the sign sits the frame out."""
+    out: dict[str, dict[int, _Candidate]] = {label_id: {} for label_id in per_label}
+    for frame in frames:
+        present = sorted((c for by_frame in per_label.values() if (c := by_frame.get(frame)) is not None), key=_priority)
+        blocked = caption_rects(frame)
+        accepted: list[Rect] = []
+        # a list glides as one block: its first member with a previous frame sets the slide for every member
+        slide: dict[int, tuple[float, float]] = {}
+        for c in present:
+            fam = family(c.placement.label_id)
+            prev = out[c.placement.label_id].get(frame - 1)
+            if fam not in slide and prev is not None:
+                g = _glide_step(c, prev)
+                slide[fam] = (g.rect[0] - c.rect[0], g.rect[1] - c.rect[1])
+        for c in present:
+            label_id = c.placement.label_id
+            dx, dy = slide.get(family(label_id), (0.0, 0.0))
+            options: tuple[_Candidate, ...] = (c,)
+            if dx or dy:
+                g = _Candidate(c.placement, c.index, c.origin_px, c.depth, c.rect, c.must, c.anchor_px)
+                _shift(g, dx, dy)
+                options = (g, c)
+            for option in options:
+                if (_inside_safe(option.rect) and not any(_intersects(option.rect, b, ty.CAPTION_BAND_CLEARANCE_PX) for b in blocked)
+                        and not any(_intersects(option.rect, a, ty.SIGN_GAP_PX) for a in accepted)):
+                    accepted.append(option.rect)
+                    out[label_id][frame] = option
+                    break
+    return out
+
+
 @cache
 def plan_signs() -> dict[str, SignPlan]:
     """The sign plan for the whole film (deterministic: no randomness)."""
@@ -361,21 +581,27 @@ def plan_signs() -> dict[str, SignPlan]:
     plan = camera.CameraPlan(timeline)
     beats = beat_of_frame()
     per_label: dict[str, dict[int, _Candidate]] = {p.label_id: {} for p in labels.PLACEMENTS}
+    memory: dict[int, tuple[float, float]] = {}  # one pass, frames ascending: each family remembers its last move
     for frame in plan.frames():
-        for label_id, cand in _visible_set(timeline, plan, frame, beats.get(frame, "")).items():
+        for label_id, cand in _visible_set(timeline, plan, frame, beats.get(frame, ""), memory=memory).items():
             per_label[label_id][frame] = cand
     enter = motion.label_entrance_frames()
     leave = motion.label_exit_frames()
     out: dict[str, SignPlan] = {}
-    for label_id, by_frame in per_label.items():
+    for label_id, by_frame in _glide_all(per_label, plan.frames()).items():
         frames: dict[int, SignFrame] = {}
+        dips: dict[int, float] = {}  # a forced hop larger than the pop limit is hidden by a short dip (V1-LEG-02)
+        for hop in _hops(by_frame):
+            for i, a in enumerate(ty.SIGN_HOP_DIP):
+                f = hop - len(ty.SIGN_HOP_DIP) // 2 + i
+                dips[f] = min(dips.get(f, 1.0), a)
         for first, last in _runs(sorted(by_frame)):
             if last - first + 1 < ty.SIGN_MIN_RUN_FRAMES:
                 continue  # too short to read: never flashed
             for frame in range(first, last + 1):
                 c = by_frame[frame]
                 into, outof = frame - first, last - frame
-                alpha = 1.0
+                alpha = dips.get(frame, 1.0)
                 if into < enter:
                     alpha = min(alpha, motion.evaluate(motion.EASE_OUT, into / enter))
                 if outof < leave:

@@ -45,7 +45,11 @@ SIGN_MAX_NUDGE_PX = 420.0  # a sign (or a list) may be moved this far to fit ins
 SIGN_NEAR_M = 1.2  # a sign nearer the lens than this fades out (CIN-S1R1-01)
 SIGN_DEPTH_FACTOR = 2.5  # a persistent name farther than this x the focus distance is not shown (unless it must be read now)
 SIGN_SAFE_MARGIN_PX = 4.0  # signs keep this far inside title-safe
-SIGN_MIN_RUN_FRAMES = 12  # a sign is never shown or hidden for less than this (no flicker)
+SIGN_MIN_RUN_FRAMES = 24  # a sign is never shown for less than this (no flashes; V1-LEG-02, was 12)
+SIGN_JUMP_PX = 48.0  # a sign's layout move glides at most this far per frame instead of popping (V1-LEG-02)
+SIGN_HOP_DIP: tuple[float, ...] = (0.7, 0.3, 0.3, 0.7)  # alpha on frames f-2..f+1 round a forced hop larger than the C-06 pop limit
+SIGN_LIST_STEP_PX = 24  # grid step of the search for a check list's one fixed place (V1-LEG-03, Appendix A.3)
+SIGN_LIST_PAD_PX = 12.0  # a check list's fixed place keeps this far from the focal subject, capsules, cards and keys
 
 
 def sign_plate_size_px(text: str, cap_px: float = SIGN_CAP_PX) -> tuple[float, float]:
