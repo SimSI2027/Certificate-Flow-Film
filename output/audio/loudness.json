@@ -23,7 +23,7 @@
     "normalization_type": "dynamic",
     "target_offset": "-0.07"
   },
-  "ebur128_summary": "Summary:\n\n  Integrated loudness:\n    I:         -15.9 LUFS\n    Threshold: -26.0 LUFS\n\n  Loudness range:\n    LRA:         4.9 LU\n    Threshold: -35.9 LUFS\n    LRA low:   -18.7 LUFS\n    LRA high:  -13.9 LUFS\n\n  True peak:\n    Peak:       -1.2 dBFS\n[out#0/null @ 000000800057f380] video:0KiB audio:20438KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown\nsize=N/A time=00:01:49.00 bitrate=N/A speed= 423x elapsed=0:00:00.25",
+  "ebur128_summary": "Summary:\n\n  Integrated loudness:\n    I:         -15.9 LUFS\n    Threshold: -26.0 LUFS\n\n  Loudness range:\n    LRA:         4.9 LU\n    Threshold: -35.9 LUFS\n    LRA low:   -18.7 LUFS\n    LRA high:  -13.9 LUFS\n\n  True peak:\n    Peak:       -1.2 dBFS\n[out#0/null @ 00000080005e1280] video:0KiB audio:20438KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown\nsize=N/A time=00:01:49.00 bitrate=N/A speed= 391x elapsed=0:00:00.27",
   "cues": 88,
   "duration_s": 109.0
 }
