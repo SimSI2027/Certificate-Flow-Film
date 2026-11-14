@@ -154,3 +154,14 @@ Lean mode (no subagents, no discriminator round, no tag, no release). Details, p
 - **Tests run (real results):** `python -m tools verify` VERIFY GREEN on the third pass: ruff clean; mypy --strict 68 files; pytest 205 passed; traceability current; palette 87 pairs, 0 failing; planned-film audits 0 hard; in-Blender 16 of 16; both tiers 3270/3270, 0 blank; final MP4 on spec, true peak −1.2 dBFS; cut steps 0.4 / 0.1; MP4 luma gate f746 0.1, f1376 0.6, f1534 1.4, f1535 2.0, f477 1.8, f595 0.1, f600 0.1, f671 0.5, f705 0.0, f719 0.0, B-09.2 mean 56.3.
 - **Final MP4:** SHA-256 `e5050765e7633399b04b3c3014fd811da7ccff6d3871d36216015001bfd330b6`, 70.3 MB, `dirty: false`. Reviewed: 1 final contact sheet (accepted).
 - **Decision: v1.3 PASS DELIVERED, release held for the V3 audit.** This is the first attempt at the gate, so it is not approved as a release. Not approved: the charter's film gate (no discriminator round).
+
+## MALAWI rename and realistic user character, session V4 (Opus 5.5, 2026-11-14)
+
+Lean mode (no subagents, no discriminator round, no tag, no release). Details: `docs\GAN-LEDGER.md` "Session V4".
+
+- **Pre-flight:** V3 phase entry was "v1.3 pass delivered, release held for the V3 audit"; the owner ran V4 before that audit, so the V3 MP4 is superseded unaudited. `python -m tools verify` GREEN and local HEAD == origin/main (28ed351) before any change.
+- **Scope:** V4-A1 rename to MALAWI (names, docs, tests, site builder; history left as written with a dated note); V4-A2 realistic user character from MPFB + CC0 MakeHuman assets (option B, fallback A not needed); partial beauty re-render (computed range), full sign and caption re-render, encode.
+- **Problems found and corrections:** the laptop was out of a seated human's reach (moved, V4-R1); V4-CHR-02 fingertips inside the laptop base (found by the new in-Blender check, fixed before any final frame).
+- **Tests run (real results):** `python -m tools verify` VERIFY GREEN on the V4 Final MP4: ruff clean; mypy --strict 72 files; pytest 213 passed (new `tests\test_v4.py`: V4-REN-01, V4-CHR-01); traceability current; palette 87/0; planned-film audits 0 hard; in-Blender 17 of 17 (new `character_seated`); both tiers 3270/3270, 0 blank; final MP4 on spec, true peak −1.2 dBFS; cut steps 0.4 / 0.1; MP4 luma gate PASS. Re-render seams measured smooth.
+- **Final MP4:** SHA-256 `f084da6043c8162f379f2c1c62e43bebaad53f40c99c4c6f34973ee571fee205`, 70.0 MB. Reviewed: preview gate (2 stills, 1 typing strip) and 1 final contact sheet (accepted). 4 of 10 images used.
+- **Decision: V4 PASS DELIVERED, release held for the V4 audit.** First attempt at this gate, so not approved as a release. Pages stays on v1.2.0.

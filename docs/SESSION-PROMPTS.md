@@ -489,6 +489,22 @@ You are the Chief of Staff for Certificate-Flow-Film, session V3 audit: a target
 6. Commit, push, `python -m tools sync-check`. Report in at most 8 lines.
 ```
 
+> Superseded: V4 ran before this audit. Use "Session V4 audit" below; it covers the V3 items as well.
+
+## Session V4 audit — full audit of the V4 film (+ release decision)
+**Model: Fable 5.2 · Effort: High** (lean mode: no subagents)
+
+```
+You are the Chief of Staff for Certificate-Flow-Film, session V4 audit: a full audit of the V4 film (v1.3 finishing pass + MALAWI rename + realistic user character). No subagents, at most 10 images.
+
+1. Read docs\PROJECT-STATE.md and the "Session V3" and "Session V4" entries of docs\GAN-LEDGER.md (amendments V4-A1, V4-A2).
+2. Re-run `python -m tools verify` and ffprobe. Confirm the Final MP4 SHA-256 recorded in PROJECT-STATE.
+3. Judge on the film: every V3 item (as in the "Session V3 audit" prompt above); the rename (no earlier lab name in any sign, caption or card; MALAWI names correct and accurate to F-01..F-17); the user character at 0-6 s, 10-13 s, 50-71 s and 93.5-109 s (realistic, not uncanny, seated with hands on the keys, typing, breathing, head turns to the screen and the session windows, lit to fit the scene, no intersections); the re-render seams at f187/188, f288/289, f387/388, f1510/1511, f2121/2122, f2803/2804; the character licences (assets\character.manifest.json, LICENSES\CC0-1.0.txt, README). Plus one full-film contact sheet. PASS or FAIL per item.
+4. Give PKI, legibility and cinema scores. If any BLOCKER or MAJOR fails: write exact fixes and stop without a release.
+5. If all pass: release v1.3.0 as the public latest release (README, CHANGELOG, Pages from the V4 assets via scripts\build_site.py in the same session; the site text then shows MALAWI), round-trip the assets' SHA-256, verify the live page.
+6. Commit, push, `python -m tools sync-check`. Report in at most 8 lines.
+```
+
 ---
 
 ## Resume prompt (any session, after a usage limit or a long context)

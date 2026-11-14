@@ -2,18 +2,21 @@
 
 Updated: 2026-11-14 (Session V4, `claude-opus-5-5`, no subagents)
 
-## SESSION V4 (2026-11-14, Opus 5.5, no subagents) — MALAWI rename + realistic user character, NO release (Pages stays on v1.2.0)
-- The owner set V4 before the V3 audit ran. The V3 Final MP4 (`e5050765…30b6`) was never audited and is superseded by the V4 render.
-- Done and pushed: d3c600d (rerender-range tool and pre-change baseline), ea51f11 (V4-A1 rename, V4-A2 amendment, new spec hash `6a60d216…1a55`), a58e8d8 (character: `assets\character.blend` 4.2 MB, MPFB 2.0.18 + CC0 MakeHuman assets, option B kept after the preview gate; laptop to x −11.42, chair to −10.9; in-Blender check `character_seated`).
-- **Running:** `python -m tools render --tier final --rebuild` (log `renders\v4-render.log`, resumable). It fills exactly the missing frames: beauty 1364 frames (f1–187, f289–387, f1511–2121, f2804–3270, from `qa\v4\beauty-rerender.json`), all 2808 sign and 1933 caption frames (rename). Replaced frames are kept in `renders\final-v1.3-beauty-replaced`, `renders\final-v1.3-signs` and `renders\final-v1.3-captions`. Audio is kept (no timing change).
-- **If interrupted:** rerun the same command, then `python -m tools encode`, then `python -m tools verify`.
+## SESSION V4 DONE (2026-11-14, Opus 5.5, no subagents, 4 of 10 images) — MALAWI rename + realistic user character, NO release (Pages stays on v1.2.0)
+- **Final MP4 SHA-256 `f084da6043c8162f379f2c1c62e43bebaad53f40c99c4c6f34973ee571fee205`**, 70.0 MB (gitignored release asset). Poster, contact sheet and metadata in `output\` are committed; `site\` is untouched (still v1.2.0, earlier lab name).
+- `python -m tools verify` VERIFY GREEN: pytest 213, **17** in-Blender checks (new `character_seated`), both tiers 3270/3270, MP4 on spec, true peak −1.2 dBFS, cut steps 0.4 / 0.1, MP4 luma gate PASS.
+- The owner set V4 before the V3 audit ran; the V3 MP4 (`e5050765…30b6`) is superseded unaudited.
+- Commits: d3c600d (rerender-range tool and baseline), ea51f11 (V4-A1 rename, V4-A2 amendment, spec hash `6a60d216…1a55`, Stage 4 clean-round counter reset), a58e8d8 (character), then render and close-out commits.
+- **Character: option B kept** (preview gate: 2 stills, 1 typing strip). `assets\character.blend` 4.2 MB from MPFB 2.0.18 + CC0 MakeHuman assets (`assets\character.manifest.json`, `LICENSES\CC0-1.0.txt`, README). Regenerate: `python -m tools character`. Laptop moved to x −11.42, chair to −10.9 (V4-R1). V4-CHR-02 (fingertips in the laptop) found and fixed before the final render.
+- Render: beauty 1364 computed frames (`qa\v4\beauty-rerender.json`), all signs (2829) and captions (1933); audio kept. Replaced v1.3 frames are kept in `renders\final-v1.3-beauty-replaced`, `-signs`, `-captions`; seams measured smooth.
+- **Next session: V4 audit on Fable 5.2, High.** Prompt "Session V4 audit" in `docs\SESSION-PROMPTS.md`: a full audit of this Final MP4, then release v1.3.0 only if it passes (the site is rebuilt then, so Pages shows MALAWI).
 
 ## SESSION V3 DONE (2026-11-14, Opus 5.5, no subagents, 5 of 8 images) — v1.3 finishing pass, NO release (Pages stays on v1.2.0)
 - **Final MP4 SHA-256 `e5050765e7633399b04b3c3014fd811da7ccff6d3871d36216015001bfd330b6`**, 70.3 MB, render commit 3260ec4, `dirty: false`; H.264 High 4.1, bt709, 3270 frames, 109.000 s. Gitignored (release asset). Poster, contact sheet and metadata in `output\` are committed; `site\` is untouched (still v1.2.0).
 - `python -m tools verify` VERIFY GREEN: pytest 205, 16 in-Blender checks, both tiers 3270/3270, MP4 on spec, true peak −1.2 dBFS, cut steps 0.4 / 0.1, new MP4 luma gate PASS (f746 0.1, f1376 0.6, f1534 1.4, f1535 2.0; V3-CIN-01 frames ≤ 1.8; B-09.2 mean 56.3, from 98.5 s 56.1).
 - Items: (1) L2-CIN-01 fixed by a continuous rig-light lift; (2) chassis and vault interiors dressed and lit; (3) hero whole from 98.5 s (B-09.2 also left `C03_OPEN_BEATS`); (4) proof tag "Proof: private-key signature", 45 of 45 full frames. New MINOR V3-CIN-01 (interior flicker from EEVEE shadow-pool overflow) found and fixed. Remaining steps above 4.0 (f1254 4.1, f2454–2455) are ruled not findings (V3-R3). Details: `docs\GAN-LEDGER.md` "Session V3".
 - Kept on disk (gitignored) for the audit: `renders\final-v1.2-beauty` (v1.2 beauty frames) and `renders\final-v1.2-signs-changed`. `renders\preview` holds the preview-gate frames.
-- **Next session: V3 audit on Fable 5.2, High** — prompt "Session V3 audit" in `docs\SESSION-PROMPTS.md`: re-audit this Final MP4, then release v1.3.0 only if it passes.
+- (superseded by V4) **Next session was: V3 audit on Fable 5.2, High** — prompt "Session V3 audit" in `docs\SESSION-PROMPTS.md`: re-audit this Final MP4, then release v1.3.0 only if it passes.
 
 ### V3 progress log (history)
 - Source done and pushed (9882cec, 63289f7, ab51778, 9d11993, 994e7ca): L2-CIN-01 rig keep-out (`cff\stage\rig.py`), interiors (`blender\dressing.py`), hero whole from 98.5 s (`Shot.lead_s/arrive/focus_pull`), proof tag `LBL-HS-RDP`. Tests `tests\test_v13.py`, in-Blender check `interior_dressing`, verify step `MP4 luma (L2-CIN-01, hero)`.
@@ -109,6 +112,6 @@ Updated: 2026-11-14 (Session V4, `claude-opus-5-5`, no subagents)
 - `pyproject.toml`: ruff line length is **160** (raised from 120 in Session 3), with per-file E501 and N806 ignores for stage data tables, theme, tools and Blender builders.
 
 ## Names in use
-- Fixed: `1SN0S.LAB`, `1SN0S`, `1sn0s.lab`, `RDPAuth`, `WebServer-TLS`.
-- Fallbacks in use: DC `DC01`, client `CLIENT01`, RDP server `RDP01` (`rdp01.1sn0s.lab`), web server `WEB01`, site `portal.1sn0s.lab`, Root CA `1SN0S Root CA`, Issuing CAs `1SN0S Issuing CA 1` / `1SN0S Issuing CA 2`, PKI HTTP host `pki.1sn0s.lab`.
+- Fixed (since V4, 2026-11-14): `MALAWI.LAB`, `MALAWI`, `malawi.lab`, `RDPAuth`, `WebServer-TLS`. Session entries above V4 are historical and still use the earlier name.
+- Fallbacks in use: DC `DC01`, client `CLIENT01`, RDP server `RDP01` (`rdp01.malawi.lab`), web server `WEB01`, site `portal.malawi.lab`, Root CA `MALAWI Root CA`, Issuing CAs `MALAWI Issuing CA 1` / `MALAWI Issuing CA 2`, PKI HTTP host `pki.malawi.lab`.
 
