@@ -440,6 +440,41 @@ You are the Chief of Staff for Certificate-Flow-Film, session F2: the remaining 
 
 ---
 
+## Session L1 — v1.2 look pass + the single final render (after v1.1.0)
+**Model: Sonnet 5.5 · Effort: High** (lean mode: no subagents, no GAN rounds)
+
+Added on 2026-11-14 by session F3. The plan is `docs\LOOK-PLAN-v1.2.md`. Run L1 once, then L2.
+
+```
+You are the Chief of Staff for Certificate-Flow-Film, session L1: the v1.2 look pass. No subagents, at most 6 images. Do NOT tag or release anything: session L2 does that after a re-audit.
+
+1. Read docs\PROJECT-STATE.md and docs\LOOK-PLAN-v1.2.md. Read a source file only when its item names it. Do not re-read the spec documents.
+2. Follow the plan exactly. It gives every value and every rule; where it says "stop", stop and record the value. Do not tune by eye.
+3. Work order: Item A, C, E, B (second change), D, F. One commit per item, pushed, with `python -m tools verify --skip-blender` green; full `python -m tools verify` after A and after E.
+4. Stills-and-strips gate (plan Section 5): `python -m tools build --tier final`, `python -m tools look-test`, view the 2 images named there. Test frames go to renders\look-test, never to renders\final. At most three attempts.
+5. Only if the gate passes: commit everything, delete renders\final\beauty, renders\final\signs and renders\final\captions, run `python -m tools render --tier final --rebuild` in the background (300-frame chunks, progress in PROJECT-STATE), then `python -m tools audio`, `python -m tools encode`, `python scripts\build_site.py`, `python -m tools verify`. This is the only full render.
+6. View the final contact sheet, a strip of f2700-2710 and the poster. Record the per-beat luma and the luma steps of the Final MP4 (plan Appendix A).
+7. Record rulings, gate numbers and stop-rule values in docs\GAN-LEDGER.md "Session L1"; record the phase in docs\CHIEF-OF-STAFF-APPROVALS.md. Commit, push, `python -m tools sync-check`. Set PROJECT-STATE "Next session" to L2. Report in at most 8 lines.
+If the gate fails three times, or usage runs short, record the exact state and stop.
+```
+
+## Session L2 — v1.2 targeted re-audit + release
+**Model: Opus 5.5 · Effort: Medium** (or Fable 5.2; lean mode: no subagents)
+
+```
+You are the Chief of Staff for Certificate-Flow-Film, session L2: a targeted re-audit of the v1.2 film and its release. No subagents, at most 8 images.
+
+1. Read docs\PROJECT-STATE.md, docs\LOOK-PLAN-v1.2.md and the "Session L1" entry of docs\GAN-LEDGER.md.
+2. Re-run `python -m tools verify` and ffprobe. Record the Final MP4 SHA-256.
+3. Check every plan item on the film at its timestamps (hero 98-104 s, flash 81.0 s and 90.0-90.3 s, cut at 46.5 s, proof tag 50.9-52.7 s, the ten focal beats), plus one full-film contact sheet for regressions and every v1.1.0 fix that the look could have broken (sign legibility over haze, caption contrast, cut frames, the trust store being gold before docking). PASS or FAIL per item.
+4. Judge V1-CIN-03 on the frames: is the grey-box look closed? Give PKI, legibility and cinema scores.
+5. If any BLOCKER or MAJOR fails: write exact fix instructions, name the model needed, and stop without a release.
+6. If all pass: update README, CHANGELOG and the Pages text; tag v1.2.0; release it (a full release only if V1-CIN-03 is closed and no new MAJOR exists, otherwise a pre-release) with all assets; download the assets and compare SHA-256; check that Pages is current.
+7. Commit, push, `python -m tools sync-check`. Report in at most 8 lines.
+```
+
+---
+
 ## Resume prompt (any session, after a usage limit or a long context)
 **Model and effort: the same as the session being resumed**
 
