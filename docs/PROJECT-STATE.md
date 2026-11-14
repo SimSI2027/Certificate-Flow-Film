@@ -2,7 +2,12 @@
 
 Updated: 2026-11-13 (v1 AUDIT session, read-only, model `claude-fable-5-2`; before it: LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 
-## v1 AUDIT (current) — v1.0.0 is a provisional pre-release
+## Session F1 DONE (2026-11-13, Sonnet 5.5 medium) — NEXT: session F2 (Opus 5.5, High)
+- F1 fixes are in commits 77b8119, 50fe77e, d7544fc; per-finding status is in `docs\AUDIT-v1.md` ("F1 status"). `python -m tools verify`: VERIFY GREEN (pytest 170, 14 in-Blender checks, final tier 3270/3270). No render was done; the Final MP4 on disk is still the v1.0.0 file; release and tags untouched.
+- **F2 must:** do everything marked NEEDS-F2 or not yet touched (V1-LEG-05 and LEG-02/03, PKI-04/05/06, CIN-01/02/05/06/07, COL-01, AUD-01/02, CIN-03 step 1, the LEG-04 residual); lower `CROSSING_LIMIT` in `tests\test_gan_findings_stage1.py` to 0.02; after the single final re-render + encode set `tools.verify.MP4_PENDING_RERENDER = False` (then `verify` must be green with the real MP4 checks); delete `renders\final\signs` and `renders\final\beauty` (and captions if needed) before rendering; rebuild the site; confirm the live Pages page has no default caption track.
+- Older stale material (Sessions 3-4) is in `docs\archive\PROJECT-STATE-sessions-3-4.md`.
+
+## v1 AUDIT — v1.0.0 is a provisional pre-release
 - **v1.0.0 is a provisional pre-release pending the v1 audit.** `gh release edit v1.0.0 --prerelease` was run on 2026-11-13; GitHub reports `isPrerelease=true`. README, CHANGELOG and the Pages page still say "released" (audit finding V1-DOC-02; this session was allowed to change only this file and the audit file).
 - Audit report: `docs\AUDIT-v1.md`. Result: 0 BLOCKER, 16 MAJOR, 10 MINOR. Verdict: **ship as v1.1.0 after fixes**; the grey-box look (V1-CIN-03) stays open and is the "bigger rework" for a later v2.0.
 - Re-verified in the audit: `python -m tools verify` VERIFY GREEN (pytest 158, 14 in-Blender checks, 3270/3270 **animatic** frames; the final tier is not checked by verify, finding V1-PIPE-01); Final MP4 is H.264/AAC, 1920x1080, 30 FPS, 3270 frames, 109.000 s, −16.1 LUFS; spec hash unchanged; live Pages page identical to `site\index.html`.

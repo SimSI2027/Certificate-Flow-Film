@@ -62,6 +62,27 @@ Outcome in one line: **0 BLOCKER, 16 MAJOR, 10 MINOR. v1.0.0 stays a pre-release
 | 25 | V1-DOC-02 | MINOR | README, Pages | Wording does not match the film or its status. |
 | 26 | V1-DOC-03 | MINOR | PROJECT-STATE | Stale sections contradict the top of the file. |
 
+### F1 status (session F1, Sonnet medium; commits 77b8119, 50fe77e, d7544fc)
+
+"FIXED" = fixed in code/docs with a regression test; frame-level effects show only after the F2 re-render.
+
+| ID | Status | Note |
+|---|---|---|
+| V1-LEG-01 | FIXED (77b8119) | `apply_tier`: `and not transparent`; test `test_V1_LEG_01_...`. The optional in-Blender check was not added (static test only). Final signs pass must be re-rendered (F2). |
+| V1-CIN-04 | FIXED (77b8119) | `motion_blur_position = "START"`; `verify` "cut frames" step measures it (v1.0.0 MP4: steps 14.3 and 30.1). Re-render needed (F2); if f1246/f1396 still fail, render them without blur. |
+| V1-PIPE-01 | FIXED (77b8119) | `verify` runs the frame check per tier, a "final MP4" step and a "cut frames" step. While `tools.verify.MP4_PENDING_RERENDER` is True the two MP4 steps report the v1.0.0 problems but pass. **F2 must set it to False after the final re-render.** |
+| V1-ENC-01 | FIXED (77b8119) | `setparams` BT.709 tags, `-refs 4 -level:v 4.1` on both encodes. Verified only after the F2 encode. |
+| V1-PKI-01 | FIXED (50fe77e) | Trust-store cradle gold from frame 1; shimmer returns to rest. |
+| V1-PKI-02 | FIXED (50fe77e) | `LBL-FLASHBACK` fixed at (960, 975) with `Placement.screen_px`. |
+| V1-PKI-03 | FIXED (50fe77e) | Four key tags added. Deviation (the audit's offsets overlapped): RDP tags sit at x ∓0.45 m (`PRIV` −0.45, `PUB` +0.45), the RDP public-key window opens at 0.1 s (not 0.4 s, or fewer than 45 frames can be fully shown), web private-key tag at z −0.34. |
+| V1-LEG-04 | FIXED for plates (50fe77e); residual NEEDS-F2 | `PLATE_BEATS` table and `_clear_of` on every family are in. Crossing ratio now 297/7120 = 4.2%, not 2%: 258 frames are the CA check lists and the CA 2 note (f932–990, f2503–2565), which need V1-LEG-03's fixed list places. `CROSSING_LIMIT` is 0.045; F2 must lower it to 0.02. `test_V1_LEG_04_at_most_10_signs` passes. |
+| V1-LEG-05 | NEEDS-F2 | A longer hold for the two AIA tags collides with the first line of the RDP check list (f1783+), so `LBL-AIA-1` stays at 1.5 s. It resolves with V1-LEG-03 (lines appear when their check starts). Change reverted. |
+| V1-DOC-01 | FIXED (d7544fc) | `default` removed from the `<track>`; `site\index.html` rebuilt. **The live page changes only when this is pushed and Pages deploys; confirm once after the F2 deploy.** |
+| V1-DOC-02 | FIXED (d7544fc) | README, Pages and CHANGELOG wording. The README no longer says "released". |
+| V1-DOC-03 | FIXED (d7544fc) | Stale sections moved to `docs\archive\PROJECT-STATE-sessions-3-4.md`; Git, URLs, Toolchain and Names kept. |
+
+All other findings (V1-LEG-02, -03, V1-PKI-04, -05, -06, V1-CIN-01, -02, -03, -05, -06, -07, V1-COL-01, V1-AUD-01, -02) are unchanged and belong to F2.
+
 ## 4. Findings in detail
 
 ### V1-LEG-01 (MAJOR) Signs are motion-blurred in the final tier
