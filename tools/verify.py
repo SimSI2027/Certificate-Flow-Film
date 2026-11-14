@@ -105,7 +105,7 @@ EXPECTED_VIDEO = {"codec_name": "h264", "width": 1920, "height": 1080, "r_frame_
 DURATION_TOLERANCE_S = 0.05
 # The v1.0.0 MP4 predated the F1 fixes (blended cut frames, sRGB transfer tag, level 5.0). While this was True the two MP4 steps
 # reported those known problems without failing. Session F2 set it to False after the final re-render: the MP4 checks are binding.
-MP4_PENDING_RERENDER = True  # Session L1: True from the F3-AUD-01/F3-PIPE-02 commit until the v1.2 re-render is encoded, then False again
+MP4_PENDING_RERENDER = False  # Session L1: was True from the F3-AUD-01/F3-PIPE-02 commit until the v1.2 re-render was encoded (2026-11-14)
 
 
 def step_frame_tiers() -> list[Step]:

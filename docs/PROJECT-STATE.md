@@ -1,13 +1,13 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-14 (Session F3 third run, `claude-fable-5-2`, no subagents, 10 of 12 images)
+Updated: 2026-11-14 (Session L1, `claude-sonnet-5-5`, no subagents, 5 of 6 images)
 
-## SESSION L1 IN PROGRESS (Sonnet 5.5, High, no subagents) — final render running
-- Code done and pushed (HEAD `e560f11`): Items A, C, E, B (second change), D, F, plus `tools look-test` and `tools\luma.py`. Gate passed on attempt 2 of 3 (numbers in `docs\GAN-LEDGER.md` "Session L1"). 2 of 6 images used for the gate.
-- **Full final render started** (`python -m tools render --tier final --rebuild`, background, 300-frame chunks, `renders\final\progress.json`). `renders\final\beauty|signs|captions` were deleted first. Resume after an interruption: run the same command again (it skips finished frames; do NOT delete again).
-- Remaining after the render: `python -m tools audio`, `python -m tools encode`, `python scripts\build_site.py`, set `MP4_PENDING_RERENDER = False` in `tools\verify.py`, `python -m tools verify`, view contact sheet + strip f2700-2710 + poster, record per-beat luma and steps (`tools\luma.py`), ledger "Session L1", approvals, commit, push, `sync-check`, then set "Next session" to L2.
-- `tools\verify.py` has `MP4_PENDING_RERENDER = True` only until the new MP4 exists (the old MP4's AAC true peak is −0.6 dBFS, above the new −1.0 limit).
-- NEXT SESSION after L1: L2 (Opus 5.5, Medium): re-audit and release v1.2.0 (Plan Section 6).
+## SESSION L1 DONE (2026-11-14, Sonnet 5.5, High, no subagents, 5 of 6 images) — no tag, no release
+- Items A, C, E, B (second change), D, F done, one commit each, plus `tools look-test` and `tools\luma.py`. Gate passed on attempt 2 of 3. Full final render, audio, encode, site build done. **Final MP4 SHA-256 `84097e10311daafa6b9d6b72bb94a31380357a82aee3006cf56536ad25093f44`**, 70.3 MB, grain 3, `dirty: false`. The Final MP4 is gitignored (release asset); Preview, poster, contact sheet and site are committed.
+- `python -m tools verify` VERIFY GREEN, no waiver (`MP4_PENDING_RERENDER = False`): pytest 200, 15 in-Blender checks, both tiers 3270/3270, true peak −1.2 dBFS.
+- Measured: B-09.2 mean YAVG 51.3 (was 38.4); film mean 57.7; f2431 step 0.3; f2695–2712 max 3.7. Still over 4.0: f746 8.0, f1376 10.6 (flashback), f1157 4.0, f1534/1535 4.4/6.7, f2454/2455 5.6/5.1. Per-beat table: `docs\GAN-LEDGER.md` "Session L1".
+- Shortfalls for L2 to rule on: `RESIDUAL_PX` has 10 entries (plan: ≤ 6); F3-PKI-01 label removed (36 of 45 frames), finding open; soft haze glow near the rim light; flashback steps.
+- **Next session: L2 (Opus 5.5, Medium): re-audit the Final MP4 and release v1.2.0 (Plan Section 6).** Do not re-render unless the audit demands it.
 
 ## Session F3, third run DONE (2026-11-14) — GATE PASSED, v1.1.0 released as a PRE-RELEASE
 - Gate: Final MP4 SHA-256 `2b56cee7…f78e` confirmed. `python -m tools verify` VERIFY GREEN twice (before and after the doc changes): pytest 189, 14 in-Blender checks, both tiers 3270/3270, final MP4 on spec, cut-frame steps 0.4 / 0.0. ffprobe: H.264 High 4.1, bt709, 3270 frames, 109.000 s; exactly two cuts.

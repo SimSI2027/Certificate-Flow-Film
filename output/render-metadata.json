@@ -1,5 +1,6 @@
 {
-  "commit": "5cdae700d11cce04660f97e7e6948443b1b1c54d",
+  "commit": "51a87aa17d43ab53c40bf2ee54928e7b7921dbdd",
+  "dirty": false,
   "tier": "final",
   "blender": "5.2.3 LTS",
   "engine": "BLENDER_EEVEE",
@@ -9,11 +10,11 @@
   "beats": 33,
   "spec_sha256": "7cf45afa01572b7e9d30a6fb376807fb10a4f6a693af41ffed1d96bce2686d23",
   "last_render_progress": {
-    "layer": "beauty",
+    "layer": "captions",
     "status": "complete",
-    "present": 3270,
-    "of": 330,
-    "elapsed_s": 239.2
+    "present": 1933,
+    "of": 1933,
+    "elapsed_s": 373.4
   },
   "loudness": {
     "first_pass": {
@@ -21,26 +22,26 @@
       "input_tp": "-0.88",
       "input_lra": "6.30",
       "input_thresh": "-28.30",
-      "output_i": "-15.53",
-      "output_tp": "-1.50",
-      "output_lra": "4.70",
-      "output_thresh": "-25.59",
+      "output_i": "-15.61",
+      "output_tp": "-2.00",
+      "output_lra": "4.40",
+      "output_thresh": "-25.67",
       "normalization_type": "dynamic",
-      "target_offset": "-0.47"
+      "target_offset": "-0.39"
     },
     "second_pass": {
       "input_i": "-18.20",
       "input_tp": "-0.88",
       "input_lra": "6.30",
       "input_thresh": "-28.30",
-      "output_i": "-15.93",
-      "output_tp": "-1.50",
-      "output_lra": "4.90",
-      "output_thresh": "-25.99",
+      "output_i": "-15.94",
+      "output_tp": "-2.00",
+      "output_lra": "4.60",
+      "output_thresh": "-26.00",
       "normalization_type": "dynamic",
-      "target_offset": "-0.07"
+      "target_offset": "-0.06"
     },
-    "ebur128_summary": "Summary:\n\n  Integrated loudness:\n    I:         -15.9 LUFS\n    Threshold: -26.0 LUFS\n\n  Loudness range:\n    LRA:         4.9 LU\n    Threshold: -35.9 LUFS\n    LRA low:   -18.7 LUFS\n    LRA high:  -13.9 LUFS\n\n  True peak:\n    Peak:       -1.2 dBFS\n[out#0/null @ 00000080005e1280] video:0KiB audio:20438KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown\nsize=N/A time=00:01:49.00 bitrate=N/A speed= 391x elapsed=0:00:00.27",
+    "ebur128_summary": "Summary:\n\n  Integrated loudness:\n    I:         -15.9 LUFS\n    Threshold: -26.0 LUFS\n\n  Loudness range:\n    LRA:         4.6 LU\n    Threshold: -35.9 LUFS\n    LRA low:   -18.6 LUFS\n    LRA high:  -14.0 LUFS\n\n  True peak:\n    Peak:       -1.7 dBFS\n[out#0/null @ 000000e7d521ff40] video:0KiB audio:20438KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown\nsize=N/A time=00:01:49.00 bitrate=N/A speed= 447x elapsed=0:00:00.24",
     "cues": 88,
     "duration_s": 109.0
   },
@@ -109,7 +110,7 @@
         "start_time": "0.000000",
         "duration_ts": 1674240,
         "duration": "109.000000",
-        "bit_rate": "3863997",
+        "bit_rate": "4956564",
         "bits_per_raw_sample": "8",
         "nb_frames": "3270",
         "extradata_size": 51,
@@ -163,7 +164,7 @@
         "start_time": "0.000000",
         "duration_ts": 5232000,
         "duration": "109.000000",
-        "bit_rate": "193353",
+        "bit_rate": "193396",
         "nb_frames": "5111",
         "extradata_size": 5,
         "disposition": {
@@ -202,8 +203,8 @@
       "format_long_name": "QuickTime / MOV",
       "start_time": "0.000000",
       "duration": "109.000000",
-      "size": "55401782",
-      "bit_rate": "4066185",
+      "size": "70288611",
+      "bit_rate": "5158797",
       "probe_score": 100,
       "tags": {
         "major_brand": "isom",
@@ -249,7 +250,7 @@
         "start_time": "0.000000",
         "duration_ts": 1674240,
         "duration": "109.000000",
-        "bit_rate": "652189",
+        "bit_rate": "609070",
         "bits_per_raw_sample": "8",
         "nb_frames": "3270",
         "extradata_size": 49,
@@ -303,7 +304,7 @@
         "start_time": "0.000000",
         "duration_ts": 5232000,
         "duration": "109.000000",
-        "bit_rate": "97241",
+        "bit_rate": "97401",
         "nb_frames": "5111",
         "extradata_size": 5,
         "disposition": {
@@ -342,8 +343,8 @@
       "format_long_name": "QuickTime / MOV",
       "start_time": "0.000000",
       "duration": "109.000000",
-      "size": "10331173",
-      "bit_rate": "758251",
+      "size": "9746321",
+      "bit_rate": "715326",
       "probe_score": 100,
       "tags": {
         "major_brand": "isom",

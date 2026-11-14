@@ -119,3 +119,15 @@ Lean mode (no discriminator round). Sessions F1 and F2 and the first two F3 runs
 - **Tests run (real results):** `python -m tools verify` VERIFY GREEN before and after the doc changes: ruff clean; mypy --strict clean (62 files); pytest 189 passed; traceability current; palette 87 pairs, 0 failing; planned-film audits 0 hard, 3 advisory; in-Blender 14 of 14; animatic and final tiers 3270 of 3270, 0 blank; final MP4 matches the delivery spec; cut-frame luma steps 0.4 and 0.0. ffprobe: H.264 High level 41, bt709, 3270 frames, 109.000 s. Loudness −15.9 LUFS, true peak −0.6 dBFS (AAC). Film mean luma 50.3; B-09.2 38.4; steps f746 5.6, f1376 4.6, f2431 6.4, f2709 7.7.
 - **Release and sync:** commits b128263 and a036067; tag `v1.1.0` on a036067; release https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.1.0, `isPrerelease=true`, 7 assets; all 7 downloaded back with equal SHA-256. Pages run 43578886004 succeeded; the live page, preview, poster and captions equal `site\`. The close-out commit and its sync result are in the Session F3 report.
 - **Decision: APPROVED as a pre-release** — 2026-11-14. Third attempt at this gate. Not approved: the charter's film gate (V1-CIN-03 open; cinema estimate 5 of 10).
+
+## v1.2 look pass, session L1 (Sonnet 5.5, high, 2026-11-14)
+
+Lean mode (no discriminator round, no tag, no release). Details, rulings and stop-rule values: `docs\GAN-LEDGER.md` "Session L1".
+
+- **Scope:** `docs\LOOK-PLAN-v1.2.md` Items A, C, E, B (second change), D, F; one commit each; `python -m tools verify --skip-blender` green on each, full verify after A and after E.
+- **Gate (stills-and-strips):** passed on attempt 2 of 3. Attempt 1 failed on the flash steps (4.8 and 4.6 at badge glow 0.25); at 0.15 they are 3.9 and 3.8. Hero mean YAVG 53.0.
+- **Full final render (the only one):** 3270 beauty, 2770 sign and 1933 caption frames; audio −15.9 LUFS; Final MP4 `84097e10…3f44`, 70.3 MB, on spec.
+- **Tests run (real results):** `python -m tools verify` VERIFY GREEN with no waiver: ruff clean; mypy --strict clean (66 files); pytest 200 passed; traceability current; palette 87 pairs, 0 failing; planned-film audits 0 hard, 3 advisory; in-Blender 15 of 15; animatic and final tiers 3270/3270, 0 blank; final MP4 on spec, true peak −1.2 dBFS; cut-frame steps 0.3 and 0.1.
+- **Measured on the MP4:** B-09.2 mean YAVG 51.3 (was 38.4; target 50 met); film mean 57.7; f2431 step 0.3, f2695–2712 largest 3.7. f746 8.0 and f1376 10.6 (flashback entry and exit) are over 4.0 and not tuned.
+- **Shortfalls, recorded and not hidden:** F3-PKI-01 label tried and removed (36 of 45 frames), finding stays open; Item D left 10 `RESIDUAL_PX` entries (plan: at most 6) because three beats cannot take a longer lens; a soft glow near the rim light is left for L2 to rule on.
+- **Decision: LOOK PASS DELIVERED, release held for L2** — first attempt at this gate; not auto-approved as a release. L2 re-audits the Final MP4 and decides v1.2.0.

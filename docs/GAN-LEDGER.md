@@ -316,3 +316,62 @@ Known limitations accepted for v1.1.0 (Chief of Staff ruling: each is recorded, 
 | F3-PKI-01 | MINOR, new | handshake proof visible but unlabelled | 85 px (RDP), 55 px (web) |
 
 Next: `docs\LOOK-PLAN-v1.2.md` (materials and lighting, hero brightness, the 90 s flash, focal sizes, and the four F3 MINORs).
+
+## Session L1 (2026-11-14, `claude-sonnet-5-5`, high; no subagents, 5 of 6 images): v1.2 look pass
+
+- **Scope:** `docs\LOOK-PLAN-v1.2.md` Items A, C, E, B (second change), D, F, in that order, one commit each (a79760f, 88bcf24, 25aaf11, d297079, 798e44f, 776e83a), plus the gate tooling `tools look-test` and `tools\luma.py` (8491152). No tag, no release (L2 does that). Spec hash unchanged; no amendment.
+- **Final MP4:** SHA-256 `84097e10311daafa6b9d6b72bb94a31380357a82aee3006cf56536ad25093f44`, 70.3 MB (limit 120), grain strength 3. `python -m tools verify` VERIFY GREEN with `MP4_PENDING_RERENDER = False`: pytest 200, ruff and mypy clean, 15 in-Blender checks, both tiers 3270/3270, final MP4 on spec, true peak −1.2 dBFS (AAC; was −0.6), render metadata `dirty: false`, cut-frame steps 0.3 / 0.1. Loudness −15.9 LUFS, TP −1.7 dBFS (WAV).
+
+### Rulings
+
+| ID | Ruling |
+|---|---|
+| L1-R1 | The plan's 25 dE test between pool light colours and state colours is unreachable: `POOL_ROOT_HEX` is 15.9 dE from REVOCATION. The test uses the palette's own floor `palette.L07_MIN_DELTA_E` (15). Pools never use a state colour. |
+| L1-R2 | Pool lights are set dressing, not a state signal: they are static, one per actor, and never change colour or intensity. The root's pool is a pale gold tint (`POOL_ROOT_HEX`), always on from the start, so it does not signal state either. |
+| L1-R3 | Haze, horizon glow and bloom are set dressing: they live only on volumetric tiers, carry no state colour, and the ambient stays at 0.02 (C-05 unchanged). |
+| L1-R4 | A longer lens is an allowed focal-size lever inside the charter's 24–50 mm range. A lens step that fails C-02/C-03, a sign hold or a legibility audit is undone (stop rule), not tuned. |
+
+### Gate (`tools build --tier final`, `tools look-test`, frames in `renders\look-test`)
+
+| Attempt | Result |
+|---|---|
+| 1 | Hero mean, f3100 YLOW and SATAVG, f457, f943, f2058 all in range; **FAIL**: largest YAVG step in the flash strips 4.8 (f2430) and 4.6 (f2709) at `BADGE_REST_GLOW` 0.25. Stop rule: lower to 0.15. |
+| 2 | **PASS** at 0.15: steps 3.9 (f2430) and 3.8 (f2709), both ≤ 4.0. Hero mean YAVG 53.0 (before 37.8; want 50–62). Images viewed: no white floor blob, no hidden subject, no visible noise or banding. |
+
+Haze density stayed at `HAZE_DENSITY` 0.004 (the tuning rule never fired).
+
+### Stop-rule values recorded
+
+- **Badge rest glow:** 0.25 → 0.15 (steps 4.8 / 4.6 → 3.9 / 3.8).
+- **Hero follow (Item B, second change):** kept at 0.45. 0.3, 0.2 and 0.1 each gave 62 frames with the whole topology in frame against 63 at 0.45, and failed camera tests.
+- **F3-PKI-01 (handshake proof label):** tried and removed. The label reached 36 of the 45 required frames; the plan says remove it. The storyboard and traceability net diff is none. Finding stays open as MINOR.
+- **Item D (lens as a lever).** Lenses: B-01.2 35→39, B-02.3 35→39, B-04.2 35→50, B-05.2 35→50, B-06.1 40→44, B-07.4 35→50; B-06.3 took `AIA-RDP` 1.5x instead (50 mm already). B-08.3 (28 mm), B-05.3 (28 mm) and B-02.2 (42 mm) cannot go longer: the next lens step pushes B-09.1, B-06.1 or B-02.3 out of the C-03 box, or fails a sign hold.
+
+| Beat | F3 px | L1 px | Plan target | Met |
+|---|---|---|---|---|
+| B-01.2 | 78 | 83.8 | 150 | no |
+| B-02.2 | 99 | 99.3 | 150 | no |
+| B-02.3 | 96 | 103.2 | 150 | no |
+| B-04.2 | 65 | 81.4 | 150 | no |
+| B-05.2 | 55 | 75.0 | 150 | no |
+| B-05.3 | 39 | 38.7 | 150 | no |
+| B-06.1 | 63 | 63.8 | 150 | no |
+| B-06.3 | 53 | 80.0 | 150 | no |
+| B-07.4 | 64 | 72.5 | 150 | no |
+| B-08.3 | 69 | 69.2 | 150 | no |
+
+  Shortfall: `RESIDUAL_PX` in `tools\focal_audit.py` still has **10** entries; the plan asked for at most 6. Every value was raised or kept to the size now reached, so `python -m tools focal` prints 0 beats under target. L2 to rule whether the V1-CIN-01 residual is accepted for v1.2.0.
+
+### Measured on the Final MP4 (`tools\luma.py`, BT.709 video range)
+
+- **Per-beat mean YAVG:** B-01.1 47.7, B-01.2 54.6, B-02.1 50.8, B-02.2 58.6, B-02.3 51.0, B-03.1 48.4, B-03.2 57.8, B-03.3 54.4, B-03.4 60.6, B-04.1 56.0, B-04.2 58.5, B-04.3 61.0, B-04.4 68.7, B-04.5 60.0, B-05.1 60.6, **B-05.2 104.1** (pale flashback, by design), B-05.3 61.5, B-06.1 60.3, B-06.2 44.8, B-06.3 51.5, B-06.4 47.9, B-06.5 50.4, B-06.6 55.6, B-07.1 61.9, B-07.2 61.9, B-07.3 60.7, B-07.4 56.5, B-08.1 51.7, B-08.2 61.0, B-08.3 60.9, B-09.1 58.7, **B-09.2 51.3** (was 38.4; target ≥ 50 met), B-09.3 39.2. Film mean 57.7 (was 50.3).
+- **Frame-to-frame steps over 4.0 (cut frames excluded):** f746 8.0, f1157 4.0, f1376 10.6, f1534 4.4, f1535 6.7, f2454 5.6, f2455 5.1. Targets met: f2431 step 0.3 (was 6.4), f2695–2712 largest 3.7 at f2709 (was 7.7). **Not met / new:** f746 (8.0, was 5.6) and f1376 (10.6, was 4.6) are the flashback entry and exit; f1534–1535 and f2454–2455 were not measured before L1. Recorded, not tuned.
+- **F3 MINORs:** F3-LEG-01 fixed (marker ends at the cut), F3-AUD-01 fixed (−1.2 dBFS, check added), F3-PIPE-02 fixed (`dirty` flag and commit check), F3-PKI-01 still open.
+
+### Notes for L2
+
+- **Soft glow:** a soft haze glow shows around the key/rim light above the root in some wide frames (the poster's upper right). It reads as atmosphere, not a blob; L2 to rule whether it is acceptable.
+- Frames viewed on the Final MP4: the 33-tile contact sheet, a 3x4 strip of f2700–2710 (no flash, no pop; the Root CA label fades in as designed) and the poster (pool cones and haze visible, all five labels legible).
+- Not heard: the audio. Not re-run: a discriminator round (lean mode).
+
+Next: L2 (Opus 5.5, medium): re-audit the Final MP4 and release v1.2.0 per `docs\LOOK-PLAN-v1.2.md` Section 6.
