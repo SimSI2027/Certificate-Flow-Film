@@ -27,6 +27,7 @@ ignore = [
 "cff/stage/*" = ["E501", "N806", "PLR0915", "PLR0917", "RUF007", "PLR0912"]
 "cff/theme/*" = ["E501"]
 "tools/*" = ["E501"]
+"scripts/build_site.py" = ["E501"]  # one HTML template with long prose lines
 "cff/theme/colour.py" = ["PLR0917"]
 "blender/*" = ["E501", "N806", "PLR0915", "PLR0917", "PLR0912", "PLR0911"]
 "blender/**/*.py" = ["E501", "N806", "PLR0915", "PLR0917", "PLR0912", "PLR0911"]

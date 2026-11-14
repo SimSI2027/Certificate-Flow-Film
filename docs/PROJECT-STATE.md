@@ -7,7 +7,11 @@ Updated: 2026-11-13 (LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 - Review agents archived to `docs\archive\agents\` (not auto-invoked). The R2 discriminator replies in `qa\rounds\stage1-R2` are partial/unjudged and are not used.
 - Step 1 DONE: the pending R2 fixes (signs parallel to the image plane, blended plates in a PLATES/TEXT view-layer split, sign clearance of capsules/cards/private keys, trust links grow from nothing) were completed; build bug fixed (`view_layer.update()`), tag crossing falls back to focal-only. VERIFY GREEN (pytest 155, 14 in-Blender checks, 3270/3270 animatic frames).
 - **Remaining, in order:** 2 final look (bloom/grain/volumetrics via the `final` tier), 3 render final 1920x1080 + captions + audio (`cff\audio` is empty: synth, cue sheet, mix needed), encode, 4 one contact sheet review, 5 outputs, 6 Pages + v1.0.0.
-- **Next action:** Step 2: preview-render a few frames at the `final` tier to check the look and time per frame; then start the background final render.
+- Step 2 DONE: contact-sheet review 1 of 2 at the `final` tier (`scripts\render_sheet.py final` -> `output\final\contact-sheet.png`): lit, captions/signs in place, no blank frames; accepted.
+- Audio DONE: `cff\audio\{cues,synth}.py` (88 cues from the story events, stdlib synth, seeds 5101-5103) + `python -m tools audio` -> `output\audio\mix.wav` (-16.0 LUFS, true peak -3.7 dBFS; `loudness.json`). Tests in `tests\test_audio.py`.
+- Encode tooling DONE: `python -m tools encode` (Final MP4, 720p Preview, poster, contact sheet, `render-metadata.json`); site builder `scripts\build_site.py`; Pages workflow `.github\workflows\pages.yml`.
+- **Final render RUNNING** in the background: `python -m tools render --tier final` (beauty, then signs, then captions; ~0.7 s/frame; resumable: just re-run it). Progress: `renders\final\progress.json`.
+- **Next action:** when the render is complete (3270 beauty frames, sign and caption frames), run `python -m tools verify` (frames check on `animatic` only), `python -m tools encode`, review `output\Certificate-Flow-Film-Contact-Sheet.png` once (review 2 of 2), then `scripts\build_site.py`, push, enable Pages, `gh release create v1.0.0`.
 
 
 ## Session 4 part 2 handoff (historical)
