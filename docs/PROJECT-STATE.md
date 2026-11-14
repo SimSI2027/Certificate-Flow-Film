@@ -4,9 +4,9 @@ Updated: 2026-11-13 (LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 
 ## LEAN FINISH MODE (current; overrides the charter governance)
 - The user switched to lean finish: no subagents, no GAN rounds, `python -m tools verify` is the quality gate, at most 2 contact-sheet reviews, one final-quality render, a simple Pages page and v1.0.0 release.
-- Review agents archived to `docsrchivegents\` (not auto-invoked). The R2 discriminator replies in `qaounds\stage1-R2` are partial/unjudged and are not used.
-- Step 1 DONE: the pending R2 fixes (signs as parallel-to-image plates, blended plates in a PLATES/TEXT view-layer split, sign clearance of capsules/cards/private keys, trust-link grow-from-nothing) were completed; build bug fixed (`view_layer.update()`), tag-crossing fallback to focal-only. VERIFY GREEN (pytest 155, 14 in-Blender checks, 3270/3270 animatic frames).
-- **Remaining, in order:** 2 final look (bloom/grain/volumetrics via the `final` tier), 3 render final 1920x1080 + captions + audio (`cffudio` is empty: synth, cue sheet, mix needed), encode, 4 one contact sheet review, 5 outputs, 6 Pages + v1.0.0.
+- Review agents archived to `docs\archive\agents\` (not auto-invoked). The R2 discriminator replies in `qa\rounds\stage1-R2` are partial/unjudged and are not used.
+- Step 1 DONE: the pending R2 fixes (signs parallel to the image plane, blended plates in a PLATES/TEXT view-layer split, sign clearance of capsules/cards/private keys, trust links grow from nothing) were completed; build bug fixed (`view_layer.update()`), tag crossing falls back to focal-only. VERIFY GREEN (pytest 155, 14 in-Blender checks, 3270/3270 animatic frames).
+- **Remaining, in order:** 2 final look (bloom/grain/volumetrics via the `final` tier), 3 render final 1920x1080 + captions + audio (`cff\audio` is empty: synth, cue sheet, mix needed), encode, 4 one contact sheet review, 5 outputs, 6 Pages + v1.0.0.
 - **Next action:** Step 2: preview-render a few frames at the `final` tier to check the look and time per frame; then start the background final render.
 
 

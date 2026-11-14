@@ -127,6 +127,21 @@ def _cmd_calibrate(args: argparse.Namespace) -> int:
     return worst
 
 
+def _cmd_audio(_: argparse.Namespace) -> int:
+    from tools import film  # noqa: PLC0415
+
+    print(json.dumps(film.build_audio(), indent=2))
+    return 0
+
+
+def _cmd_encode(args: argparse.Namespace) -> int:
+    from tools import film  # noqa: PLC0415
+
+    film.encode(args.tier)
+    print(f"wrote {film.FINAL_MP4}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m tools")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -169,6 +184,13 @@ def main(argv: list[str] | None = None) -> int:
         ("legibility", _cmd_legibility, "planned-film legibility audit: must-read sign holds (L-06), captions clear of the focal subject (L-05)"),
     ):
         sub.add_parser(name, help=text).set_defaults(func=func)
+
+    p = sub.add_parser("audio", help="synthesise the cue mix and loudness-normalise it (output/audio/mix.wav)")
+    p.set_defaults(func=_cmd_audio)
+
+    p = sub.add_parser("encode", help="overlay signs and captions, mux audio, write Final/Preview MP4, poster, contact sheet, metadata")
+    p.add_argument("--tier", default="final", choices=["preview", "final"])
+    p.set_defaults(func=_cmd_encode)
 
     p = sub.add_parser("traceability", help="generate docs/TRACEABILITY.md")
     p.add_argument("--check", action="store_true", help="fail if stale or any ID is uncovered")

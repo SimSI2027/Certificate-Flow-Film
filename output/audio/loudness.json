@@ -1,0 +1,29 @@
+{
+  "first_pass": {
+    "input_i": "-21.49",
+    "input_tp": "-1.01",
+    "input_lra": "7.70",
+    "input_thresh": "-31.61",
+    "output_i": "-16.10",
+    "output_tp": "-1.00",
+    "output_lra": "5.00",
+    "output_thresh": "-26.17",
+    "normalization_type": "dynamic",
+    "target_offset": "0.10"
+  },
+  "second_pass": {
+    "input_i": "-21.49",
+    "input_tp": "-1.01",
+    "input_lra": "7.70",
+    "input_thresh": "-31.61",
+    "output_i": "-16.04",
+    "output_tp": "-1.00",
+    "output_lra": "5.00",
+    "output_thresh": "-26.11",
+    "normalization_type": "dynamic",
+    "target_offset": "0.04"
+  },
+  "ebur128_summary": "Summary:\n\n  Integrated loudness:\n    I:         -16.0 LUFS\n    Threshold: -26.1 LUFS\n\n  Loudness range:\n    LRA:         4.9 LU\n    Threshold: -36.0 LUFS\n    LRA low:   -18.7 LUFS\n    LRA high:  -13.8 LUFS\n\n  True peak:\n    Peak:       -3.7 dBFS\n[out#0/null @ 000000e368b910c0] video:0KiB audio:20438KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown\nsize=N/A time=00:01:49.00 bitrate=N/A speed= 435x elapsed=0:00:00.25",
+  "cues": 88,
+  "duration_s": 109.0
+}
