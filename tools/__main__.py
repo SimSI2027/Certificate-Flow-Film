@@ -139,6 +139,17 @@ def _cmd_calibrate(args: argparse.Namespace) -> int:
     return worst
 
 
+def _cmd_rerender_range(args: argparse.Namespace) -> int:
+    from tools import rerender_range  # noqa: PLC0415
+
+    if args.snapshot:
+        print(f"wrote {rerender_range.snapshot()}")
+        return 0
+    result = rerender_range.compute()
+    print(f"wrote {rerender_range.write(result)}: {result['count']} of {result['of']} frames, ranges {result['ranges']}")
+    return 0
+
+
 def _cmd_audio(_: argparse.Namespace) -> int:
     from tools import film  # noqa: PLC0415
 
@@ -152,6 +163,14 @@ def _cmd_encode(args: argparse.Namespace) -> int:
     film.encode(args.tier)
     print(f"wrote {film.FINAL_MP4}")
     return 0
+
+
+def _add_v4_commands(sub: argparse._SubParsersAction) -> None:  # type: ignore[type-arg]
+    p = sub.add_parser("rerender-range", help="beauty frames touched by a client-cluster change (V4): --snapshot before, then compute after")
+    p.add_argument("--snapshot", action="store_true", help="record the current camera plan and cluster bounds as the baseline")
+    p.set_defaults(func=_cmd_rerender_range)
+    p = sub.add_parser("audio", help="synthesise the cue mix and loudness-normalise it (output/audio/mix.wav)")
+    p.set_defaults(func=_cmd_audio)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -199,8 +218,7 @@ def main(argv: list[str] | None = None) -> int:
     ):
         sub.add_parser(name, help=text).set_defaults(func=func)
 
-    p = sub.add_parser("audio", help="synthesise the cue mix and loudness-normalise it (output/audio/mix.wav)")
-    p.set_defaults(func=_cmd_audio)
+    _add_v4_commands(sub)
 
     p = sub.add_parser("encode", help="overlay signs and captions, mux audio, write Final/Preview MP4, poster, contact sheet, metadata")
     p.add_argument("--tier", default="final", choices=["preview", "final"])
