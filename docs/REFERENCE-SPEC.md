@@ -64,7 +64,7 @@ A beat verdict of **WRONG** is a BLOCKER. A verdict of **MISLEADING** is at leas
 ## Architecture
 
 ### AR-01 Root CA
-`MALAWI Root CA` is an offline, standalone, non-domain-joined Root CA. Its certificate is self-signed. It is the **trust anchor**. It has no live network connection at any time in the film. On screen: a sealed gold vault on its own plinth, with no cables or network channels.
+`MALAWI Root CA` is an offline, standalone, non-domain-joined Root CA. Its certificate is self-signed. It is the **trust anchor**. It has no live network connection at any time in the film. On screen: an offline, air-gapped machine in a locked gold cage (the root vault) on its own plinth, with no cables or network channels.
 
 ### AR-02 What the Root CA signs
 The Root CA signs only:
@@ -273,7 +273,7 @@ The card returns and locks into the server **beside** the existing private key, 
 ### S5 — The hierarchy and the trust anchor (12 s)
 
 #### B-05.1 The trust anchor
-The camera cranes up to a sealed gold vault on its own plinth, **with no cables**: `MALAWI Root CA`. Its self-signed seal, a ring that closes on itself, is revealed by a sweep of light as an existing property.
+The camera cranes up to a locked gold cage on its own plinth, holding one offline, air-gapped machine, **with no cables**: `MALAWI Root CA`. Its self-signed seal, a ring that closes on itself, is revealed by a sweep of light as an existing property.
 - Accuracy constraint: the root is offline and performs no signing in the present-tense part of the film. The seal does not animate closed. The root's key module does not glow and its press does not move outside the flashback.
 
 #### B-05.2 Offline ceremony (flashback)

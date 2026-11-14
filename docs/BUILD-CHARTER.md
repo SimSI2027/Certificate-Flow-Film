@@ -621,14 +621,16 @@ Timings are named constants in seconds, converted to frames via FPS in `cff\stor
 
 ## 8. LOOK AND WORLD (Blender)
 
-- **World.** A stylized, low-to-mid-poly technical world built procedurally from primitives, modifiers, geometry nodes or materials, all in code:
-  - a dark navy / near-black environment with a subtle floor grid
-  - light-channel conduits in the floor
-  - restrained volumetric haze
+- **World.** Amendment V5-A1 (2026-11-14, owner request; `docs\GAN-LEDGER.md` "Session V5a"): hardware and environment move from grey-box to realistic. Every model is still built procedurally in code (`bpy`, `bmesh`, materials), at the detail of the V4 character:
+  - a dim datacenter: rows of racks, a raised floor of 0.6 m tiles with perforated airflow tiles, overhead cable trays, cold-aisle light fixtures, restrained volumetric haze
+  - real hardware: a thin generic laptop showing the RDP client; 1U/2U rack servers with bezels, drive bays, status LEDs and rear cabling for the RDP and web servers; the AD/DC node as a rack in steel blue; the issuing CAs as secured enclosures of CA server racks with an HSM-style key module, in cyan and violet; the Root CA as an offline, air-gapped machine in a locked gold cage on its own plinth, with no network cable
+  - light-channel conduits in the floor (the network channels and CA routes keep their meaning)
   - vignette
   - very restrained film grain
-  
-  "Windows-style" infrastructure must be generic. **No Microsoft, Windows or other vendor logos or trademarks.** No external models, textures, HDRIs or footage, with one exception: the user character (amendment V4-A2, 2026-11-14, owner request; `docs\GAN-LEDGER.md` "Session V4"). The user may be a realistic adult office worker generated with the MPFB add-on from CC0 MakeHuman assets, saved locally as `assets\character.blend` and loaded at build time (nothing is downloaded at render time). Skin and cloth stay slightly stylized. Each asset's licence is recorded in `LICENSES\` and `README.md`.
+
+  Identity and state colours keep their meaning (C-10): physical finishes are neutral palette tokens; role colours sit on accents and the glow channel. The PKI hard checks measure declared shell boxes (`cff\stage\hardware.py`), and a check proves every detailed mesh stays inside its box.
+
+  "Windows-style" infrastructure must be generic. **No Microsoft, Windows or other vendor logos or trademarks**, and no brand marks or text on any hardware. No external models, HDRIs or footage. Exceptions: the user character (amendment V4-A2, 2026-11-14, owner request; `docs\GAN-LEDGER.md` "Session V4"), a realistic adult office worker generated with the MPFB add-on from CC0 MakeHuman assets, saved locally as `assets\character.blend` and loaded at build time, with skin and cloth slightly stylized; and CC0 PBR textures from ambientCG or Poly Haven (amendment V5-A1), stored in `assets\textures\` with a manifest, kept small (`assets\` under about 150 MB). Nothing is downloaded at build or render time. Each asset's licence is recorded in `LICENSES\` and `README.md`.
 - **Camera.**
   - One rig: a dolly/crane path with a "look-at" target and an animated focus target.
   - Real lens values (24–50 mm).

@@ -480,3 +480,45 @@ The owner set this session before the V3 audit ran, so the V3 Final MP4 (`e50507
 - **Review:** 1 final contact sheet (image 4 of 10). MALAWI names on every sign and card shown, the character seated and typing, no blank or broken tiles. Not run: a discriminator round (lean mode); the audio was not heard (unchanged).
 
 Next: the V4 audit (Fable 5.2, High), prompt "Session V4 audit" in `docs\SESSION-PROMPTS.md`: a full audit of this Final MP4 and the release decision. Pages stays on v1.2.0 until then.
+
+## Session V5a (2026-11-14, `claude-opus-5-5`; lean mode, no subagents, 4 of 10 images): realistic hardware and world, no render
+
+The owner set V5a before the V4 audit ran. No final render was made (by instruction), so the Final MP4 on disk is still the V4 film (`f084da60…e205`) and does not show V5a. Pages stays on v1.2.0.
+
+### Amendment (Chief of Staff, owner request)
+
+- **V5-A1 Realistic hardware and environment (owner request, 2026-11-14).** Hardware and environment move from grey-box to realistic, at the detail of the V4 character. Everything is still modelled procedurally in `bpy`. CC0 PBR textures from ambientCG or Poly Haven are allowed in `assets\textures\` with a manifest; `assets\` stays under about 150 MB. No brand logos, marks or text on any hardware. Charter Section 8 "World" is rewritten to match. REFERENCE-SPEC changed in two sentences only: the Root CA "on screen" line (AR-01 context) and B-05.1 now say "an offline, air-gapped machine in a locked gold cage on its own plinth", still with no cables or network channels. Story, timing, captions, events and every PKI fact are unchanged.
+- **Frozen REFERENCE-SPEC SHA-256:** `90d698fc70be64c596500d903dfec64f7bf90b50f4730926404436ccf6c66fe8` (V5-A1; was `6a60d216…1a55`). The Stage 4 clean-round counter resets to 0.
+
+### What changed
+
+- **RDP and web servers:** a double-width rack cabinet with two 19-inch columns of 1U/2U devices (servers with drive caddies, storage, switch, patch panel, cable manager, UPS, blanks; seeded fills, `RACK_SEED`), rails with holes, vertical cable managers, a perforated rear door, a perforated hinged front door with handle and lock, and rear cable bundles into a floor grommet. The devices stand against the back wall (faces at y 0.33), behind every story artefact (the key container's back face is at 0.31).
+- **AD/DC:** a 42U rack 0.8 x 1.1 x 2.2 m (was a 3.4 m hexagonal column) with a closed perforated door; its frame and the DC's bezel stripe carry the steel-blue identity and glow. The two Enrollment Services rings now circle the rack body (z 1.55 and 1.95, 1.75 m across). The PKI HTTP point is a half-height rack.
+- **Issuing CAs:** the enclosure walls keep the dimmed cyan or violet (the glow channel); inside are panel seams, a tiled floor, steel pilasters and four CA server racks along the back wall. The key module is an HSM (steel body, keypad, card slot, display and tamper bands carrying the glow, identity LEDs).
+- **Root CA:** a locked gold cage (gold frame, steel mesh, padlocked door) on a CC0-concrete plinth with a gold band, holding one offline tower on a stand with no port in use and no cable. The dais is concrete with a tiled deck and a gold ring.
+- **Client:** a thin aluminium laptop (keyboard, trackpad, lid with bezel); the idle screen now lies on the lid (it stood 5 cm behind it) and shows the RDP client's connection dialog. An office desk and chair.
+- **Datacenter:** 688 rack instances in four row pairs outside the camera envelope, overhead ladder trays over the hot aisles with cable drops, 84 cold-aisle fixtures with a shadowless area light per aisle, a raised floor of 0.6 m tiles and 182 perforated tiles. Haze unchanged.
+- **Textures:** ambientCG `Metal009`, `SheetMetal001` and `Concrete034`, CC0, 7 maps, 3.0 MB (`assets\textures\textures.manifest.json`; README; `LICENSES\CC0-1.0.txt`). `assets\` is 8.6 MB.
+
+### Bounds and checks (definitions updated, checks not relaxed)
+
+- Shells (chassis, CA enclosure, root cage, plinth, dais, AD rack, PKI rack) declare their boxes in `cff\stage\hardware.py`. Key containment, root isolation and route integrity now measure these boxes, not the mesh bounding boxes. A new in-Blender check, `shell_bounds`, fails if any detailed mesh leaves its box. All 9 shells pass.
+- A new in-Blender check, `root_no_cables`: every cable in the scene is one of the 200 declared runs, none belongs to or hangs from a Root CA part, and every cable keeps 3.0 m from the root complex (nearest: 5.2 m). Pure tests: `tests\test_v5.py` (V5-LIC-01, V5-NET-01, V5-BND-01, V5-HW-01, V5-DC-01, V5-LOGO-01).
+
+### Found and fixed in this session
+
+| ID | Severity | Finding | Fix |
+|---|---|---|---|
+| V5-LEG-01 | MAJOR (fixed before commit) | With the screen on the lid, the "connect" sign moved 2.5 cm and its must-read hold fell to 43 of 45 frames. Found by the existing hold test. | The sign keeps its V4 world point (`layout.CONNECT_SIGN_POINT`). Test: `tests\test_v5.py::test_V5_LEG_01_screen_lies_on_the_laptop_lid_and_the_connect_sign_stays_put`. |
+| V5-PRV-01 | MINOR | Preview close-up: the offline machine was hidden behind the seal and the cage's mid rail. | The machine sits right of the door on a taller stand; lighter body, a full-height gold light bar, mid rail lowered, an inspection light under the roof. |
+| V5-PRV-02 | MINOR | The laptop lid rendered near-black (fully metallic in a dark hall). | Aluminium metallic 0.75, roughness 0.42. |
+
+### Review (preview tier)
+
+- 1 contact sheet and 3 close-up sheets (`qa\v5a\`; close-up sheet 1 shows the state before V5-PRV-01/02). The racks, devices, tiled floor, rows, trays and fixtures read as a real datacenter. The gold cage and HSM read clearly. Every sign and caption is in place.
+
+### Open for V5b (not done here)
+
+- No final-tier render. The final-tier luma gates (B-09.2 mean, L2-CIN-01 and V3-CIN-01 frames, cuts, flashback) are unmeasured for the new world. The verify MP4 gate still passes only because it measures the V4 MP4.
+- The camera plan changed where the AD is focal (its centre moved from 1.7 m to 1.1 m), and the AD labels moved with the rack top. The final render needs every beauty and sign frame.
+- Captions and audio are unchanged.
