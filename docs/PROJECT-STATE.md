@@ -1,6 +1,11 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-14 (Session V5a, `claude-opus-5-5`, High, no subagents)
+Updated: 2026-11-14 (Session V5b, `claude-opus-5-5`, High, no subagents)
+
+## SESSION V5b IN PROGRESS (2026-11-14, Opus 5.5, High, no subagents): iconography, polish, final render. NO release (Pages stays on v1.2.0)
+- Done and pushed: PKI iconography (`cff\stage\icons.py`, commit 1 of V5b), new in-Blender check `silhouettes` (C-11, 20 checks), `tests\test_v5b.py`, slot fix V5B-PIPE-01; preview gate (1 contact sheet, 4 transition strips; `qa\v5b\`) and its fix (card marks on both faces, c62cd3c). Verify was GREEN before the render.
+- **Running: the full final render** (background): `python -m tools render --tier final --scene BEAUTY --rebuild`, then `--scene SIGNS`. Resumable; progress in `renders\final\progress.json`, log `renders\v5b-final-render.log`. V4 frames moved to `renders\final-v4-beauty` and `renders\final-v4-signs`. Captions and audio kept (timing unchanged).
+- **If interrupted:** rerun the two render commands (without `--rebuild` if `renders\film.blend` is the final-tier V5b build), then `python -m tools encode`, `python -m tools verify`, a full-film luma scan of the beauty frames (steps <= 4.0 outside 1246/1247/1396/1397), one final contact sheet, ledger/approvals, PROJECT-STATE, commit, push, sync-check.
 
 ## SESSION V5a DONE (2026-11-14, Opus 5.5, High, no subagents, 4 of 10 images): realistic hardware and world, NO render, NO release (Pages stays on v1.2.0)
 - Amendment **V5-A1** (owner request): hardware and environment are now realistic. Charter Section 8 was rewritten. REFERENCE-SPEC root wording now reads "an offline, air-gapped machine in a locked gold cage on its own plinth". New spec hash `90d698fc70be64c596500d903dfec64f7bf90b50f4730926404436ccf6c66fe8`; Stage 4 clean-round counter reset to 0.
