@@ -200,7 +200,7 @@ def build_catalogue() -> tuple[StageObject, ...]:
         StageObject("CERT-WEB", Kind.CARD, R.ISSUING_CA2, lo.add(lo.WEB, lo.CERT_SLOT), size=lo.CARD_SIZE, variant="end_entity", on_stage=False, spec_ids=("F-07", "F-08")),
         StageObject("CERT-CA1-COPY-RDP", Kind.CARD, R.ISSUING_CA1, lo.add(lo.RDP, lo.INTERMEDIATE_SLOT), size=lo.CARD_SIZE, variant="copy", on_stage=False, spec_ids=("F-10",)),
         StageObject("CERT-CA2-COPY-WEB", Kind.CARD, R.ISSUING_CA2, lo.add(lo.WEB, lo.INTERMEDIATE_SLOT), size=lo.CARD_SIZE, variant="copy", on_stage=False, spec_ids=("F-10",)),
-        StageObject("AIA-RDP", Kind.AIA, R.NEUTRAL, lo.add(lo.STACK_CERT, (0.42, 0.0, 0.0)), size=(0.16, 0.05, 0.16), on_stage=False, spec_ids=("F-11",)),
+        StageObject("AIA-RDP", Kind.AIA, R.NEUTRAL, lo.add(lo.STACK_CERT, (0.42, 0.0, 0.0)), size=(0.24, 0.075, 0.24), on_stage=False, spec_ids=("F-11",)),  # v1.2 Item D: 1.5x for B-06.3 focal size
         StageObject("REQ-CA1", Kind.CAPSULE, R.REQUEST, lo.add(lo.CA1, lo.CA_MODULE), size=(lo.CAPSULE_LENGTH, lo.CAPSULE_RADIUS, lo.CAPSULE_RADIUS), owner=m.ISSUING_CA1, on_stage=False, variant="ca_request", spec_ids=("AR-02",)),
         StageObject("BAND-CA1", Kind.BAND, R.ISSUING_CA1, lo.add(lo.CA1, lo.CA_MODULE), size=(0.1, 0.12, 0.12), on_stage=False, spec_ids=("AR-02",)),
         _beam("BEAM-CA1", R.ISSUING_CA1, lo.add(lo.CA1, (lo.CA_MODULE[0], lo.CA_MODULE[1], lo.CA_MODULE[2] + 0.42)),

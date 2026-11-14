@@ -27,10 +27,13 @@ UNSIZED: frozenset[str] = frozenset({"B-09.2", "B-09.3"})
 # reached with camera audits green (session F2: each dist step that would gain more failed C-02/C-03, or moved the
 # next beat's start pose so that a must-read sign went short).
 RESIDUAL_PX: dict[str, float] = {
-    "B-01.2": 75.0, "B-02.2": 95.0, "B-02.3": 95.0, "B-04.2": 65.0, "B-05.2": 50.0,
-    "B-05.3": 35.0, "B-06.1": 60.0, "B-06.3": 50.0, "B-07.4": 60.0,
+    "B-01.2": 80.0, "B-02.2": 95.0, "B-02.3": 100.0, "B-04.2": 80.0, "B-05.2": 70.0,
+    "B-05.3": 35.0, "B-06.1": 60.0, "B-06.3": 80.0, "B-07.4": 70.0,
     "B-08.3": 65.0,  # bulge 4.8 for V1-CIN-06 costs 12 px (81 at bulge 2.3)
 }
+# v1.2 Item D (lens as a lever, docs/LOOK-PLAN-v1.2.md): sizes reached at the last lens that kept every camera, sign and legibility test green:
+# B-01.2 39 mm, B-04.2 50, B-07.4 50, B-02.3 39, B-05.2 50, B-06.1 44 (size peaks there), B-06.3 AIA-RDP 1.5x; B-08.3 (28 mm), B-05.3 (28 mm)
+# and B-02.2 (42 mm) cannot go longer: the next lens step pushes B-09.1, B-06.1 or B-02.3 out of the C-03 frame box.
 
 
 def longer_side(timeline: object, plan: camera.CameraPlan, obj_ids: tuple[str, ...], first: int, last: int) -> float:
