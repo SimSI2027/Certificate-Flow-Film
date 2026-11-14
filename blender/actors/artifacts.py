@@ -146,6 +146,20 @@ def card(bm: bmesh.types.BMesh, o: StageObject) -> None:
     marks = icons.card_marks(o.id)
     fold = hb * icons.CARD_FOLD_FRACTION  # the document's folded top-right corner
     p.prism(bm, [(-w / 2, bottom), (w / 2, bottom), (w / 2, top - fold), (w / 2 - fold, top), (-w / 2, top)], t)
+    body = set(bm.verts)
+    _card_marks(bm, o, w, t, h, hb, top, bottom, fold, marks)
+    # V5b preview gate: the client's trust store is seen from behind, so every mark is printed on both faces (mirrored through
+    # the card; the fold stays on the body's cut corner).
+    marks_verts = [v for v in bm.verts if v not in body]
+    geom = [*marks_verts, *{e for v in marks_verts for e in v.link_edges}, *{f for v in marks_verts for f in v.link_faces}]
+    for elem in bmesh.ops.duplicate(bm, geom=geom)["geom"]:
+        if isinstance(elem, bmesh.types.BMVert):
+            elem.co.y = -elem.co.y
+
+
+def _card_marks(bm: bmesh.types.BMesh, o: StageObject, w: float, t: float, h: float, hb: float, top: float, bottom: float, fold: float,
+                marks: frozenset[str]) -> None:
+    """Every mark of a card on its -Y face (``card`` mirrors them onto the +Y face)."""
     with p.slot(bm, s.ICON_INK):
         p.prism(bm, [(w / 2 - fold, top - fold), (w / 2, top - fold), (w / 2 - fold, top)], INK_DEPTH_M, (0.0, _front(t), 0.0))  # the fold
         header_x0 = -w * 0.2 if "ca_badge" in marks else -w * 0.42
