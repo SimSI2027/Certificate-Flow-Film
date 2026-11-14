@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.1.0 (2026-11-14, pre-release)
+## v1.1.0 (2026-11-14, current release)
 
 The audit-fix release. v1.0.0 was audited (`docs\AUDIT-v1.md`: 0 BLOCKER, 16 MAJOR, 10 MINOR); every finding except the look (V1-CIN-03) was fixed in sessions F1 and F2, the final tier was fully re-rendered, and session F3 re-checked each fix on the rendered film before this release. v1.1.0 is a pre-release because V1-CIN-03 is still open. v1.0.0 is superseded.
 

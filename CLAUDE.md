@@ -45,6 +45,9 @@ Never read, modify or depend on the Approach A project (`Certificate-Flow-Animat
 - GitHub Pages must stay in sync with `main`.
 - No release without rendered, inspected, discriminator-cleared assets. The project is complete only when everything in Charter 17 is true.
 
+## Release rule
+Release rule: after every session, push and verify sync (local HEAD = origin/main). The Pages demo always shows the newest AUDITED release. When an audit passes, publish that version as the public latest release (not a pre-release), update the README, CHANGELOG and Pages in the same session, and verify the live page.
+
 ## Session continuity
 Keep `docs\PROJECT-STATE.md` accurate enough for a brand-new session to resume from it alone. If context gets long: finish the current atomic step, update PROJECT-STATE with the exact next action, commit and push, record session number, model, effort and remaining steps, then tell the user to start a new session on the same model and effort with the Resume prompt in `docs\SESSION-PROMPTS.md`.
 Each session starts by checking the previous session's phases are APPROVED, and ends by setting `Next session` in PROJECT-STATE and giving a report of at most 10 lines (Charter 17).

@@ -2,7 +2,7 @@
 
 A 100–120 s, 1920x1080, 30 FPS film (Approach B) that explains an Active Directory Certificate Services PKI flow as one continuous camera move, with a single flashback, through a stylized 3D world. It is built with scripted Blender (`bpy`), rendered headless, and checked by automated hard checks; an adversarial review loop judged the story spec and the first animatic round only.
 
-> **Status: v1.1.0 pre-release.** It carries the fixes from the v1 audit (`docs\AUDIT-v1.md`) and passed a targeted re-audit on the rendered film. It is accurate and legible, but it is not yet the finished film: see "Known limitations" below and `CHANGELOG.md`. The automated checks in `python -m tools verify` are the quality gate. The look pass planned for v1.2 is in `docs\LOOK-PLAN-v1.2.md`.
+> **Status: v1.1.0 is the current release (the newest audited version).** It carries the fixes from the v1 audit (`docs\AUDIT-v1.md`) and passed a targeted re-audit on the rendered film. It is accurate and legible, but it is not yet the finished film: see "Known limitations" below and `CHANGELOG.md`. The automated checks in `python -m tools verify` are the quality gate. The look pass planned for v1.2 is in `docs\LOOK-PLAN-v1.2.md`.
 
 ## The film
 
@@ -51,5 +51,5 @@ Fallbacks currently in use (owner may replace them later): `DC01`, `CLIENT01`, `
 
 - Repository: https://github.com/SimSI2027/Certificate-Flow-Film
 - Demo (GitHub Pages): https://simsi2027.github.io/Certificate-Flow-Film/
-- Latest pre-release, v1.1.0: https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.1.0 (v1.0.0 is superseded)
+- Latest release, v1.1.0 (current): https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.1.0 (v1.0.0 is superseded)
 - Related: [Certificate-Flow-Lab](https://github.com/SimSI2027/Certificate-Flow-Lab) ([Pages](https://simsi2027.github.io/Certificate-Flow-Lab/)). Approach A (`Certificate-Flow-Animation`) was not found under SimSI2027 (HTTP 404), so it is not linked.
