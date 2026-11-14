@@ -1,0 +1,53 @@
+{
+  "purpose": "V5a realistic hardware (amendment V5-A1): CC0 PBR maps box-projected on the procedural hardware (blender/finishes.py)",
+  "source": "ambientCG",
+  "licence": "CC0-1.0",
+  "licence_text": "LICENSES/CC0-1.0.txt",
+  "licence_page": "https://docs.ambientcg.com/license/",
+  "licence_statement": "Creative Commons CC0 1.0 Universal License (quoted from the licence page; its suggested credit line: 'Created using <asset name> from ambientCG.com, licensed under the Creative Commons CC0 1.0 Universal License.')",
+  "credit": "Created using Metal009, SheetMetal001 and Concrete034 from ambientCG.com, licensed under the Creative Commons CC0 1.0 Universal License.",
+  "fetched": "2026-11-14",
+  "note": "Only the maps the film uses are kept (1K JPG). Tangent-space normal maps were dropped: the meshes have no UVs, so relief comes from a bump of the roughness or albedo map.",
+  "assets": [
+    {
+      "id": "Metal009",
+      "use": "brushed",
+      "what": "brushed steel: laptop shell (albedo luminance, roughness, bump)",
+      "page": "https://ambientcg.com/view?id=Metal009",
+      "download": "https://ambientcg.com/get?file=Metal009_1K-JPG.zip",
+      "zip_sha256": "1b1970219b40fe707e7194b28702f1a65b0d227bbea56da69dfbc8d8b5cfcb5e",
+      "licence": "CC0-1.0",
+      "files": [
+        {"path": "assets/textures/Metal009/Metal009_1K-JPG_Color.jpg", "sha256": "e066e240ad0eaab6a73fb0f40fa7caa94365160770331babc91de2e8ce6a986f", "bytes": 616678},
+        {"path": "assets/textures/Metal009/Metal009_1K-JPG_Roughness.jpg", "sha256": "6d06dfe8c240d3b6f33030740110284245bd8aefb2e10e8eb0c563444d9c0c5b", "bytes": 486233}
+      ]
+    },
+    {
+      "id": "SheetMetal001",
+      "use": "perforated",
+      "what": "perforated sheet steel: rack doors (opacity cuts the holes) and perforated floor tiles",
+      "page": "https://ambientcg.com/view?id=SheetMetal001",
+      "download": "https://ambientcg.com/get?file=SheetMetal001_1K-JPG.zip",
+      "zip_sha256": "24e323c6fa89b433433afdee6c1621c0384afb8de15c3a179fed25f5810d5bfc",
+      "licence": "CC0-1.0",
+      "files": [
+        {"path": "assets/textures/SheetMetal001/SheetMetal001_1K-JPG_Color.jpg", "sha256": "ca04ad068f9d1c83170eeb58f7467fc55a0143bb9057f6fee283d1e2e11f204a", "bytes": 519623},
+        {"path": "assets/textures/SheetMetal001/SheetMetal001_1K-JPG_Opacity.jpg", "sha256": "b4992733c084be24d923f6b908e2d2e9146a645c4b9c35445c06bce4962a4efe", "bytes": 414441},
+        {"path": "assets/textures/SheetMetal001/SheetMetal001_1K-JPG_Roughness.jpg", "sha256": "afc008b0f6b04fd6615af80750b0666904dba269053f35dd1544592ec7aad6de", "bytes": 570198}
+      ]
+    },
+    {
+      "id": "Concrete034",
+      "use": "concrete",
+      "what": "smooth cast concrete: the Root CA plinth and dais",
+      "page": "https://ambientcg.com/view?id=Concrete034",
+      "download": "https://ambientcg.com/get?file=Concrete034_1K-JPG.zip",
+      "zip_sha256": "5839d284d94ffb8d2a56df742ec522b13dd311c52dbd42b8fd33f0409ceedb81",
+      "licence": "CC0-1.0",
+      "files": [
+        {"path": "assets/textures/Concrete034/Concrete034_1K-JPG_Color.jpg", "sha256": "8ceb9186d990b31fce785e06fdc6974c160f1d27c43f6160266f164deba713aa", "bytes": 269501},
+        {"path": "assets/textures/Concrete034/Concrete034_1K-JPG_Roughness.jpg", "sha256": "a4a9e39857a19afd23a778e5abf44fcdf6bd7f93918f1cf6878b41933e553511", "bytes": 217708}
+      ]
+    }
+  ]
+}
