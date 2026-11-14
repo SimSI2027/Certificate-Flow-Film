@@ -142,7 +142,7 @@ SHOTS: tuple[Shot, ...] = (
     Shot("same-root", "B-08.3", ("CERT-CA2", "ROOT_CA"), -32, 18, 26.22, 28, 4.0, follow=0.35, bulge=4.8, focus=("CERT-CA2",)),
     # S9
     Shot("browser-arc", "B-09.1", (STACK_MID,), -80, 8, 6.0, 35, 2.8, follow=0.4, bulge=5.5),  # V1-PKI-04
-    Shot("hero", "B-09.2", (WORLD_CENTRE,), -45, 30, 42.0, 24, 5.6, follow=0.45, focus=("ROOT_CA",)),  # V1-CIN-02
+    Shot("hero", "B-09.2", (WORLD_CENTRE,), -45, 30, 42.0, 24, 5.6, follow=0.45, focus=("ROOT_CA",)),  # V1-CIN-02 (v1.2 tried 0.3/0.2/0.1: 62 inside-frames each against 63 at 0.45, and camera tests failed)
     Shot("close", "B-09.3", (WORLD_CENTRE,), -41, 32, 44.0, 24, 5.6, focus=("ROOT_CA",)),
 )
 
