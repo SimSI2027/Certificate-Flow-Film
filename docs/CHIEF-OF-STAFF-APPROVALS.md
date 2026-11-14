@@ -165,3 +165,14 @@ Lean mode (no subagents, no discriminator round, no tag, no release). Details: `
 - **Tests run (real results):** `python -m tools verify` VERIFY GREEN on the V4 Final MP4: ruff clean; mypy --strict 72 files; pytest 213 passed (new `tests\test_v4.py`: V4-REN-01, V4-CHR-01); traceability current; palette 87/0; planned-film audits 0 hard; in-Blender 17 of 17 (new `character_seated`); both tiers 3270/3270, 0 blank; final MP4 on spec, true peak −1.2 dBFS; cut steps 0.4 / 0.1; MP4 luma gate PASS. Re-render seams measured smooth.
 - **Final MP4:** SHA-256 `f084da6043c8162f379f2c1c62e43bebaad53f40c99c4c6f34973ee571fee205`, 70.0 MB. Reviewed: preview gate (2 stills, 1 typing strip) and 1 final contact sheet (accepted). 4 of 10 images used.
 - **Decision: V4 PASS DELIVERED, release held for the V4 audit.** First attempt at this gate, so not approved as a release. Pages stays on v1.2.0.
+
+## Realistic hardware and world, session V5a (Opus 5.5, 2026-11-14)
+
+Lean mode (no subagents, no discriminator round, no final render by instruction, no tag, no release). Details: `docs\GAN-LEDGER.md` "Session V5a".
+
+- **Pre-flight:** previous phase V4 was "pass delivered, release held for the V4 audit". The owner ran V5a before that audit, so the V4 MP4 is still unaudited. `python -m tools verify` was GREEN (pytest 213, 17 in-Blender checks), and local HEAD == origin/main (22cc7c5), before any change.
+- **Scope:** amendment V5-A1 (charter Section 8, REFERENCE-SPEC root wording, new hash `90d698fc…6fe8`, Stage 4 counter reset). Realistic, procedural hardware for every actor and set, plus the datacenter. Three CC0 ambientCG textures. Declared shell bounds behind the PKI checks. Two new in-Blender checks and `tests\test_v5.py`.
+- **Problems found and corrections:** V5-LEG-01 (MAJOR; "connect" sign hold 43 of 45 frames after the screen moved onto the lid), fixed and tested. V5-PRV-01 (root machine hidden) and V5-PRV-02 (laptop lid near-black), both fixed after preview close-ups.
+- **Tests run (real results):** `python -m tools verify` VERIFY GREEN after the changes: ruff clean; mypy --strict 74 files; pytest 224 passed; traceability current; palette 87/0; planned-film audits 0 hard (1 advisory); in-Blender **19** of 19 (new: `shell_bounds` 9 shells, `root_no_cables` 200 cables, nearest 5.2 m from the root complex); both tiers 3270/3270; the V4 MP4 still on spec and its luma gate PASS (it does not show V5a).
+- **Review:** preview tier, 1 contact sheet and 3 close-up sheets (4 of 10 images), saved in `qa\v5a\`.
+- **Decision: V5a DELIVERED at the preview tier, not approved for a render or release.** This is the first attempt, so nothing is auto-approved. The final-tier look gate and the full final render are V5b.

@@ -1,6 +1,21 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-14 (Session V4, `claude-opus-5-5`, no subagents)
+Updated: 2026-11-14 (Session V5a, `claude-opus-5-5`, High, no subagents)
+
+## SESSION V5a DONE (2026-11-14, Opus 5.5, High, no subagents, 4 of 10 images): realistic hardware and world, NO render, NO release (Pages stays on v1.2.0)
+- Amendment **V5-A1** (owner request): hardware and environment are now realistic. Charter Section 8 was rewritten. REFERENCE-SPEC root wording now reads "an offline, air-gapped machine in a locked gold cage on its own plinth". New spec hash `90d698fc70be64c596500d903dfec64f7bf90b50f4730926404436ccf6c66fe8`; Stage 4 clean-round counter reset to 0.
+- Built (procedural `bpy`; new modules `cff\stage\hardware.py`, `blender\actors\hardware.py`, `blender\finishes.py`, `blender\datacenter.py`):
+  - RDP and web servers: double-width racks with 1U/2U devices, a perforated door and rear cabling.
+  - AD: a 2.2 m steel-blue rack (was a 3.4 m column), with the rings moved round its body.
+  - CA enclosures: CA racks and an HSM key module.
+  - Root CA: a gold cage with an offline tower, no cables, on a concrete plinth.
+  - Client: a thin laptop with its screen on the lid showing the RDP client dialog, plus a desk and an office chair.
+  - Datacenter: 688 row racks, trays, aisle fixtures, raised-floor tiles and perforated tiles.
+- Textures: ambientCG CC0 `Metal009`, `SheetMetal001`, `Concrete034` (3.0 MB; `assets\textures\textures.manifest.json`). `assets\` total is 8.6 MB.
+- PKI checks now measure declared shell boxes. New in-Blender checks: `shell_bounds` and `root_no_cables`. New `tests\test_v5.py`. `python -m tools verify` VERIFY GREEN: pytest 224, **19** in-Blender checks, both tiers 3270/3270. The MP4 checks still measure the **V4** Final MP4 `f084da60…e205`, which does not show V5a.
+- Commits: 3323689 (amendment), e93b02c (textures), 58450b3 (hardware, checks, tests), 31a9840 (review images, V5b prompt), plus this close-out. Ledger entry: "Session V5a".
+- Local only (gitignored): `renders\preview` now holds V5a preview frames; the V4-era preview frames were moved to `renders\preview-v4`. `renders\film.blend` is the V5a build.
+- **Next session: V5b on Opus 5.5, High.** Use the "Session V5b" prompt in `docs\SESSION-PROMPTS.md` (a draft scope; the owner may replace it). Steps: final-tier look gate for the new world (B-09.2 mean ≥ 50, L2-CIN-01 and V3-CIN-01 frames, cuts, flashback, shadow pool), then a full beauty and sign re-render (the AD camera and labels changed), encode and verify. The audit and release decision come after V5b.
 
 ## SESSION V4 DONE (2026-11-14, Opus 5.5, no subagents, 4 of 10 images) — MALAWI rename + realistic user character, NO release (Pages stays on v1.2.0)
 - **Final MP4 SHA-256 `f084da6043c8162f379f2c1c62e43bebaad53f40c99c4c6f34973ee571fee205`**, 70.0 MB (gitignored release asset). Poster, contact sheet and metadata in `output\` are committed; `site\` is untouched (still v1.2.0, earlier lab name).
