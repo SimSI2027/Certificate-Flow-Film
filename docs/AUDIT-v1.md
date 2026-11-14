@@ -83,6 +83,41 @@ Outcome in one line: **0 BLOCKER, 16 MAJOR, 10 MINOR. v1.0.0 stays a pre-release
 
 All other findings (V1-LEG-02, -03, V1-PKI-04, -05, -06, V1-CIN-01, -02, -03, -05, -06, -07, V1-COL-01, V1-AUD-01, -02) are unchanged and belong to F2.
 
+### F3 targeted re-audit (2026-11-13, Opus 5.5; 1 image used) — RESULT: GATE FAILED, v1.1.0 NOT released
+
+**Session F2 never ran.** HEAD is the F1 close-out (e2c9269). `output\Certificate-Flow-Film-Final.mp4` is dated 20:10 and the final beauty/sign passes are dated 19:41/20:01. The F1 fixes were committed at 21:12, so the film on disk and in the release is the v1.0.0 film. No F1 frame-level fix can be seen in it.
+
+Re-run evidence:
+- `python -m tools verify`: VERIFY GREEN (ruff, pytest 170, 14 in-Blender checks, animatic and final tiers 3270/3270, 0 blank). The green result relies on the waiver `MP4_PENDING_RERENDER = True`: "final MP4: PENDING F2 re-render: 2 known v1.0.0 problem(s)" and "cut frames: ... blends (14.3, 30.1)". Without the waiver verify would be RED. `tests\test_audit_v1.py`: 12 passed.
+- ffprobe Final MP4: H.264 High **level 5.0**, 1920x1080, 30/1, **color_transfer=iec61966-2-1**; AAC LC 48 kHz stereo; 109.000 s.
+- One 3x3 strip of the Final MP4 (f450, f600, f1246, f1260, f1290, f1396, f1560, f1620, f2100). A whole-film contact sheet was not made: the film is byte-for-byte the v1.0.0 film, so it cannot show F1 regressions.
+
+| ID | Sev | Checked at | F3 result | Evidence |
+|---|---|---|---|---|
+| V1-LEG-01 | MAJOR | 52.0 s, 54.0 s | **FAIL** | f1560/f1620: `CLIENT01`, `rdp01.1sn0s.lab` and `Remote Desktop Authentication` are smeared and unreadable. The code fix is in, but no re-render was done. |
+| V1-CIN-04 | MAJOR | f1246, f1396 | **FAIL** | The verify cut-frame step measures steps of 14.3 and 30.1 (blended). f1246 shows a faded caption over a cross-blend. |
+| V1-PIPE-01 | MAJOR | gate | **FAIL (in effect)** | The checks exist but are waived by `MP4_PENDING_RERENDER = True`, so the gate still passes a film with known defects. |
+| V1-PKI-01 | MAJOR | 53–56.6 s | **FAIL (not rendered)** | Code fix is not in the film. |
+| V1-PKI-02 | MAJOR | 41.5–44.3 s | **FAIL** | f1246 (41.5 s) and f1290 (43.0 s) have no "Earlier: offline signing ceremony" marker. It shows at f1260 only. |
+| V1-PKI-03 | MAJOR | 15.0 s, 20.0 s | **FAIL** | f450/f600 have no private-key or public-key tag. "The private key stays on the server" still sits over the unnamed objects. |
+| V1-LEG-04 | MAJOR | sign-heavy moves | **FAIL** | Not rendered. The residual (CA check lists, `CROSSING_LIMIT` 0.045 → 0.02) is still open. |
+| V1-DOC-01 | MAJOR | live Pages | **PASS** | The live `<track>` has no `default` and matches `site\index.html`. Pages run 43545038707 succeeded. |
+| V1-ENC-01 | MINOR | file | **FAIL** | Level 5.0 and sRGB transfer are still in the file. |
+| V1-DOC-02 | MINOR | README/Pages | PASS | The pre-release wording is live. |
+| V1-DOC-03 | MINOR | PROJECT-STATE | PASS | |
+| V1-LEG-05 | MINOR | 42.0/57.4/83.7 s | FAIL | NEEDS-F2 (still open). |
+
+Also open and untouched, MAJOR: V1-LEG-02, -03, V1-PKI-04, -05, V1-CIN-01, -02, -05 (and V1-CIN-03, deferred).
+
+**Decision (Chief of Staff): stop.** 7 MAJOR fixed items fail and 7 MAJOR are untouched. No tag and no v1.1.0 release were made. README, CHANGELOG and Pages were not changed. V1-CIN-03 is not yet recorded as a v2.0 limitation; that is done at release.
+
+**Exact fix instructions: run session F2 as written in Section 7. Model: Opus 5.5, High effort (it needs judgement on rendered frames; Sonnet 5.5 High is the fallback).**
+1. Camera: V1-CIN-01, -02, -05, V1-PKI-04, -05, V1-CIN-06. Then signs: V1-LEG-03 (fixed list places, lines appear when their check starts), then V1-LEG-05 (raise the `LBL-AIA-1` hold once LEG-03 removes the collision), then V1-LEG-02. Then the small ones: V1-PKI-06, V1-CIN-07, V1-COL-01, V1-AUD-01, -02. Lower `CROSSING_LIMIT` to 0.02 in `tests\test_gan_findings_stage1.py`.
+2. Run `python -m tools render animatic --rebuild`, then review 1 contact sheet and strips at 54, 62 and 100 s.
+3. Delete `renders\final\beauty`, `renders\final\signs` and `renders\final\captions`. Run `python -m tools render --tier final` in background chunks of about 300 frames, then `python -m tools audio`, `python -m tools encode` and `python scripts\build_site.py`.
+4. Set `tools\verify.py` `MP4_PENDING_RERENDER = False`. `python -m tools verify` must be GREEN with no PENDING lines: the cut-frame steps must not be blends, ffprobe must show level ≤ 4.1 and transfer `bt709`.
+5. Then run session F3 again (this targeted re-audit) before any release.
+
 ## 4. Findings in detail
 
 ### V1-LEG-01 (MAJOR) Signs are motion-blurred in the final tier

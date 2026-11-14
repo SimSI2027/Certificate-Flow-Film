@@ -2,7 +2,12 @@
 
 Updated: 2026-11-13 (v1 AUDIT session, read-only, model `claude-fable-5-2`; before it: LEAN FINISH MODE, Session 5+, Sonnet 5.5 High)
 
-## Session F1 DONE (2026-11-13, Sonnet 5.5 medium) — NEXT: session F2 (Opus 5.5, High)
+## Session F3 (2026-11-13, Opus 5.5) — GATE FAILED, no release. NEXT: session F2 (Opus 5.5, High), then F3 again
+- F3 found that F2 never ran: the Final MP4 and the final passes predate the F1 fixes, so the shipped film is still v1.0.0. Per-item results and the exact fix list are in `docs\AUDIT-v1.md` under "F3 targeted re-audit". 7 fixed MAJORs FAIL in the film (LEG-01, CIN-04, PIPE-01 waived, PKI-01/02/03, LEG-04); only V1-DOC-01 PASSES (no default track on the live page). Verify is GREEN only because of `MP4_PENDING_RERENDER = True`.
+- No tag, release, README, CHANGELOG or Pages change was made. v1.0.0 stays a pre-release.
+- **Next action:** run session F2 exactly as described below and in AUDIT-v1 Section 7. After that, run F3 again (re-audit, then release v1.1.0 as a pre-release with Final, Preview, poster, contact sheet and captions.vtt; then check the SHA-256 round-trip).
+
+## Session F1 DONE (2026-11-13, Sonnet 5.5 medium) — F2 still pending
 - F1 fixes are in commits 77b8119, 50fe77e, d7544fc; per-finding status is in `docs\AUDIT-v1.md` ("F1 status"). `python -m tools verify`: VERIFY GREEN (pytest 170, 14 in-Blender checks, final tier 3270/3270). No render was done; the Final MP4 on disk is still the v1.0.0 file; release and tags untouched.
 - **F2 must:** do everything marked NEEDS-F2 or not yet touched (V1-LEG-05 and LEG-02/03, PKI-04/05/06, CIN-01/02/05/06/07, COL-01, AUD-01/02, CIN-03 step 1, the LEG-04 residual); lower `CROSSING_LIMIT` in `tests\test_gan_findings_stage1.py` to 0.02; after the single final re-render + encode set `tools.verify.MP4_PENDING_RERENDER = False` (then `verify` must be green with the real MP4 checks); delete `renders\final\signs` and `renders\final\beauty` (and captions if needed) before rendering; rebuild the site; confirm the live Pages page has no default caption track.
 - Older stale material (Sessions 3-4) is in `docs\archive\PROJECT-STATE-sessions-3-4.md`.
