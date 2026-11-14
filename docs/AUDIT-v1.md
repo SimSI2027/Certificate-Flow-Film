@@ -75,8 +75,8 @@ Outcome in one line: **0 BLOCKER, 16 MAJOR, 10 MINOR. v1.0.0 stays a pre-release
 | V1-PKI-01 | FIXED (50fe77e) | Trust-store cradle gold from frame 1; shimmer returns to rest. |
 | V1-PKI-02 | FIXED (50fe77e) | `LBL-FLASHBACK` fixed at (960, 975) with `Placement.screen_px`. |
 | V1-PKI-03 | FIXED (50fe77e) | Four key tags added. Deviation (the audit's offsets overlapped): RDP tags sit at x ∓0.45 m (`PRIV` −0.45, `PUB` +0.45), the RDP public-key window opens at 0.1 s (not 0.4 s, or fewer than 45 frames can be fully shown), web private-key tag at z −0.34. |
-| V1-LEG-04 | FIXED for plates (50fe77e); residual NEEDS-F2 | `PLATE_BEATS` table and `_clear_of` on every family are in. Crossing ratio now 297/7120 = 4.2%, not 2%: 258 frames are the CA check lists and the CA 2 note (f932–990, f2503–2565), which need V1-LEG-03's fixed list places. `CROSSING_LIMIT` is 0.045; F2 must lower it to 0.02. `test_V1_LEG_04_at_most_10_signs` passes. |
-| V1-LEG-05 | NEEDS-F2 | A longer hold for the two AIA tags collides with the first line of the RDP check list (f1783+), so `LBL-AIA-1` stays at 1.5 s. It resolves with V1-LEG-03 (lines appear when their check starts). Change reverted. |
+| V1-LEG-04 | FIXED for plates (50fe77e); residual FIXED in F2 (107159a, see "F2 status") | `PLATE_BEATS` table and `_clear_of` on every family are in. Crossing ratio now 297/7120 = 4.2%, not 2%: 258 frames are the CA check lists and the CA 2 note (f932–990, f2503–2565), which need V1-LEG-03's fixed list places. `CROSSING_LIMIT` is 0.045; F2 must lower it to 0.02. `test_V1_LEG_04_at_most_10_signs` passes. |
+| V1-LEG-05 | FIXED in F2 (107159a, see "F2 status") | A longer hold for the two AIA tags collides with the first line of the RDP check list (f1783+), so `LBL-AIA-1` stays at 1.5 s. It resolves with V1-LEG-03 (lines appear when their check starts). Change reverted. |
 | V1-DOC-01 | FIXED (d7544fc) | `default` removed from the `<track>`; `site\index.html` rebuilt. **The live page changes only when this is pushed and Pages deploys; confirm once after the F2 deploy.** |
 | V1-DOC-02 | FIXED (d7544fc) | README, Pages and CHANGELOG wording. The README no longer says "released". |
 | V1-DOC-03 | FIXED (d7544fc) | Stale sections moved to `docs\archive\PROJECT-STATE-sessions-3-4.md`; Git, URLs, Toolchain and Names kept. |
@@ -153,6 +153,38 @@ Still open and untouched, MAJOR: V1-LEG-02, V1-LEG-03, V1-PKI-04, V1-PKI-05, V1-
 **Why F3 ran twice without F2:** the repository had no ready-to-paste F2 prompt (`docs\SESSION-PROMPTS.md` ended at Session 9). One has been added there as "Session F2". **Model needed: Opus 5.5, High effort.** The fix list is unchanged from the first run (steps 1–5 above), with one correction to the commands: the render CLI takes `--tier`, so use `python -m tools render --tier animatic --rebuild` and `python -m tools render --tier final --rebuild` (the form `tools render animatic` is not accepted).
 
 **Running F3 a third time before F2 has finished will give the same result.** F2 is finished when all four are true: the Final MP4 is newer than the last source commit; its SHA-256 is not `5470c46c…f193a`; `MP4_PENDING_RERENDER = False`; `python -m tools verify` prints no PENDING line.
+
+### F2 status (session F2, 2026-11-13/14, Opus 5.5 High; no subagents)
+
+"FIXED" = fixed in code with a regression test named after the finding (`tests\test_audit_v1.py`, `tests\test_audio.py`), `python -m tools verify` green, and the final tier re-rendered and re-encoded from that code. Residuals (a target not fully reached, with the best value that keeps every camera audit green) are recorded in `docs\GAN-LEDGER.md` "Session F2"; the tests hold the achieved values.
+
+| ID | Status | Commit | Note |
+|---|---|---|---|
+| V1-CIN-01 | FIXED (residuals) | 242c363, 13a7cde | `python -m tools focal`; B-04.5 now meets target; 10 beats keep recorded residuals (each further step failed C-02/C-03 or a must-read sign) |
+| V1-CIN-02 | FIXED (residuals) | 242c363, F2 close-out | hero from the south-east; user, laptop, both servers, both CAs and root fully in frame from ~102 s and through B-09.3; root 112 px; CAP-S9a top band; step 4 applied (channels and trust paths at GLOW_PEAK) but B-09.2 YAVG is 38.4, not 50 (residual: more light belongs to V1-CIN-03) |
+| V1-CIN-05 | FIXED (residual) | 242c363 | green-glide 8.5 m at 50 mm: session window 188 px (target 220); no sign over it |
+| V1-PKI-04 | FIXED | 242c363 | HS-RDP 85 px, HS-WEB 55 px |
+| V1-PKI-05 | FIXED | 242c363 | CRL scrolls 78 / 73 px, docked beside their own cards |
+| V1-CIN-06 | FIXED (residual) | 13a7cde | luma step at 90 s 12.2 -> 4.2 on the animatic (target 4.0), 7.7 on the Final MP4 (bloom) |
+| V1-LEG-03 | FIXED | 107159a, 60a60b3 | one window per check line; one fixed place per list; own tick per line; revocation pending amber until E-06.5d; 3D ticks not rendered |
+| V1-LEG-05 | FIXED | 107159a | AIA tags 81 / 78 full frames (>= 63); CA 2 note 66 |
+| V1-LEG-02 | FIXED | 107159a | 0 sign jumps > 96 px, 0 runs < 24 frames (v1.0.0: 51 jumps, 29 flashes) |
+| V1-LEG-04 (residual) | FIXED | 107159a | crossing 1.55% of sign frames; `CROSSING_LIMIT` 0.02 |
+| V1-PKI-06 | FIXED | 60a60b3 | root seal 1.2 m (>= 110 px in B-05.1); self-seal ring radius x2 |
+| V1-CIN-07 | FIXED | 60a60b3 | seal tube 4.5 cm; the closed seal peaks and settles |
+| V1-COL-01 | FIXED | 60a60b3 | emission 1.8, trust links 1.2 |
+| V1-AUD-01 | FIXED | 60a60b3 | stereo: cues panned by source actor |
+| V1-AUD-02 | FIXED | 60a60b3, 13a7cde | seal cue +0.5 s; cues -3 dB; -15.9 LUFS, TP -1.2 dBFS (loudnorm still dynamic: accepted by the finding) |
+| V1-CIN-03 step 1 | FIXED (step 1 only) | 60a60b3 | issuing-CA vaults at 0.45 value; the look rework stays deferred to v2.0 |
+| V1-LEG-01, V1-CIN-04, V1-PIPE-01, V1-ENC-01, V1-PKI-01, V1-PKI-02, V1-PKI-03 | FIXED (F1 code, now rendered) | F1 + F2 final render | see "F2 final render" below |
+
+#### F2 final render (2026-11-14)
+
+- Final tier re-rendered from the F2 code after deleting `renders\final\{beauty,signs,captions}`: 3270 beauty, 2773 sign, 1933 caption frames. B-09.2/B-09.3 beauty frames (f2941-3270) re-rendered once more after the V1-CIN-02 step 4 glow change. Audio rebuilt (-15.9 LUFS, TP -1.2 dBFS), encoded, site rebuilt.
+- **Final MP4 SHA-256 `2b56cee7b030528d6bf21cf864c74ced521cbc9c18ba170e7229704fd9d7f78e`** (v1.0.0: `5470c46c…f193a`). ffprobe: h264 High, level 41, 1920x1080, 3270 frames, color_primaries/transfer/space bt709, range tv; AAC 48 kHz stereo; 109.000 s.
+- `tools.verify.MP4_PENDING_RERENDER = False`. `python -m tools verify`: VERIFY GREEN with no PENDING line (pytest 189, 14 in-Blender checks, animatic and final tiers 3270/3270, final MP4 matches the delivery spec, cut-frame luma steps 0.4 and 0.0; v1.0.0 14.3 and 30.1).
+- Per-frame luma on the MP4 (Appendix A.4): film mean 50.3; steps > 4.0 outside the cuts at f746 5.6, f1376 4.6, f2431 6.4, f2709 7.7; B-09.2 mean 38.4. Both recorded as residuals in `docs\GAN-LEDGER.md` "Session F2".
+- Inspected: the final contact sheet (every beat lit, captions and signs placed, no blank frame); a cut strip f1245-1247 / f1395-1397 (each cut frame is one clean shot, no double exposure); a sign strip f1625-1645 / f1955-1975 (no motion blur on any sign; the RDP check list holds one place with its own ticks, revocation amber then green); the poster (hero topology with root, both CAs, both servers; the user sits at the left edge, per the V1-CIN-02 residual).
 
 ## 4. Findings in detail
 

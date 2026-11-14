@@ -1,14 +1,18 @@
 ﻿# PROJECT STATE
 
-Updated: 2026-11-13 22:20 (F3 second run, model `claude-fable-5-2`, High effort; before it: F3 first run, Opus 5.5)
+Updated: 2026-11-14 (Session F2, Opus 5.5, High effort, no subagents, 8 images)
 
-## SESSION F2 IN PROGRESS (2026-11-13, Opus 5.5 High)
-- Steps 1-2 DONE (all code fixes): commits 242c363 (camera), 107159a (signs), 60a60b3 (small fixes). Full `python -m tools verify` green before the renders (pytest 187, 14 in-Blender checks). Residuals in `docs\GAN-LEDGER.md` "Session F2".
-- Step 3 DONE: animatic re-rendered and reviewed (contact sheet + strips 54/62/100 s); V1-CIN-06 bulge fix 13a7cde. Audio rebuilt (-15.9 LUFS, TP -1.2 dBFS).
-- Step 4 IN PROGRESS: old final passes deleted; `python -m tools render --tier final --rebuild` started 2026-11-14 (resumable 300-frame chunks, skips frames on disk).
-- If interrupted: re-run the same render command (it resumes), then `python -m tools encode`, `python scripts\build_site.py`, set `tools\verify.py` `MP4_PENDING_RERENDER = False`, `python -m tools verify`, review, commit, sync-check (Session F2 prompt steps 4-7).
+## NEXT SESSION: F3 (Opus 5.5, High). Session F3 is defined in `docs\AUDIT-v1.md` Section 7 (`docs\SESSION-PROMPTS.md` has no separate F3 prompt): targeted re-audit of the re-rendered film, then (if the gate passes) release v1.1.0 as a pre-release.
 
-## (superseded) NEXT SESSION: F2 (Opus 5.5, High). Paste the "Session F2" prompt from `docs\SESSION-PROMPTS.md`. Do NOT run F3 before F2 is finished.
+## Session F2 DONE (2026-11-13/14, Opus 5.5 High) — no tag, no release
+- Code: 242c363 (camera), 107159a (signs), 60a60b3 (small fixes), 13a7cde (V1-CIN-06 bulge, loudnorm TP), close-out commit (V1-CIN-02 step 4 glow; `MP4_PENDING_RERENDER = False`). Per-finding status: `docs\AUDIT-v1.md` "F2 status" and "F2 final render"; residuals: `docs\GAN-LEDGER.md` "Session F2".
+- Final tier fully re-rendered (3270 beauty, 2773 sign, 1933 caption frames), audio -15.9 LUFS / TP -1.2 dBFS, encoded, site rebuilt. **Final MP4 SHA-256 `2b56cee7b030528d6bf21cf864c74ced521cbc9c18ba170e7229704fd9d7f78e`** (was `5470c46c…f193a`). ffprobe: level 41, bt709 primaries/transfer/space.
+- `python -m tools verify`: VERIFY GREEN, no PENDING line (pytest 189, 14 in-Blender checks, both tiers 3270/3270, final MP4 matches spec, cut-frame luma steps 0.4 / 0.0).
+- Reviewed: final contact sheet, cut strip (f1245-1247, f1395-1397: clean), sign strip (f1625-1645, f1955-1975: sharp, fixed check list), poster.
+- Known residuals for F3 to judge: B-09.2 mean YAVG 38.4 (target 50; more light is V1-CIN-03), luma steps f2709 7.7 / f2431 6.4 / f746 5.6 / f1376 4.6 on the MP4, focal sizes in 10 beats (V1-CIN-01), hero topology whole only from ~102 s.
+- The Final MP4 is gitignored (release asset); Preview, poster, contact sheet, captions and site are committed.
+
+## (superseded) F2 was the next session here; it is now done.
 - **F3 second run (2026-11-13 22:15): GATE FAILED AGAIN, same cause.** F2 has still not run. The five local outputs have the same SHA-256 as the v1.0.0 release assets (Final `5470c46c…f193a`), `MP4_PENDING_RERENDER` is still True, `CROSSING_LIMIT` is still 0.045. Verify is GREEN only through that waiver (pytest 170, 14 in-Blender checks, final tier 3270/3270; MP4 level 50, transfer sRGB; cut-frame steps 14.3 and 30.1). Per-item results are in `docs\AUDIT-v1.md` under "F3 targeted re-audit, second run": 7 fixed MAJORs FAIL in the film, V1-DOC-01 PASSES.
 - No tag, release, README, CHANGELOG or Pages change. v1.0.0 stays a pre-release. The only source change in this session: the F2 prompt was added to `docs\SESSION-PROMPTS.md` (it did not exist, which is why F3 was run twice).
 - **F2 is finished when all four are true:** the Final MP4 is newer than the last source commit; its SHA-256 is not `5470c46c…f193a`; `tools\verify.py` has `MP4_PENDING_RERENDER = False`; `python -m tools verify` prints no PENDING line. Only then run F3.

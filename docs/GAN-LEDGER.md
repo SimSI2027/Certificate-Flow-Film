@@ -289,3 +289,5 @@ Residuals (targets not reached with every camera audit green; tests hold the ach
 | V1-PKI-04 | HS-RDP >= 60, HS-WEB >= 45 px | met (85, 55) | |
 | V1-PKI-05 | CRL >= 60 px | met (78, 73) | |
 | V1-CIN-06 | no luma step > 4.0 in f2695-2710 | 4.2 (v1.0.0 12.2) on the F2 animatic; bulge 4.8 (5.8 gives 4.8) | costs B-08.3 its 80 px target: 69 px (residual 65) |
+| V1-CIN-06 (final tier) | as above, on the Final MP4 | f2709 7.7 (v1.0.0 12.2); other steps > 4.0 outside the cuts: f746 5.6, f1376 4.6, f2431 6.4 (v1.0.0 had f641, f746, f1253, f1376, f2440, f2701-2705) | bloom in the final tier sharpens the passing highlight; the bulge search ran on the animatic as the finding prescribes |
+| V1-CIN-02 step 4 | B-09.2 mean YAVG >= 50 | 38.4 (38.1 before step 4; v1.0.0 40.0); B-09.3 27.9 (fade to black) | the prescribed fix (both green channels and the trust paths/links at GLOW_PEAK) was applied and adds only 0.3: the wider hero is mostly dark floor. More light needs world or lamp energy, which the finding reserves for V1-CIN-03 (deferred to v2.0) |
