@@ -10,6 +10,11 @@ Updated: 2026-11-14 (Session L1, `claude-sonnet-5-5`, no subagents, 5 of 6 image
 - **Housekeeping (2026-11-14, Sonnet 5.5):** v1.1.0 promoted to public latest release (not pre-release). Pages `site\poster.png` and `site\preview.mp4` restored to the v1.1.0 assets (the L1 commit had put the unaudited v1.2 render live); README, CHANGELOG, Pages text say v1.1.0 is current. Release rule added to CLAUDE.md. The v1.2 render stays in git history (1a20816) and is NOT on Pages until it passes audit.
 - **Next session: L2 (Fable 5.2, High): re-audit the Final MP4 (SHA-256 `84097e10…3f44`) and release v1.2.0 (Plan Section 6).** Do not re-render unless the audit demands it. On a pass: publish v1.2.0 as latest, rebuild site from v1.2 assets (`git checkout 1a20816 -- site/poster.png site/preview.mp4`), update README, CHANGELOG, Pages, verify the live page.
 
+## L2 pre-flight (2026-11-14, Sonnet 5.5, no code changes)
+- `tools verify`: **FAIL** (1 step). All stages pass except pytest: 1 failed, 199 passed. Failing test: `tests/test_audit_v1.py::test_V1_DOC_02_wording_matches_the_film_and_its_status`. It still asserts the README says "v1.1.0 pre-release" and never "released". v1.1.0 is now the public latest release, so the test is stale. Fix the test (not the README) before L2 gates on verify.
+- Final MP4 SHA-256 `84097e10311daafa6b9d6b72bb94a31380357a82aee3006cf56536ad25093f44`: this is the **L1 render**, not v1.1.0 (`2b56cee7…`).
+- `site\poster.png` (`f9d07ca7…`) and `site\preview.mp4` (`7c66720a…`) match the v1.1.0 release assets Poster and Preview.
+
 ## Session F3, third run DONE (2026-11-14) — GATE PASSED, v1.1.0 released as a PRE-RELEASE
 - Gate: Final MP4 SHA-256 `2b56cee7…f78e` confirmed. `python -m tools verify` VERIFY GREEN twice (before and after the doc changes): pytest 189, 14 in-Blender checks, both tiers 3270/3270, final MP4 on spec, cut-frame steps 0.4 / 0.0. ffprobe: H.264 High 4.1, bt709, 3270 frames, 109.000 s; exactly two cuts.
 - Every FIXED finding passes on the rendered film (15 MAJOR, 10 MINOR); 56 frames viewed in 8 images. Per-item table: `docs\AUDIT-v1.md` "F3 targeted re-audit, third run". 33 of 33 PKI beats ACCURATE. Estimated scores: PKI 9, legibility 8, cinema 5.
