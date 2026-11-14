@@ -13,6 +13,7 @@ from pathlib import Path
 
 from cff.audio import cues, synth
 from cff.story import model, timing
+from cff.theme import look, render
 from tools import frames, packet, pipeline, toolchain
 
 ROOT = toolchain.ROOT
@@ -95,7 +96,8 @@ def encode(tier: str = "final") -> dict[str, object]:
     caps = _concat_list(tier, "captions", blank, work / "captions.txt")
     beauty = (frames.tier_dir(tier) / "beauty" / "f_%04d.png").as_posix()
     fps = str(timing.FPS)
-    graph = ("[1:v]format=rgba[s];[2:v]format=rgba[c];[0:v]format=rgba[b];[b][s]overlay=format=auto[o1];[o1][c]overlay=format=auto[o2];"
+    grain = f"noise=alls={look.GRAIN_STRENGTH}:allf=t:all_seed={look.GRAIN_SEED}," if render.tier(tier).grain else ""  # Item F: beauty only, text overlays stay clean
+    graph = (f"[1:v]format=rgba[s];[2:v]format=rgba[c];[0:v]{grain}format=rgba[b];[b][s]overlay=format=auto[o1];[o1][c]overlay=format=auto[o2];"
              "[o2]scale=out_color_matrix=bt709:out_range=tv:flags=lanczos,format=yuv420p,"
              "setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv[v]")
     args = ["-framerate", fps, "-start_number", str(timing.FRAME_START), "-i", beauty,

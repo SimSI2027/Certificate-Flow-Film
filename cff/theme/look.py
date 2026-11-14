@@ -51,6 +51,12 @@ BACKDROP_METALLIC = 0.6
 BACKDROP_ROUGHNESS = 0.5
 FLOOR_ROUGHNESS = 0.4
 
+# Film grain at encode (tiers with ``grain``): temporal noise on the beauty layer only; captions and signs stay clean. Fixed seed, so the encode is deterministic.
+GRAIN_STRENGTH = 3
+GRAIN_STRENGTH_FALLBACK = 2  # if the Final MP4 exceeds GRAIN_MAX_MP4_MB at the first strength
+GRAIN_MAX_MP4_MB = 120
+GRAIN_SEED = 5201
+
 # Compositor bloom (final and preview tiers).
 BLOOM_THRESHOLD = 0.8
 BLOOM_STRENGTH = 0.6

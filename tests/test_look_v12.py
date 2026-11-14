@@ -84,6 +84,13 @@ def test_F3_PIPE_02_metadata_records_a_dirty_flag() -> None:
     assert '.get("dirty") is True' in (ROOT / "tools" / "verify.py").read_text(encoding="utf-8")
 
 
+def test_LOOK_F_grain_is_seeded_and_only_on_the_beauty_layer() -> None:
+    text = (ROOT / "tools" / "film.py").read_text(encoding="utf-8")
+    assert "all_seed={look.GRAIN_SEED}" in text
+    assert "[0:v]{grain}format=rgba[b]" in text  # the grain sits on input 0 (beauty); signs and captions are overlaid after it
+    assert render.tier("final").grain is True and render.tier("animatic").grain is False
+
+
 def test_LOOK_C_web_badge_rests_before_the_flyovers() -> None:
     from cff.stage import choreography  # noqa: PLC0415
     from cff.stage.tracks import GLOW  # noqa: PLC0415
