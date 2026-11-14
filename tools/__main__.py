@@ -123,6 +123,12 @@ def _cmd_focal(_: argparse.Namespace) -> int:
     return focal_audit.main()
 
 
+def _cmd_look_test(_: argparse.Namespace) -> int:
+    from tools import look_test  # noqa: PLC0415
+
+    return look_test.main()
+
+
 def _cmd_calibrate(args: argparse.Namespace) -> int:
     from tools import calibrate  # noqa: PLC0415  (imported only by this command, so no other command can reach a fault)
 
@@ -189,6 +195,7 @@ def main(argv: list[str] | None = None) -> int:
         ("motion", _cmd_motion, "planned-film audits: camera, focal subject, keys, easing, glow"),
         ("legibility", _cmd_legibility, "planned-film legibility audit: must-read sign holds (L-06), captions clear of the focal subject (L-05)"),
         ("focal", _cmd_focal, "focal-subject size per beat (V1-CIN-01): median projected longer side over the beat hold"),
+        ("look-test", _cmd_look_test, "stills-and-strips gate of the v1.2 look plan: renders into renders/look-test and measures luma (build --tier final first)"),
     ):
         sub.add_parser(name, help=text).set_defaults(func=func)
 
