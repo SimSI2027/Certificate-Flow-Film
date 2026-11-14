@@ -138,7 +138,8 @@ SHOTS: tuple[Shot, ...] = (
     # S8
     Shot("checks-orbit-2", "B-08.1", ("EVAL-CA2",), -77, 11, 3.4, 35, 2.8, bulge=-0.2),
     Shot("tls-stamp", "B-08.2", ("CERT-WEB",), -94, 5, 3.8, 35, 2.8, follow=0.8, bulge=8.8),
-    Shot("same-root", "B-08.3", ("CERT-CA2", "ROOT_CA"), -32, 18, 26.22, 28, 4.0, follow=0.35, bulge=1.8, focus=("CERT-CA2",)),  # V1-CIN-01
+    # V1-CIN-01 (dist) and V1-CIN-06 (bulge 1.8 -> 4.8: the white flash at 90 s drops from a 12.2 to a 4.2 luma step; 5.8 is worse)
+    Shot("same-root", "B-08.3", ("CERT-CA2", "ROOT_CA"), -32, 18, 26.22, 28, 4.0, follow=0.35, bulge=4.8, focus=("CERT-CA2",)),
     # S9
     Shot("browser-arc", "B-09.1", (STACK_MID,), -80, 8, 6.0, 35, 2.8, follow=0.4, bulge=5.5),  # V1-PKI-04
     Shot("hero", "B-09.2", (WORLD_CENTRE,), -45, 30, 42.0, 24, 5.6, follow=0.45, focus=("ROOT_CA",)),  # V1-CIN-02

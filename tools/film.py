@@ -24,7 +24,7 @@ POSTER_PNG = OUTPUT / "Certificate-Flow-Film-Poster.png"
 CONTACT_PNG = OUTPUT / "Certificate-Flow-Film-Contact-Sheet.png"
 METADATA = OUTPUT / "render-metadata.json"
 TARGET_LUFS = -16.0
-TARGET_TP = -1.0
+TARGET_TP = -1.5  # loudnorm aims here so the measured true peak of the written mix stays <= -1 dBFS (F2 measured -0.9 at a -1.0 aim)
 TARGET_LRA = 11.0
 CRF_FINAL = 17
 CRF_PREVIEW = 27

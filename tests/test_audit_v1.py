@@ -189,7 +189,7 @@ def test_V1_CIN_01_focal_subject_size() -> None:  # noqa: N802
     sizes = focal_audit.beat_sizes()
     for beat_id in focal_audit.RESIDUAL_PX:  # a residual that now meets its real target must be removed
         assert sizes[beat_id] < focal_audit.TARGET_PX.get(beat_id, focal_audit.DEFAULT_TARGET_PX), beat_id
-    assert len(focal_audit.RESIDUAL_PX) <= 9  # v1.0.0: 11 beats under target
+    assert len(focal_audit.RESIDUAL_PX) <= 10  # v1.0.0: 11 beats under target; F2 fixed B-04.5 (B-08.3 traded for V1-CIN-06)
 
 
 @pytest.mark.covers("F-10")
@@ -285,6 +285,14 @@ def test_V1_CIN_07_sealing_changes_the_capsule() -> None:  # noqa: N802
     levels = [max(v[:3]) for f in range(1, timing.frame_end() + 1) if (v := tl.value_at("SEAL-RDP", GLOW, f)) is not None]
     assert levels and max(levels) > levels[0] * 1.2, "the closed seal peaks above the glow it appears with"
     assert palette.GLOW_PEAK > palette.GLOW_ACTIVE
+
+
+@pytest.mark.covers("C-05", "B-08.3")
+def test_V1_CIN_06_same_root_pulls_back_past_the_white_object() -> None:  # noqa: N802
+    from cff.theme import shots  # noqa: PLC0415
+
+    # measured on the F2 animatic: bulge 1.8 -> luma step 12.2 at f2708; 4.8 -> 4.2 (residual, target 4.0); 5.8 -> 4.8
+    assert shots.BY_BEAT["B-08.3"].bulge == 4.8
 
 
 @pytest.mark.covers("L-07")

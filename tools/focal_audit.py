@@ -29,6 +29,7 @@ UNSIZED: frozenset[str] = frozenset({"B-09.2", "B-09.3"})
 RESIDUAL_PX: dict[str, float] = {
     "B-01.2": 75.0, "B-02.2": 95.0, "B-02.3": 95.0, "B-04.2": 65.0, "B-05.2": 50.0,
     "B-05.3": 35.0, "B-06.1": 60.0, "B-06.3": 50.0, "B-07.4": 60.0,
+    "B-08.3": 65.0,  # bulge 4.8 for V1-CIN-06 costs 12 px (81 at bulge 2.3)
 }
 
 
