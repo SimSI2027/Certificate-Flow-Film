@@ -50,6 +50,19 @@ def stage_material(role: ColourRole, glow_only: bool = False) -> bpy.types.Mater
     return mat
 
 
+def vault_material(role: ColourRole) -> bpy.types.Material:
+    """An issuing CA's vault: the stage material with its role colour's value scaled down (V1-CIN-03 step 1)."""
+    name = f"MAT-vault-{role.value}"
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+    mat = stage_material(role).copy()
+    mat.name = name
+    for node in mat.node_tree.nodes:
+        if node.type == "BSDF_PRINCIPLED":
+            node.inputs["Base Color"].default_value = linear4(palette.value_scaled_hex(palette.role_hex(role), palette.VAULT_VALUE_SCALE))
+    return mat
+
+
 def backdrop_material() -> bpy.types.Material:
     """Far set dressing: a dark, rough neutral that the key and rim lights pick out as silhouettes, never a role colour."""
     if "MAT-backdrop" in bpy.data.materials:

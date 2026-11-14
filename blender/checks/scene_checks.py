@@ -526,7 +526,8 @@ def check_signs(scene: bpy.types.Scene) -> Result:
             worst_cap = min(worst_cap, cap_px)
             x0, y0, x1, y1 = plan_frame.rect
             centre = (view.x * render.CAPTION_REFERENCE_WIDTH_PX, (1 - view.y) * render.CAPTION_REFERENCE_HEIGHT_PX)
-            anchor_x = centre[0] - (typography.SIGN_CAP_PX * typography.SIGN_PLATE_MARGIN_CAPS if stage_labels.BY_ID[label_id].align == "LEFT" else (x1 - x0) / 2)
+            left_inset = typography.SIGN_CAP_PX * typography.SIGN_PLATE_MARGIN_CAPS + stage_signs.tick_width_px(label_id)  # a check line's tick (V1-LEG-03)
+            anchor_x = centre[0] - (left_inset if stage_labels.BY_ID[label_id].align == "LEFT" else (x1 - x0) / 2)
             if abs(anchor_x - x0) > 2.0 or abs(centre[1] - (y0 + y1) / 2) > 2.0:
                 r.failures.append(f"{label_id}: frame {frame}: projected at ({centre[0]:.0f},{centre[1]:.0f}), planned plate ({x0:.0f},{y0:.0f})-({x1:.0f},{y1:.0f})")
             if cap_px < LABEL_MIN_CAP_PX:

@@ -60,7 +60,7 @@ TRUST_LINK_STOPS: dict[str, tuple[ColourRole, ColourRole]] = {
     "cyan": (ColourRole.ISSUING_CA1, ColourRole.ISSUING_CA1),
     "violet": (ColourRole.ISSUING_CA2, ColourRole.ISSUING_CA2),
 }
-TRUST_LINK_EMISSION = 1.8
+TRUST_LINK_EMISSION = 1.2  # was 1.8: links read white, not gold-to-cyan/violet, at distance (V1-COL-01)
 TRUST_LINK_REST = 0.4  # glow level a link settles to once introduced (it stays readable without dominating later shots)
 TRUST_LINK_ARC_FRACTION = 0.12  # a link bows upward by this fraction of its length (a path of light, not a taut wire)
 TRUST_LINK_SEGMENTS = 24
@@ -70,7 +70,7 @@ GLOW_OFF = 0.0
 GLOW_SOFT = 0.35
 GLOW_ACTIVE = 1.0
 GLOW_PEAK = 1.6
-EMISSION_STRENGTH = 2.4  # emission strength at glow level 1.0 (lowered from 3.0: less emissive wash, CIN-S1R1-12)
+EMISSION_STRENGTH = 1.8  # emission strength at glow level 1.0 (3.0 -> 2.4: CIN-S1R1-12; 2.4 -> 1.8: role hues held at distance, V1-COL-01)
 FLASHBACK_SATURATION = 0.3  # compositor saturation inside the S5 flashback
 FLASHBACK_VIGNETTE = 0.55
 
@@ -85,3 +85,19 @@ AMBIENT_TO_KEY_MAX = 0.20
 
 def role_hex(role: ColourRole) -> str:
     return ROLE_HEX[role]
+
+
+# V1-CIN-03 step 1: an issuing CA's vault takes its role colour at this HSV value, so the evaluation interiors (B-04.3,
+# B-08.1) stop reading as a flat, over-bright box (about 2x the luma of the beats around them).
+VAULT_VALUE_SCALE = 0.45
+VAULT_DIMMED_ROLES: tuple[ColourRole, ...] = (ColourRole.ISSUING_CA1, ColourRole.ISSUING_CA2)
+
+
+def value_scaled_hex(hex_colour: str, scale: float) -> str:
+    """``hex_colour`` with its HSV value multiplied by ``scale`` (hue and saturation kept)."""
+    import colorsys  # noqa: PLC0415
+
+    r, g, b = (int(hex_colour[i:i + 2], 16) / 255 for i in (1, 3, 5))
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+    r2, g2, b2 = colorsys.hsv_to_rgb(h, s, v * scale)
+    return "#" + "".join(f"{round(c * 255):02X}" for c in (r2, g2, b2))

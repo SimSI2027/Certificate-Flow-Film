@@ -25,7 +25,7 @@ def card(bm: bmesh.types.BMesh, o: StageObject) -> None:
     p.box(bm, w, t, h)
     p.box(bm, w * 0.9, 0.012, h * 0.16, (0.0, -t / 2 - 0.004, h * 0.34))  # header strip
     if o.variant == "self_signed":
-        p.torus(bm, h * 0.18, 0.012, (0.0, -t / 2 - 0.01, 0.02), "Y", 24, 6)  # a faint seal looping back on itself
+        p.torus(bm, h * 0.36, 0.012, (0.0, -t / 2 - 0.01, 0.02), "Y", 24, 6)  # a seal looping back on itself (radius x2: V1-PKI-06)
         return
     p.cylinder(bm, h * 0.15, 0.014, 18, (-w * 0.26, -t / 2 - 0.008, -0.02), "Y")  # issuer seal
     p.torus(bm, 0.035, 0.01, (w * 0.28, -t / 2 - 0.01, -h * 0.28), "Y", 14, 5)  # public-key emblem

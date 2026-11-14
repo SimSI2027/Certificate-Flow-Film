@@ -37,6 +37,7 @@ TRAVEL_BEHIND_S = 0.1  # a second object leaves this long after the first
 SETTLE_BOUNCE = 0.04
 HOLD_EASE = "EASE_IN_OUT"
 SEAL_CLOSED_SCALE = 0.7  # the proof-of-possession ring tightens round its capsule and stays on it
+SEAL_SETTLE_FRAMES = 12  # the closed seal settles from its peak glow over this many frames (V1-CIN-07)
 CHECKS_CLEAR_S = 0.3  # a CA's check slots leave this long into the next beat, with their written list
 CRL_DOCK_OFFSET: Value = (0.95, 0.0, 0.0)  # a CRL scroll docks beside the card it checks (V1-PKI-05: larger scrolls stay out of the cards)
 INELIGIBLE_VAULT_GLOW = 0.25  # a grey cast over the ineligible CA's vault (brighter reads as white under AgX)
@@ -400,6 +401,9 @@ class Choreographer:
         self.key_to(ring, SCALE, ring_end, ring_end + close_d, (SEAL_CLOSED_SCALE,) * 3, "EASE_IN_OUT")
         self.seal_binds.append((ring, req, ring_end + close_d))
         self.glow_to(req, ring_end, ring_end + close_d, white)
+        # the seal ends on a peak and settles, so sealing visibly changes the capsule (V1-CIN-07)
+        self.glow_to(ring, ring_end, ring_end + close_d, glow_value(R.REQUEST, palette.GLOW_PEAK), "EASE_OUT")
+        self.glow_to(ring, ring_end + close_d, ring_end + close_d + SEAL_SETTLE_FRAMES, glow_value(R.REQUEST, palette.GLOW_ACTIVE), "EASE_IN_OUT")
         self.hide(f"BEAM-{tag}", ring_end, sink=(0.0, 0.0, 0.0))
 
     def s3(self) -> None:

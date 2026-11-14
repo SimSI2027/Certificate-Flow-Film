@@ -1,7 +1,7 @@
 """Deterministic cue synthesis and mixing (Charter 10). Pure Python, standard library only, seeded.
 
-Each cue kind is a short mono float buffer at ``SAMPLE_RATE``. ``mix`` places every cue at its exact sample offset on top of a
-slowly moving low bed. Nothing here reads the clock; the only randomness is ``random.Random(SEED_*)``.
+Each cue kind is a short mono float buffer at ``SAMPLE_RATE``. ``mix`` places every cue at its exact sample offset, panned by
+its source actor (V1-AUD-01), on top of a slowly moving, centred low bed. Nothing here reads the clock; the only randomness is ``random.Random(SEED_*)``.
 """
 
 from __future__ import annotations
@@ -125,25 +125,37 @@ def bed(seconds: float) -> list[float]:
     return out
 
 
-def mix() -> list[float]:
-    """The full mono mix, scaled so its peak is ``PEAK_CEILING``."""
+def pan_gains(pan: float) -> tuple[float, float]:
+    """Constant-power (left, right) gains for ``pan`` in -1..+1 (V1-AUD-01)."""
+    a = (pan + 1) * math.pi / 4
+    return math.cos(a), math.sin(a)
+
+
+def mix() -> tuple[list[float], list[float]]:
+    """The full stereo mix (left, right): a centred bed, each cue panned by its source actor; peak at ``PEAK_CEILING``."""
     total = cue_sheet_module.duration_s()
-    out = bed(total)
-    scale = _db(cue_sheet_module.BED_GAIN_DB)
-    out = [v * scale for v in out]
+    centre = pan_gains(0.0)[0]
+    scale = _db(cue_sheet_module.BED_GAIN_DB) * centre
+    left = [v * scale for v in bed(total)]
+    right = list(left)
     kinds = {name: build() for name, build in KINDS.items()}
     for cue in cue_sheet_module.cue_sheet():
-        _add(out, kinds[cue.kind], at=_n(cue.time_s), gain=_db(cue_sheet_module.CUE_GAIN_DB[cue.kind]) * 0.5)
-    peak = max(abs(v) for v in out) or 1.0
-    return [v * PEAK_CEILING / peak for v in out]
+        gain = _db(cue_sheet_module.CUE_GAIN_DB[cue.kind]) * 0.5
+        gl, gr = pan_gains(cue.pan)
+        _add(left, kinds[cue.kind], at=_n(cue.time_s), gain=gain * gl)
+        _add(right, kinds[cue.kind], at=_n(cue.time_s), gain=gain * gr)
+    peak = max(abs(v) for channel in (left, right) for v in channel) or 1.0
+    k = PEAK_CEILING / peak
+    return [v * k for v in left], [v * k for v in right]
 
 
-def write_wav(samples: list[float], path: Path) -> Path:
-    """Write mono samples as a 16-bit PCM WAV."""
+def write_wav(samples: tuple[list[float], list[float]], path: Path) -> Path:
+    """Write (left, right) samples as a 16-bit PCM stereo WAV."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    left, right = samples
     with wave.open(str(path), "wb") as w:
-        w.setnchannels(1)
+        w.setnchannels(2)
         w.setsampwidth(2)
         w.setframerate(SAMPLE_RATE)
-        w.writeframes(b"".join(struct.pack("<h", max(-32767, min(32767, round(v * 32767)))) for v in samples))
+        w.writeframes(b"".join(struct.pack("<hh", *(max(-32767, min(32767, round(v * 32767))) for v in pair)) for pair in zip(left, right, strict=True)))
     return path

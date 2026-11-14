@@ -265,6 +265,46 @@ def test_V1_CIN_02_hero_holds_the_whole_topology() -> None:  # noqa: N802
 HERO_ARRIVED_FRAMES = 60  # residual: the camera pulls back from the B-09.1 close-up, so the topology is whole from ~102 s
 
 
+# --- session F2: small fixes ----------------------------------------------------------------------------------------
+
+@pytest.mark.covers("AR-01", "B-05.1")
+def test_V1_PKI_06_self_signed_seals_are_perceivable() -> None:  # noqa: N802
+    from tools import focal_audit  # noqa: PLC0415
+
+    tl, plan = _plan()
+    assert focal_audit.longer_side(tl, plan, ("SEAL-ROOT",), *_hold("B-05.1")) >= 110.0
+    assert "h * 0.36, 0.012" in _text("blender/actors/artifacts.py")  # the self-seal ring radius doubled (was h * 0.18)
+
+
+@pytest.mark.covers("F-04", "B-03.4")
+def test_V1_CIN_07_sealing_changes_the_capsule() -> None:  # noqa: N802
+    from cff.theme import palette  # noqa: PLC0415
+
+    assert "o.size[0] / 2, 0.045" in _text("blender/actors/network.py")
+    tl = choreography.build_timeline()
+    levels = [max(v[:3]) for f in range(1, timing.frame_end() + 1) if (v := tl.value_at("SEAL-RDP", GLOW, f)) is not None]
+    assert levels and max(levels) > levels[0] * 1.2, "the closed seal peaks above the glow it appears with"
+    assert palette.GLOW_PEAK > palette.GLOW_ACTIVE
+
+
+@pytest.mark.covers("L-07")
+def test_V1_COL_01_role_hues_hold_at_distance() -> None:  # noqa: N802
+    from cff.theme import palette  # noqa: PLC0415
+
+    assert palette.EMISSION_STRENGTH <= 1.8 and palette.TRUST_LINK_EMISSION <= 1.2
+
+
+@pytest.mark.covers("C-05")
+def test_V1_CIN_03_step1_issuing_ca_vaults_are_dimmed() -> None:  # noqa: N802
+    from cff.story.model import ColourRole  # noqa: PLC0415
+    from cff.theme import palette  # noqa: PLC0415
+
+    cyan = palette.role_hex(ColourRole.ISSUING_CA1)
+    dim = palette.value_scaled_hex(cyan, palette.VAULT_VALUE_SCALE)
+    assert max(int(dim[i:i + 2], 16) for i in (1, 3, 5)) == round(max(int(cyan[i:i + 2], 16) for i in (1, 3, 5)) * 0.45)
+    assert "vault_material" in _text("blender/world.py")
+
+
 # --- session F2: signs ----------------------------------------------------------------------------------------------
 
 def _check_lines() -> list[str]:

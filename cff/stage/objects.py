@@ -227,7 +227,7 @@ def build_catalogue() -> tuple[StageObject, ...]:
         StageObject("ROOT-DAIS", Kind.DAIS, R.ROOT, (lo.ROOT[0], lo.ROOT[1] - 1.2, 0.0), size=(lo.ROOT_DAIS_RADIUS, lo.ROOT_DAIS_RADIUS, rz), on_stage=False, owner=m.ROOT_CA),
         StageObject("ROOT-PLINTH", Kind.PLINTH, R.ROOT, (lo.ROOT[0], lo.ROOT[1], rz), size=lo.ROOT_PLINTH_SIZE, on_stage=False, owner=m.ROOT_CA),
         StageObject(m.ROOT_CA, Kind.ROOT_VAULT, R.ROOT, lo.ROOT_VAULT_CENTRE, size=lo.ROOT_VAULT_SIZE, on_stage=False, owner=m.ROOT_CA, spec_ids=("AR-01",)),
-        StageObject("SEAL-ROOT", Kind.SEAL, R.ROOT, lo.ROOT_SEAL, size=(0.5, 0.5, 0.06), on_stage=False, owner=m.ROOT_CA, spec_ids=("AR-01",)),
+        StageObject("SEAL-ROOT", Kind.SEAL, R.ROOT, lo.ROOT_SEAL, size=(1.2, 1.2, 0.06), on_stage=False, owner=m.ROOT_CA, spec_ids=("AR-01",)),
         StageObject("READER-ROOT", Kind.READER, R.ROOT, lo.ROOT_READER, size=(0.5, 0.5, 0.9), on_stage=False, owner=m.ROOT_CA),
         StageObject("PRESS-ROOT", Kind.PRESS, R.NEUTRAL, lo.ROOT_PRESS, size=(0.9, 0.9, 0.8), on_stage=False, owner=m.ROOT_CA),
         StageObject("PRESSHEAD-ROOT", Kind.PRESS_HEAD, R.ROOT, lo.add(lo.ROOT_PRESS, (0.0, 0.0, 0.85)), size=(0.5, 0.5, 0.2), on_stage=False, owner=m.ROOT_CA),

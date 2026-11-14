@@ -57,7 +57,7 @@ def beam(bm: bmesh.types.BMesh, o: StageObject) -> None:
 
 def seal_ring(bm: bmesh.types.BMesh, o: StageObject) -> None:
     """The proof-of-possession seal ring that closes round the capsule (normal along +X)."""
-    p.torus(bm, o.size[0] / 2, 0.02, (0.0, 0.0, 0.0), "X", 28, 6)
+    p.torus(bm, o.size[0] / 2, 0.045, (0.0, 0.0, 0.0), "X", 28, 6)  # a 4.5 cm tube so the sealing reads (V1-CIN-07)
 
 
 BUILDERS = {Kind.CHANNEL: channel, Kind.ROUTE: route, Kind.TRUST_LINK: trust_link, Kind.BEAM: beam, Kind.SEAL_RING: seal_ring}
