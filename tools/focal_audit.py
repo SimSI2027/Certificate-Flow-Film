@@ -1,4 +1,4 @@
-"""Focal-subject size audit (V1-CIN-01, Appendix A.1 of docs/AUDIT-v1.md).
+"""Focal-subject size audit (V1-CIN-01, Appendix A.1 of docs/history/AUDIT-v1.md).
 
 For every beat: the median longer side (1080p px) of the projected bounds of the beat's focal objects over the beat
 hold (start + 0.5 s .. end - 0.5 s), against the target in ``TARGET_PX``.
@@ -23,7 +23,7 @@ TARGET_PX: dict[str, float] = {
 # Beats the audit does not size: the opening/closing wides and the hero (V1-CIN-02 has its own test), and the
 # beats whose focal subject is a whole actor or the network (already large).
 UNSIZED: frozenset[str] = frozenset({"B-09.2", "B-09.3"})
-# Residuals recorded in docs/GAN-LEDGER.md (beat -> achieved px, rounded down to 5 px) when a target cannot be
+# Residuals recorded in docs/history/GAN-LEDGER.md (beat -> achieved px, rounded down to 5 px) when a target cannot be
 # reached with camera audits green (session F2: each dist step that would gain more failed C-02/C-03, or moved the
 # next beat's start pose so that a must-read sign went short).
 RESIDUAL_PX: dict[str, float] = {
@@ -31,7 +31,7 @@ RESIDUAL_PX: dict[str, float] = {
     "B-05.3": 35.0, "B-06.1": 60.0, "B-06.3": 80.0, "B-07.4": 70.0,
     "B-08.3": 65.0,  # bulge 4.8 for V1-CIN-06 costs 12 px (81 at bulge 2.3)
 }
-# v1.2 Item D (lens as a lever, docs/LOOK-PLAN-v1.2.md): sizes reached at the last lens that kept every camera, sign and legibility test green:
+# v1.2 Item D (lens as a lever, docs/history/LOOK-PLAN-v1.2.md): sizes reached at the last lens that kept every camera, sign and legibility test green:
 # B-01.2 39 mm, B-04.2 50, B-07.4 50, B-02.3 39, B-05.2 50, B-06.1 44 (size peaks there), B-06.3 AIA-RDP 1.5x; B-08.3 (28 mm), B-05.3 (28 mm)
 # and B-02.2 (42 mm) cannot go longer: the next lens step pushes B-09.1, B-06.1 or B-02.3 out of the C-03 frame box.
 

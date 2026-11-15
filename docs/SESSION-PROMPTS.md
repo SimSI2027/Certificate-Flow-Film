@@ -60,7 +60,7 @@ SCOPE (Phases 1–2 only)
 6. Create:
    - CLAUDE.md (at most about 120 lines, meeting every requirement in Charter Section 13; it points to docs\BUILD-CHARTER.md)
    - docs\PROJECT-STATE.md
-   - docs\CHIEF-OF-STAFF-APPROVALS.md
+   - docs\history\CHIEF-OF-STAFF-APPROVALS.md
 
 GATE
 - Every tool is verified with versions recorded, and the GPU probe frame is not blank.
@@ -115,14 +115,14 @@ SCOPE (Phase 3 only)
 5. Generate docs\TRACEABILITY.md from the model, with a test that fails on any missing ID.
 
 GATE
-1. Build a spec packet in qa\rounds\stage0-R<n>\ with:
+1. Build a spec packet in docs\history\rounds\stage0-R<n>\ with:
    - the written docs
    - a model dump
    - schema.json
    No source code and no generator notes.
 2. Spawn a fresh pki-discriminator on it and triage per Charter 2.4.
 3. Fix and repeat until there are 0 BLOCKER/MAJOR findings, with a cap of 5 rounds.
-4. Freeze: record the REFERENCE-SPEC SHA-256 and every round in docs\GAN-LEDGER.md.
+4. Freeze: record the REFERENCE-SPEC SHA-256 and every round in docs\history\GAN-LEDGER.md.
 5. Record APPROVED or REJECTED for Phase 3.
 
 CLOSE-OUT
@@ -189,7 +189,7 @@ PRE-FLIGHT
 - Confirm you are running on Opus 5.5. If not, stop and tell me to switch.
 - Read CLAUDE.md and docs\PROJECT-STATE.md.
 - Read docs\BUILD-CHARTER.md: the intro and Sections 1–4 (all of Section 2, especially 2.4–2.8), 7, 11, 12 and 17.
-- Read docs\GAN-LEDGER.md.
+- Read docs\history\GAN-LEDGER.md.
 - Confirm Session 3's build is APPROVED, the spec hash matches, and local HEAD equals origin/main. If not, stop and report.
 
 SCOPE (Phase 4 gate)
@@ -230,7 +230,7 @@ PRE-FLIGHT
 - Confirm you are running on Opus 5.5. If not, stop and tell me to switch.
 - Read CLAUDE.md and docs\PROJECT-STATE.md.
 - Read docs\BUILD-CHARTER.md: the intro and Sections 1–4, 7 (S4), 8, 10, 11, 12 and 17.
-- Read docs\GAN-LEDGER.md.
+- Read docs\history\GAN-LEDGER.md.
 - Confirm Phase 4 is APPROVED, the spec hash matches, and local HEAD equals origin/main. If not, stop and report.
 
 SCOPE (Phase 5 only)
@@ -269,7 +269,7 @@ PRE-FLIGHT
 - Confirm you are running on Sonnet 5.5. If not, stop and tell me to switch.
 - Read CLAUDE.md and docs\PROJECT-STATE.md.
 - Read docs\BUILD-CHARTER.md: the intro and Sections 1–4, 7, 8, 9, 11, 12 and 17.
-- Read docs\LOOK-BIBLE.md and docs\GAN-LEDGER.md.
+- Read docs\LOOK-BIBLE.md and docs\history\GAN-LEDGER.md.
 - Confirm Phase 5 is APPROVED, the spec and look-bible hashes match, and local HEAD equals origin/main. If not, stop and report.
 - The spec and the look bible are FROZEN. Match the look bible; do not reinvent it.
 
@@ -306,7 +306,7 @@ PRE-FLIGHT
 - Confirm you are running on Sonnet 5.5. If not, stop and tell me to switch.
 - Read CLAUDE.md and docs\PROJECT-STATE.md.
 - Read docs\BUILD-CHARTER.md: the intro and Sections 1–4, 10, 11, 12 and 17.
-- Read docs\RENDER-BUDGET.md and docs\GAN-LEDGER.md.
+- Read docs\RENDER-BUDGET.md and docs\history\GAN-LEDGER.md.
 - Confirm Phase 6 is APPROVED, the hashes match, and local HEAD equals origin/main. If not, stop and report.
 
 SCOPE (Phase 7 only)
@@ -388,7 +388,7 @@ PRE-FLIGHT
 - Confirm you are running on Opus 5.5. If not, stop and tell me to switch.
 - Read CLAUDE.md and docs\PROJECT-STATE.md.
 - Read docs\BUILD-CHARTER.md: the intro and Sections 1–4, 14, 15, 16 and 17.
-- Read docs\GAN-LEDGER.md and docs\CHIEF-OF-STAFF-APPROVALS.md.
+- Read docs\history\GAN-LEDGER.md and docs\history\CHIEF-OF-STAFF-APPROVALS.md.
 - Confirm Phases 1–8 are APPROVED and local HEAD equals origin/main. If not, stop and report.
 
 SCOPE (Phase 9)
@@ -425,12 +425,12 @@ Added on 2026-11-13 because session F3 was run twice before F2 existed as a prom
 ```
 You are the Chief of Staff for Certificate-Flow-Film, session F2: the remaining audit fixes and the single final re-render for v1.1.0. No subagents, at most 8 images. Do NOT tag or release anything: session F3 does that after a re-audit.
 
-1. Read docs\PROJECT-STATE.md. In docs\AUDIT-v1.md read the "F1 status" table, both "F3 targeted re-audit" records, Section 7 and Appendix A. Read each finding's own section only when you fix it. Do not re-read the spec documents.
+1. Read docs\PROJECT-STATE.md. In docs\history\AUDIT-v1.md read the "F1 status" table, both "F3 targeted re-audit" records, Section 7 and Appendix A. Read each finding's own section only when you fix it. Do not re-read the spec documents.
 2. Fix in this order. One commit per finding, pushed. Every testable fix gets a test named after its finding ID in tests\test_audit_v1.py. `python -m tools verify` must be green after each group.
    a. Camera: V1-CIN-01, V1-CIN-02, V1-CIN-05, V1-PKI-04, V1-PKI-05, V1-CIN-06.
    b. Signs: V1-LEG-03, then V1-LEG-05, then V1-LEG-02. Lower CROSSING_LIMIT to 0.02 in tests\test_gan_findings_stage1.py (the V1-LEG-04 residual).
    c. Small: V1-PKI-06, V1-CIN-07, V1-COL-01, V1-AUD-01, V1-AUD-02, and V1-CIN-03 step 1 only.
-   If a target cannot be reached, do not relax a test silently: keep the best passing value and record the achieved number in docs\GAN-LEDGER.md as a residual.
+   If a target cannot be reached, do not relax a test silently: keep the best passing value and record the achieved number in docs\history\GAN-LEDGER.md as a residual.
 3. `python -m tools render --tier animatic --rebuild`. Review 1 contact sheet and 3 strips (54 s, 62 s, 100 s). Fix what the tests missed.
 4. Delete renders\final\beauty, renders\final\signs and renders\final\captions (gitignored build output). Run `python -m tools render --tier final --rebuild` in the background (300-frame chunks) and record progress in PROJECT-STATE. Then `python -m tools audio`, `python -m tools encode`, `python scripts\build_site.py`.
 5. Set MP4_PENDING_RERENDER = False in tools\verify.py. `python -m tools verify` must be GREEN with no PENDING line: f1246 and f1396 are not blends, ffprobe shows level <= 41 and color_transfer=bt709.
@@ -443,18 +443,18 @@ You are the Chief of Staff for Certificate-Flow-Film, session F2: the remaining 
 ## Session L1 — v1.2 look pass + the single final render (after v1.1.0)
 **Model: Sonnet 5.5 · Effort: High** (lean mode: no subagents, no GAN rounds)
 
-Added on 2026-11-14 by session F3. The plan is `docs\LOOK-PLAN-v1.2.md`. Run L1 once, then L2.
+Added on 2026-11-14 by session F3. The plan is `docs\history\LOOK-PLAN-v1.2.md`. Run L1 once, then L2.
 
 ```
 You are the Chief of Staff for Certificate-Flow-Film, session L1: the v1.2 look pass. No subagents, at most 6 images. Do NOT tag or release anything: session L2 does that after a re-audit.
 
-1. Read docs\PROJECT-STATE.md and docs\LOOK-PLAN-v1.2.md. Read a source file only when its item names it. Do not re-read the spec documents.
+1. Read docs\PROJECT-STATE.md and docs\history\LOOK-PLAN-v1.2.md. Read a source file only when its item names it. Do not re-read the spec documents.
 2. Follow the plan exactly. It gives every value and every rule; where it says "stop", stop and record the value. Do not tune by eye.
 3. Work order: Item A, C, E, B (second change), D, F. One commit per item, pushed, with `python -m tools verify --skip-blender` green; full `python -m tools verify` after A and after E.
 4. Stills-and-strips gate (plan Section 5): `python -m tools build --tier final`, `python -m tools look-test`, view the 2 images named there. Test frames go to renders\look-test, never to renders\final. At most three attempts.
 5. Only if the gate passes: commit everything, delete renders\final\beauty, renders\final\signs and renders\final\captions, run `python -m tools render --tier final --rebuild` in the background (300-frame chunks, progress in PROJECT-STATE), then `python -m tools audio`, `python -m tools encode`, `python scripts\build_site.py`, `python -m tools verify`. This is the only full render.
 6. View the final contact sheet, a strip of f2700-2710 and the poster. Record the per-beat luma and the luma steps of the Final MP4 (plan Appendix A).
-7. Record rulings, gate numbers and stop-rule values in docs\GAN-LEDGER.md "Session L1"; record the phase in docs\CHIEF-OF-STAFF-APPROVALS.md. Commit, push, `python -m tools sync-check`. Set PROJECT-STATE "Next session" to L2. Report in at most 8 lines.
+7. Record rulings, gate numbers and stop-rule values in docs\history\GAN-LEDGER.md "Session L1"; record the phase in docs\history\CHIEF-OF-STAFF-APPROVALS.md. Commit, push, `python -m tools sync-check`. Set PROJECT-STATE "Next session" to L2. Report in at most 8 lines.
 If the gate fails three times, or usage runs short, record the exact state and stop.
 ```
 
@@ -464,7 +464,7 @@ If the gate fails three times, or usage runs short, record the exact state and s
 ```
 You are the Chief of Staff for Certificate-Flow-Film, session L2: a targeted re-audit of the v1.2 film and its release. No subagents, at most 8 images.
 
-1. Read docs\PROJECT-STATE.md, docs\LOOK-PLAN-v1.2.md and the "Session L1" entry of docs\GAN-LEDGER.md.
+1. Read docs\PROJECT-STATE.md, docs\history\LOOK-PLAN-v1.2.md and the "Session L1" entry of docs\history\GAN-LEDGER.md.
 2. Re-run `python -m tools verify` and ffprobe. Record the Final MP4 SHA-256.
 3. Check every plan item on the film at its timestamps (hero 98-104 s, flash 81.0 s and 90.0-90.3 s, cut at 46.5 s, proof tag 50.9-52.7 s, the ten focal beats), plus one full-film contact sheet for regressions and every v1.1.0 fix that the look could have broken (sign legibility over haze, caption contrast, cut frames, the trust store being gold before docking). PASS or FAIL per item.
 4. Judge V1-CIN-03 on the frames: is the grey-box look closed? Give PKI, legibility and cinema scores.
@@ -481,7 +481,7 @@ You are the Chief of Staff for Certificate-Flow-Film, session L2: a targeted re-
 ```
 You are the Chief of Staff for Certificate-Flow-Film, session V3 audit: a targeted re-audit of the v1.3 film. No subagents, at most 8 images.
 
-1. Read docs\PROJECT-STATE.md and the "Session V3" entry of docs\GAN-LEDGER.md.
+1. Read docs\PROJECT-STATE.md and the "Session V3" entry of docs\history\GAN-LEDGER.md.
 2. Re-run `python -m tools verify` and ffprobe. Confirm the Final MP4 SHA-256 recorded in PROJECT-STATE.
 3. Judge each V3 item on the film at its timestamps: luma steps at 24.8 s, 45.8 s and 51.1 s (L2-CIN-01); server interior 14-24 s and 73-76 s and the CA vaults 29-36 s and 82-90 s (look, no grey-box, no flicker; V3-CIN-01 frames f477, f595, f600, f671, f705, f719); hero 98.5-104 s (whole topology with the user, mean luma >= 50); proof tag 50.9-53.0 s (readable, accurate to F-10). Plus one full-film contact sheet for regressions. PASS or FAIL per item; rule on V3-R1..R3.
 4. Give PKI, legibility and cinema scores. If any BLOCKER or MAJOR fails: write exact fixes and stop without a release.
@@ -497,7 +497,7 @@ You are the Chief of Staff for Certificate-Flow-Film, session V3 audit: a target
 ```
 You are the Chief of Staff for Certificate-Flow-Film, session V4 audit: a full audit of the V4 film (v1.3 finishing pass + MALAWI rename + realistic user character). No subagents, at most 10 images.
 
-1. Read docs\PROJECT-STATE.md and the "Session V3" and "Session V4" entries of docs\GAN-LEDGER.md (amendments V4-A1, V4-A2).
+1. Read docs\PROJECT-STATE.md and the "Session V3" and "Session V4" entries of docs\history\GAN-LEDGER.md (amendments V4-A1, V4-A2).
 2. Re-run `python -m tools verify` and ffprobe. Confirm the Final MP4 SHA-256 recorded in PROJECT-STATE.
 3. Judge on the film: every V3 item (as in the "Session V3 audit" prompt above); the rename (no earlier lab name in any sign, caption or card; MALAWI names correct and accurate to F-01..F-17); the user character at 0-6 s, 10-13 s, 50-71 s and 93.5-109 s (realistic, not uncanny, seated with hands on the keys, typing, breathing, head turns to the screen and the session windows, lit to fit the scene, no intersections); the re-render seams at f187/188, f288/289, f387/388, f1510/1511, f2121/2122, f2803/2804; the character licences (assets\character.manifest.json, LICENSES\CC0-1.0.txt, README). Plus one full-film contact sheet. PASS or FAIL per item.
 4. Give PKI, legibility and cinema scores. If any BLOCKER or MAJOR fails: write exact fixes and stop without a release.
@@ -513,7 +513,7 @@ You are the Chief of Staff for Certificate-Flow-Film, session V4 audit: a full a
 ```
 You are the Chief of Staff for Certificate-Flow-Film, session V5b: the realistic hardware and world from V5a (amendment V5-A1) at the final tier, then the full final render. No subagents, at most 10 images.
 
-1. Read docs\PROJECT-STATE.md, CLAUDE.md and the "Session V5a" entry of docs\GAN-LEDGER.md (amendment V5-A1, the open items). Verify green and sync OK before any change.
+1. Read docs\PROJECT-STATE.md, CLAUDE.md and the "Session V5a" entry of docs\history\GAN-LEDGER.md (amendment V5-A1, the open items). Verify green and sync OK before any change.
 2. Final-tier look gate on stills and strips before any full render (`python -m tools build --tier final`, `python -m tools look-test`): the realistic world changed every beauty frame and the camera where the AD rack is focal. Measure B-09.2 mean luma (>= 50), the L2-CIN-01 frames (f746, f1376, f1534/1535), the V3-CIN-01 frames (f477, f595, f600, f671, f705, f719), the cut frames, and the flashback. Watch for shadow-pool overflow (V3-CIN-01): every new light stays shadowless. Fix until the gate passes; never by dimming the scene or moving content out of frame.
 3. Full final render: beauty and signs for the whole film (the AD labels moved with the 2.2 m rack, and the camera changed where the AD is focal); captions and audio only if their inputs changed. Background chunks of about 300 frames, resumable; record progress in PROJECT-STATE.
 4. Encode, `python -m tools verify` (all in-Blender checks incl. shell_bounds and root_no_cables; MP4 luma gate), one final contact sheet. No release: the next session audits.
@@ -528,7 +528,7 @@ You are the Chief of Staff for Certificate-Flow-Film, session V5b: the realistic
 ```
 You are the Chief of Staff for Certificate-Flow-Film, session V5 audit: a full audit of the V5 film (V5a realistic hardware and world, V5b PKI iconography and polish). No subagents, at most 10 images.
 
-1. Read docs\PROJECT-STATE.md, CLAUDE.md and the "Session V5a" and "Session V5b" entries of docs\GAN-LEDGER.md (amendment V5-A1; rulings V5B-R1, V5B-R2; open V5B-CIN-03, V5B-OBS-01).
+1. Read docs\PROJECT-STATE.md, CLAUDE.md and the "Session V5a" and "Session V5b" entries of docs\history\GAN-LEDGER.md (amendment V5-A1; rulings V5B-R1, V5B-R2; open V5B-CIN-03, V5B-OBS-01).
 2. Re-run `python -m tools verify` and ffprobe. Confirm the Final MP4 SHA-256 recorded in PROJECT-STATE (`ce4cf1fb…15d9`).
 3. Judge on the film, PASS or FAIL per item: the realistic world (racks, datacenter, gold cage, HSM, laptop; no vendor marks); the iconography (qa\v5b\icon-legend.png against the film: issuer-coloured seals, CA badge only on CA certificates, self-closing seal only on self-signed ones, locked private vs open public key, signature marks, struck CRL, chain links, check marks; readable at 1080p, L-01; inside the palette, C-10); every PKI beat ACCURATE against F-01..F-17; lighting continuity and the luma steps (rule V5B-CIN-03 and V5B-OBS-01: finding or not); the cuts, the hero and the title card; the re-render seams at f1238/1253, f1388/1403, f1907/1952. Plus one full-film contact sheet.
 4. Give PKI, legibility and cinema scores. If any BLOCKER or MAJOR fails: write exact fixes and stop without a release.
@@ -559,7 +559,7 @@ You are the Chief of Staff for Certificate-Flow-Film, running an ESCALATION sess
 
 PRE-FLIGHT
 - Confirm you are running on Opus 5.5. If not, stop and tell me to switch.
-- Read CLAUDE.md, docs\PROJECT-STATE.md (the escalation record), docs\GAN-LEDGER.md, and the BUILD-CHARTER sections relevant to the blocked session.
+- Read CLAUDE.md, docs\PROJECT-STATE.md (the escalation record), docs\history\GAN-LEDGER.md, and the BUILD-CHARTER sections relevant to the blocked session.
 
 SCOPE
 1. Diagnose the root cause of the escalation, using the evidence, not assumptions.

@@ -198,7 +198,7 @@ def _list_span(ids: tuple[str, ...]) -> tuple[int, int]:
 def fixed_list_positions() -> dict[str, tuple[float, float]]:
     """Check-list row -> (left x, centre y) on the 1080p frame, one fixed place per list for its whole life (V1-LEG-03).
 
-    Appendix A.3 of docs/AUDIT-v1.md: a deterministic grid search over title-safe for the block that is blocked (by the
+    Appendix A.3 of docs/history/AUDIT-v1.md: a deterministic grid search over title-safe for the block that is blocked (by the
     focal subject, a capsule, card or private key, or a caption band) on the fewest frames, nearest the mean screen
     position of the list's first tick slot. Rows keep their slot even while earlier rows are not yet shown."""
     timeline = choreography.build_timeline()

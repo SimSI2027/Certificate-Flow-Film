@@ -1,4 +1,4 @@
-"""Static checks for the v1.2 materials and lighting pass (docs/LOOK-PLAN-v1.2.md). No Blender needed. Test names carry the finding ID."""
+"""Static checks for the v1.2 materials and lighting pass (docs/history/LOOK-PLAN-v1.2.md). No Blender needed. Test names carry the finding ID."""
 # ruff: noqa: N802
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from cff.story.model import ColourRole
 from cff.theme import colour, look, palette, render
 
 ROOT = Path(__file__).resolve().parents[1]
-# Ruling L1-R1 (docs/GAN-LEDGER.md "Session L1"): the plan said 25 dE2000, but its own gold root pool (15.9 from REVOCATION, as close as
+# Ruling L1-R1 (docs/history/GAN-LEDGER.md "Session L1"): the plan said 25 dE2000, but its own gold root pool (15.9 from REVOCATION, as close as
 # the root's identity colour itself) cannot reach that. The project's existing role-separation floor applies instead.
 STATE_DE_MIN = palette.L07_MIN_DELTA_E
 

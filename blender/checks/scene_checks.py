@@ -694,7 +694,7 @@ def check_provenance() -> Result:
 
 
 def check_pool_lights() -> Result:
-    """v1.2 look: exactly one static pool light per actor in ``look.POOLS``; none is animated (docs/LOOK-PLAN-v1.2.md, Item A7)."""
+    """v1.2 look: exactly one static pool light per actor in ``look.POOLS``; none is animated (docs/history/LOOK-PLAN-v1.2.md, Item A7)."""
     r = Result("pool_lights")
     pools = [o for o in bpy.data.objects if o.name.startswith("LIGHT-pool-")]
     if len(pools) != len(look.POOLS):

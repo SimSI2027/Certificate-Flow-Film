@@ -1,6 +1,6 @@
 """Hard tests learned from accepted GAN findings (Charter 2.4 step 7). Never delete these.
 
-Each test is named after the finding ID it encodes; see docs/GAN-LEDGER.md.
+Each test is named after the finding ID it encodes; see docs/history/GAN-LEDGER.md.
 """
 
 from __future__ import annotations

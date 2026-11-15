@@ -1,4 +1,4 @@
-"""``python -m tools look-test``: the stills-and-strips gate of docs/LOOK-PLAN-v1.2.md, Section 5.
+"""``python -m tools look-test``: the stills-and-strips gate of docs/history/LOOK-PLAN-v1.2.md, Section 5.
 
 Renders the beauty pass at the final tier into ``renders/look-test`` (never ``renders/final``: the final render skips frames that
 are already on disk), measures them with ``signalstats`` and prints PASS or FAIL for the checks of Items A and C and the haze

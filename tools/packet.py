@@ -23,7 +23,7 @@ from tools import frames, toolchain
 
 ROOT = Path(__file__).resolve().parents[1]
 FILM_BLEND = ROOT / "renders" / "film.blend"
-ROUNDS = ROOT / "qa" / "rounds"
+ROUNDS = ROOT / "docs" / "history" / "rounds"  # every round packet, past and future, lives with the process history
 SCHEMA = ROOT / "qa" / "schema.json"
 REGRESSIONS = ROOT / "qa" / "regressions.json"
 SPEC = ROOT / "docs" / "REFERENCE-SPEC.md"

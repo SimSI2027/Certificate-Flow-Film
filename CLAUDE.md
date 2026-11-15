@@ -33,11 +33,11 @@ Never read, modify or depend on the Approach A project (`Certificate-Flow-Animat
 
 ## Quality control (GAN loop)
 - Hard discriminators (`python -m tools verify`) are persistent. Never delete a useful test. Every accepted BLOCKER/MAJOR that can be tested becomes a test named after its finding ID.
-- Round protocol: candidate commit -> `tools packet` (no source, no commit messages, no generator claims) -> three fresh read-only discriminators in parallel (`pki-discriminator` opus; `cinema-` and `legibility-discriminator` sonnet) -> `tools verify` -> Chief of Staff triage -> fixes -> ledger entry in `docs\GAN-LEDGER.md`.
+- Round protocol: candidate commit -> `tools packet` (no source, no commit messages, no generator claims) -> three fresh read-only discriminators in parallel (`pki-discriminator` opus; `cinema-` and `legibility-discriminator` sonnet) -> `tools verify` -> Chief of Staff triage -> fixes -> ledger entry in `docs\history\GAN-LEDGER.md`.
 - Gate: 0 BLOCKER, 0 MAJOR, scores >= 8, all PKI beats ACCURATE, hard tests green. Stage 4 needs two consecutive clean rounds with fresh instances. Cap 5 rounds per stage; open BLOCKER/MAJOR never ships.
 - Anti-gaming: never win by deleting or merging beats, shrinking captions, moving content out of frame, cutting checks or dimming the scene. Aim at the frozen spec, not at discriminator wording.
 - Frozen-spec change control: `docs\REFERENCE-SPEC.md` changes only by written Chief of Staff amendment in the ledger with a new SHA-256; the stage's clean-round counter resets. The generator never edits the spec to remove a finding.
-- Chief of Staff approval: record every phase in `docs\CHIEF-OF-STAFF-APPROVALS.md` with real test results and commit/sync. Never auto-approve a first attempt. Never claim placeholders, uninspected output, fake results, invented URLs or unsynced GitHub state.
+- Chief of Staff approval: record every phase in `docs\history\CHIEF-OF-STAFF-APPROVALS.md` with real test results and commit/sync. Never auto-approve a first attempt. Never claim placeholders, uninspected output, fake results, invented URLs or unsynced GitHub state.
 
 ## Delivery
 - After every milestone: commit related changes only, push to `origin/main`, run `python -m tools sync-check` (local HEAD == origin/main), update and push `docs\PROJECT-STATE.md`. Never accumulate the project into one commit.

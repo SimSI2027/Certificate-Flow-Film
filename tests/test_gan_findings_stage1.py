@@ -1,6 +1,6 @@
 """Hard tests learned from the accepted Stage 1 findings (Charter 2.4 step 7). Never delete these.
 
-Each test is named after the finding it encodes; see docs/GAN-LEDGER.md, stage1-R1. In-Blender counterparts live in
+Each test is named after the finding it encodes; see docs/history/GAN-LEDGER.md, stage1-R1. In-Blender counterparts live in
 ``blender/checks/scene_checks.py`` (``fonts``, ``text_materials``, ``signs``).
 """
 

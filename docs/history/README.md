@@ -1,0 +1,1 @@
+Process history of Certificate-Flow-Film (the GAN ledger, Chief of Staff approvals, the v1 audit, the v1.2 look plan, earlier project state and the review round packets), kept as written; the frozen `docs\REFERENCE-SPEC.md` still calls the ledger `docs/GAN-LEDGER.md`, which is `GAN-LEDGER.md` here.

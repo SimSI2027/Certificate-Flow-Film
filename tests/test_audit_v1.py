@@ -1,4 +1,4 @@
-"""Regression tests for the v1 audit (docs/AUDIT-v1.md), session F1. Each test is named after its finding ID."""
+"""Regression tests for the v1 audit (docs/history/AUDIT-v1.md), session F1. Each test is named after its finding ID."""
 
 from __future__ import annotations
 
@@ -269,7 +269,7 @@ HERO_ARRIVED_FRAMES = 60  # kept; v1.3 is stricter: tests/test_v13.py wants ever
 def test_V1_CIN_02_hero_paths_burn_at_peak() -> None:  # noqa: N802
     """Step 4 (brightness): both green channels and the trust paths and links reach GLOW_PEAK by the end of B-09.2.
 
-    Residual (docs/GAN-LEDGER.md, session F2): the final-tier B-09.2 mean YAVG is 38.4 (target 50); more light needs
+    Residual (docs/history/GAN-LEDGER.md, session F2): the final-tier B-09.2 mean YAVG is 38.4 (target 50); more light needs
     world or lamp energy, which belongs to V1-CIN-03."""
     from cff.story.model import ColourRole  # noqa: PLC0415
     from cff.theme import palette  # noqa: PLC0415

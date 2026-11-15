@@ -93,7 +93,7 @@ Derived values (compute, never hard-code):
 - the legibility criteria **L-01…L-08** (2.6)
 - the glossary (`docs\GLOSSARY.md`)
 
-At the end of Stage 0, record its SHA-256 in `docs\GAN-LEDGER.md`.
+At the end of Stage 0, record its SHA-256 in `docs\history\GAN-LEDGER.md`.
 
 **Change control after the freeze:**
 - Any change needs a written amendment from the Chief of Staff, giving the reason, in the ledger.
@@ -170,7 +170,7 @@ Score each criterion 0-10. Re-check regressions.json. Output only the JSON repor
 ### 2.4 Round protocol
 
 1. **Generator builds a candidate** for the current stage and commits it locally (the commit hash is the candidate ID).
-2. **Packet.** `python -m tools packet <stage>` assembles `qa\rounds\<stage>-R<n>\` containing:
+2. **Packet.** `python -m tools packet <stage>` assembles `docs\history\rounds\<stage>-R<n>\` containing:
    - the frames
    - motion strips (tiled frames sampled every 3rd frame across every transition and camera move)
    - `manifest.json` (frame ↔ beat ID ↔ timestamp; caption timings; measured text bounds; contrast samples; palette results)
@@ -188,7 +188,7 @@ Score each criterion 0-10. Re-check regressions.json. Output only the JSON repor
    Rejecting a PKI BLOCKER also needs a second, fresh `pki-discriminator` to concur. Severity may not be downgraded without written justification.
 6. **Generator fixes** all accepted findings.
 7. **Learned → hard.** Every accepted BLOCKER/MAJOR that can be expressed geometrically, temporally or textually becomes a permanent automated test named after its finding ID.
-8. **Ledger.** Append the round to `docs\GAN-LEDGER.md`:
+8. **Ledger.** Append the round to `docs\history\GAN-LEDGER.md`:
    - candidate commit, spec hash
    - counts per severity, scores per criterion
    - accepted and rejected findings with reasons
@@ -293,11 +293,11 @@ Implement `python -m tools calibrate <fault>`. It builds deliberately broken var
 - If anything misses a fault, strengthen that discriminator's prompt or test and re-calibrate.
 - Calibration code paths only run under the explicit `calibrate` command. Tests confirm that normal builds never enable a fault.
 
-Record the results in `docs\GAN-LEDGER.md`.
+Record the results in `docs\history\GAN-LEDGER.md`.
 
 ### 2.9 Chief of Staff approvals
 
-For each phase, record the following in `docs\CHIEF-OF-STAFF-APPROVALS.md`:
+For each phase, record the following in `docs\history\CHIEF-OF-STAFF-APPROVALS.md`:
 - phase, scope, acceptance criteria
 - review performed
 - problems found and corrections made
@@ -442,7 +442,7 @@ Script errors must fail the process. `--factory-startup` ignores user preference
 1. Run `git init` with default branch `main`.
 2. Add `.gitignore`. It must ignore:
    - `.venv`
-   - `renders\`, `qa\rounds\**\frames`
+   - `renders\`, `docs\history\rounds\**\frames`
    - generated `.blend` files
    - `output\*.mp4`
    - `config\toolchain.local.json`
@@ -621,7 +621,7 @@ Timings are named constants in seconds, converted to frames via FPS in `cff\stor
 
 ## 8. LOOK AND WORLD (Blender)
 
-- **World.** Amendment V5-A1 (2026-11-14, owner request; `docs\GAN-LEDGER.md` "Session V5a"): hardware and environment move from grey-box to realistic. Every model is still built procedurally in code (`bpy`, `bmesh`, materials), at the detail of the V4 character:
+- **World.** Amendment V5-A1 (2026-11-14, owner request; `docs\history\GAN-LEDGER.md` "Session V5a"): hardware and environment move from grey-box to realistic. Every model is still built procedurally in code (`bpy`, `bmesh`, materials), at the detail of the V4 character:
   - a dim datacenter: rows of racks, a raised floor of 0.6 m tiles with perforated airflow tiles, overhead cable trays, cold-aisle light fixtures, restrained volumetric haze
   - real hardware: a thin generic laptop showing the RDP client; 1U/2U rack servers with bezels, drive bays, status LEDs and rear cabling for the RDP and web servers; the AD/DC node as a rack in steel blue; the issuing CAs as secured enclosures of CA server racks with an HSM-style key module, in cyan and violet; the Root CA as an offline, air-gapped machine in a locked gold cage on its own plinth, with no network cable
   - light-channel conduits in the floor (the network channels and CA routes keep their meaning)
@@ -630,7 +630,7 @@ Timings are named constants in seconds, converted to frames via FPS in `cff\stor
 
   Identity and state colours keep their meaning (C-10): physical finishes are neutral palette tokens; role colours sit on accents and the glow channel. The PKI hard checks measure declared shell boxes (`cff\stage\hardware.py`), and a check proves every detailed mesh stays inside its box.
 
-  "Windows-style" infrastructure must be generic. **No Microsoft, Windows or other vendor logos or trademarks**, and no brand marks or text on any hardware. No external models, HDRIs or footage. Exceptions: the user character (amendment V4-A2, 2026-11-14, owner request; `docs\GAN-LEDGER.md` "Session V4"), a realistic adult office worker generated with the MPFB add-on from CC0 MakeHuman assets, saved locally as `assets\character.blend` and loaded at build time, with skin and cloth slightly stylized; and CC0 PBR textures from ambientCG or Poly Haven (amendment V5-A1), stored in `assets\textures\` with a manifest, kept small (`assets\` under about 150 MB). Nothing is downloaded at build or render time. Each asset's licence is recorded in `LICENSES\` and `README.md`.
+  "Windows-style" infrastructure must be generic. **No Microsoft, Windows or other vendor logos or trademarks**, and no brand marks or text on any hardware. No external models, HDRIs or footage. Exceptions: the user character (amendment V4-A2, 2026-11-14, owner request; `docs\history\GAN-LEDGER.md` "Session V4"), a realistic adult office worker generated with the MPFB add-on from CC0 MakeHuman assets, saved locally as `assets\character.blend` and loaded at build time, with skin and cloth slightly stylized; and CC0 PBR textures from ambientCG or Poly Haven (amendment V5-A1), stored in `assets\textures\` with a manifest, kept small (`assets\` under about 150 MB). Nothing is downloaded at build or render time. Each asset's licence is recorded in `LICENSES\` and `README.md`.
 - **Camera.**
   - One rig: a dolly/crane path with a "look-at" target and an animated focus target.
   - Real lens values (24–50 mm).
@@ -911,8 +911,8 @@ Do not commit the full MP4 (GitHub blocks files over 100 MB). Ship it as a relea
 - `REFERENCE-SPEC.md`
 - `TRACEABILITY.md`
 - `GAN-FRAMEWORK.md` (how the loop works, with roles, schema, severities, gates and calibration)
-- `GAN-LEDGER.md`
-- `CHIEF-OF-STAFF-APPROVALS.md`
+- `history\GAN-LEDGER.md`
+- `history\CHIEF-OF-STAFF-APPROVALS.md`
 - `LOOK-BIBLE.md`
 - `RENDER-BUDGET.md`
 - `TOOLCHAIN.md`

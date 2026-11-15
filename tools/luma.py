@@ -1,4 +1,4 @@
-"""Luma measurement (docs/LOOK-PLAN-v1.2.md, Appendix A): FFmpeg ``signalstats`` on PNG stills and on the Final MP4.
+"""Luma measurement (docs/history/LOOK-PLAN-v1.2.md, Appendix A): FFmpeg ``signalstats`` on PNG stills and on the Final MP4.
 
 Stills are converted the way the encode does (BT.709, video range, 8-bit) so that YAVG on a PNG matches YAVG on the MP4.
 Film frame numbers are 1-based, as in the render folders.

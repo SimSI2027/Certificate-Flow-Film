@@ -48,7 +48,7 @@ def _spot(name: str, hex_colour: str, collection: bpy.types.Collection, target: 
 
 
 def build_pools(collection: bpy.types.Collection) -> None:
-    """One static spot above each actor in its own pale identity tint. Never animated (docs/LOOK-PLAN-v1.2.md, Item A4)."""
+    """One static spot above each actor in its own pale identity tint. Never animated (docs/history/LOOK-PLAN-v1.2.md, Item A4)."""
     for name, anchor, token, relative in look.POOLS:
         light_name = f"{POOL_PREFIX}{name}"
         data = bpy.data.lights.new(light_name, "SPOT")

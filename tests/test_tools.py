@@ -93,7 +93,9 @@ def test_packet_locator_is_measurement_only_with_no_pass_or_fail_claims() -> Non
     keys = {k.value for n in ast.walk(tree) if isinstance(n, ast.Dict) for k in n.keys if isinstance(k, ast.Constant)}
     assert keys == LOCATOR_KEYS
     assert "Measured object positions" in packet.STAGE1_README and "locator.json" in packet.STAGE1_README
-    for path in (toolchain.ROOT / "qa").rglob("locator.json"):  # every locator already shipped in a packet
+    shipped = [*(toolchain.ROOT / "qa").rglob("locator.json"), *packet.ROUNDS.rglob("locator.json")]
+    assert shipped
+    for path in shipped:  # every locator already shipped in a packet (calibration packets and round packets)
         data = json.loads(path.read_text(encoding="utf-8"))
         assert not CLAIM_WORDS.search(str(data["description"])), path
         assert set(data) == {"description", "frame_size_px", "objects", "frames"}, path

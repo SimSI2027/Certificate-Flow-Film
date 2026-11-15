@@ -1,4 +1,4 @@
-"""Look constants for the v1.2 materials and lighting pass (docs/LOOK-PLAN-v1.2.md). Colours live in cff.theme.palette."""
+"""Look constants for the v1.2 materials and lighting pass (docs/history/LOOK-PLAN-v1.2.md). Colours live in cff.theme.palette."""
 
 from __future__ import annotations
 

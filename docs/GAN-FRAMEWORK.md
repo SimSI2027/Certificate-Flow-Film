@@ -1,6 +1,6 @@
 # GAN framework
 
-How Certificate-Flow-Film's adversarial review loop works. The authority is `docs/BUILD-CHARTER.md`, Section 2. This page explains the loop and records how each stage applies it. Round results go in `docs/GAN-LEDGER.md`; phase decisions go in `docs/CHIEF-OF-STAFF-APPROVALS.md`.
+How Certificate-Flow-Film's adversarial review loop works. The authority is `docs/BUILD-CHARTER.md`, Section 2. This page explains the loop and records how each stage applies it. Round results go in `docs/history/GAN-LEDGER.md`; phase decisions go in `docs/history/CHIEF-OF-STAFF-APPROVALS.md`.
 
 ## Roles
 
@@ -33,7 +33,7 @@ They are spawned as **fresh instances** every round, in parallel, so they do not
 ## Round protocol
 
 1. **Candidate.** The generator commits the candidate locally. The commit hash is the candidate ID.
-2. **Packet.** `python -m tools packet <stage>` builds `qa/rounds/<stage>-R<n>/`. A packet is immutable once built.
+2. **Packet.** `python -m tools packet <stage>` builds `docs/history/rounds/<stage>-R<n>/`. A packet is immutable once built.
 3. **Judgement.** Fresh discriminators run in parallel, each pointed only at the packet path. Each JSON reply is saved verbatim in the packet folder.
 4. **Hard discriminators.** `python -m tools verify` runs on the same candidate.
 5. **Triage.** The Chief of Staff marks every finding as either:
@@ -43,7 +43,7 @@ They are spawned as **fresh instances** every round, in parallel, so they do not
    Rejecting a PKI BLOCKER also needs a second, fresh `pki-discriminator` to concur. Severity may not be downgraded without written justification.
 6. **Fixes.** The generator fixes every accepted finding.
 7. **Learned → hard.** Every accepted BLOCKER or MAJOR that can be expressed geometrically, temporally or textually becomes a permanent automated test named after its finding ID (for example `test_PKI_S0R1_003_...`).
-8. **Ledger.** The round is appended to `docs/GAN-LEDGER.md`:
+8. **Ledger.** The round is appended to `docs/history/GAN-LEDGER.md`:
    - candidate commit and spec hash
    - counts per severity and scores per criterion
    - accepted and rejected findings, with reasons

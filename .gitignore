@@ -10,8 +10,8 @@ __pycache__/
 
 # Generated render artefacts
 renders/
-qa/rounds/**/frames/
-qa/rounds/**/strips/
+docs/history/rounds/**/frames/
+docs/history/rounds/**/strips/
 qa/calibration/**/frames/
 qa/calibration/**/strips/
 output/animatic/
