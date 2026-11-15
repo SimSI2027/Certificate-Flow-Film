@@ -575,3 +575,15 @@ The 14 shapes (assemblies where the film shows them as one: CA vault + crown, ke
 - Full-film MP4 luma scan: steps over 4.0 outside the cuts only f2454 6.4, f2455 5.5; cuts 1.6 / 15.3 (by design); B-09.2 mean 58.8; film mean 57.4.
 - **Final MP4 SHA-256 `ce4cf1fb12fa71d35237463506069c5f80c06b2c6ff15722dc69be43646f15d9`**, 110.6 MB, render commit 2666bad, `dirty: false`.
 - Images: icon legend x2, preview sheet, strips, step tiles, final sheet, 2 crops (8 of 10).
+
+## Session V5 audit (2026-11-14, `claude-fable-5-2`, High; lean mode, no subagents, 13 of 14 images): full audit and v1.3.0 release
+
+Full report: `docs\AUDIT-V5.md`. Film: Final MP4 `ce4cf1fb…15d9` (confirmed), spec hash `90d698fc…6fe8` (unchanged).
+
+- **Hard discriminators:** `python -m tools verify` VERIFY GREEN (pytest 232, 20 in-Blender checks, both tiers 3270/3270, MP4 on spec, true peak −1.2 dBFS, cut steps 0.5/0.1, luma gate PASS).
+- **Result: 0 BLOCKER, 0 MAJOR, 10 MINOR; 33 of 33 PKI beats ACCURATE.** Scores: PKI 9, icons 8.5, realism 8, presentation 7.5, legibility 8.5. The session gate (no BLOCKER, no MAJOR) is met; presentation is 0.5 under the charter's score gate of 8.
+- **Rulings:**
+  - **V5A-R1 (V5B-CIN-03):** accepted as MINOR, no fix for release. The camera passes through CA 2's lit doorway; luma falls 64.0 → 44.7 over f2451–2456 and stays flat (one-way, no rebound).
+  - **V5A-R2 (V5B-OBS-01):** accepted as MINOR. The viewer still understands the root is already trusted: the gold store is there from frame 1, the root card is seen in it at 11.2 s, 52.0 s and 66–70 s, the sign reads "Installed earlier by policy", and check 1 reads "Chain ends at a trusted root".
+- **New MINOR findings:** V5A-LEG-01 (the "Self-signed" and "Unverified" tags sit about 600 px from the card, 10.4–12.1 s), V5A-LEG-02, V5A-ICO-01, V5A-ICO-02, V5A-PKI-01, V5A-REAL-01, V5A-CIN-02, V5A-CIN-03, V5A-CIN-04 (V5A-CIN-01 is V5B-CIN-03). None is testable as a hard gate without a design change; each has an item in `docs\ENHANCEMENTS-v1.4.md`.
+- **Release:** v1.3.0, public latest. The Stage 4 clean-round counter is unchanged (lean mode; no discriminator round ran).
