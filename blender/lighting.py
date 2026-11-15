@@ -81,16 +81,22 @@ def build_lights(collection: bpy.types.Collection, target: bpy.types.Object, pla
     rim = _spot(RIM_NAME, palette.RIM_LIGHT_HEX, collection, target, look.RIM_RADIUS_M, look.RIM_SPECULAR)
     writers = {n: FCurveWriter(o, f"{n}-rig") for n, o in ((KEY_NAME, key), (RIM_NAME, rim))}
     data_writers = {n: FCurveWriter(o.data, f"{n}-data") for n, o in ((KEY_NAME, key), (RIM_NAME, rim))}
-    frames = sorted(set(range(plan.frames()[0], plan.frames()[-1] + 1, LIGHT_KEY_STEP)) | set(plan.key_frames()))
+    cut_frames = set(plan.cut_frames)
+    frames = sorted(set(range(plan.frames()[0], plan.frames()[-1] + 1, LIGHT_KEY_STEP)) | set(plan.key_frames())
+                    | {c - 1 for c in cut_frames} | cut_frames)
     for frame in frames:
         state = plan.state(frame)
         placed = rig.rig_frame(state)  # kept out of the actors' bodies before keying, so the Bezier keys stay smooth (L2-CIN-01)
         scale = placed.power_scale
         radius = max(SPOT_MIN_RADIUS_M, SPOT_RADIUS_PER_DISTANCE * placed.distance)
+        # V5B-CIN-02: the rig cuts with the camera. A Bezier segment across a cut let the final tier's motion blur (shutter
+        # from the frame onward) see the lights travelling to their next-shot places during the last frame before the cut.
+        hold = (frame + 1) in cut_frames
         for name, light_pos, watts in ((KEY_NAME, placed.key, palette.KEY_LIGHT_POWER_W), (RIM_NAME, placed.rim, palette.RIM_LIGHT_POWER_W)):
-            writers[name].key("location", frame, light_pos, smooth=True)
-            data_writers[name].key("energy", frame, (watts * scale,), smooth=True)
+            writers[name].key("location", frame, light_pos, smooth=True, constant=hold)
+            data_writers[name].key("energy", frame, (watts * scale,), smooth=True, constant=hold)
             reach = lo.dist(light_pos, state.look)
-            data_writers[name].key("spot_size", frame, (min(math.radians(120.0), 2.0 * math.atan2(radius, max(reach, 1e-3))),), smooth=True)
+            data_writers[name].key("spot_size", frame, (min(math.radians(120.0), 2.0 * math.atan2(radius, max(reach, 1e-3))),), smooth=True,
+                                   constant=hold)
     for writer in (*writers.values(), *data_writers.values()):
         writer.finish()

@@ -11,6 +11,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+from cff.stage import hardware
 from cff.stage import layout as lo
 from cff.stage.camera import CamState
 from cff.stage.layout import Vec3
@@ -65,15 +66,31 @@ def clearance(x: float, y: float, solid: Solid) -> float:
     return (solid.top + look.RIG_KEEP_OUT_ABOVE_M) * weight
 
 
+def row_clearance(x: float, y: float, row: hardware.Row) -> float:
+    """V5B-CIN-01: the lowest height a rig light may have at (x, y) for a datacenter row pair (inner and outer racks with the hot
+    aisle between them): the rack top plus the clearance over the band, falling linearly to nothing over ``RIG_KEEP_OUT_RAMP_M``.
+    The rim light entered the west row's racks at f1922 (2.2 m high, x -19.0) and was cut off: a 12.6 luma step."""
+    dx, dy = x - row.start[0], y - row.start[1]
+    along = dx * row.along[0] + dy * row.along[1]
+    across = dx * row.facing[0] + dy * row.facing[1]  # 0 at the inner fronts, negative behind them
+    length = hardware.ROW_PITCH_M * row.count
+    depth = 2 * hardware.ROW_RACK_SIZE[1] + hardware.HOT_AISLE_M
+    out_along = max(0.0, -along, along - length)
+    out_across = max(0.0, -depth - across, across)
+    d = math.hypot(out_along, out_across)
+    weight = max(0.0, 1.0 - d / look.RIG_KEEP_OUT_RAMP_M)
+    return (hardware.ROW_RACK_SIZE[2] + look.RIG_KEEP_OUT_ABOVE_M) * weight
+
+
 def keep_out(point: Vec3) -> Vec3:
-    """``point`` lifted over every keep-out cylinder it lies in or near.
+    """``point`` lifted over every keep-out cylinder (and, V5b, every datacenter row) it lies in or near.
 
     A lift, not a sideways push: a radial push swings a light round the axis when its path passes near it (2.4 m in one
     frame at f1372), and pushing along the view direction jumps by a chord length where the path enters. The required
     height is a continuous function of (x, y), so a smooth camera move gives a smooth light path.
     """
     x, y, z = point
-    return (x, y, max([z, *(clearance(x, y, s) for s in SOLIDS)]))
+    return (x, y, max([z, *(clearance(x, y, s) for s in SOLIDS), *(row_clearance(x, y, r) for r in hardware.ROWS)]))
 
 
 def _ramp(value: float) -> float:

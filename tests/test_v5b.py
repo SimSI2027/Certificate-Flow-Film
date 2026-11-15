@@ -115,6 +115,35 @@ def test_V5B_PIPE_01_material_slots_are_claimed_per_primitive() -> None:  # noqa
             assert _calls(path) == [], f"{path.name}: use the primitives (p.cube) so material slots are claimed"
 
 
+@pytest.mark.covers("C-05", "C-06")
+def test_V5B_CIN_01_rig_lights_never_enter_a_datacenter_row() -> None:  # noqa: N802
+    from cff.stage import camera, choreography, hardware, rig  # noqa: PLC0415
+
+    plan = camera.CameraPlan(choreography.build_timeline())
+    from cff.theme import look  # noqa: PLC0415
+
+    over_band = hardware.ROW_RACK_SIZE[2] + look.RIG_KEEP_OUT_ABOVE_M  # the full clearance applies over the rack band itself
+    for frame in plan.frames():
+        placed = rig.rig_frame(plan.state(frame))
+        for light in (placed.key, placed.rim):
+            for row in hardware.ROWS:
+                needed = rig.row_clearance(light[0], light[1], row)
+                assert light[2] >= needed - 1e-9, f"frame {frame}: a rig light at {light} is below the {row.name} row's clearance"
+                if needed >= over_band - 1e-9:
+                    assert light[2] > hardware.ROW_RACK_SIZE[2], f"frame {frame}: a rig light at {light} is inside the {row.name} row"
+    f1922 = rig.rig_frame(plan.state(1922)).rim
+    assert f1922[2] > hardware.ROW_RACK_SIZE[2], "the rim that was cut off inside the west row at f1922 now passes over it"
+
+
+@pytest.mark.covers("C-02", "C-05")
+def test_V5B_CIN_02_rig_lights_cut_with_the_camera() -> None:  # noqa: N802
+    text = (ROOT / "blender" / "lighting.py").read_text(encoding="utf-8")
+    fn = text[text.index("def build_lights"):]
+    assert "hold = (frame + 1) in cut_frames" in fn
+    assert fn.count("constant=hold") == 3, "location, energy and spot size all step at the cuts"
+    assert "{c - 1 for c in cut_frames} | cut_frames" in fn, "both sides of each cut are keyed"
+
+
 @pytest.mark.covers("C-11")
 def test_V5B_ICON_05_symbols_are_original_and_sized_to_stay_apart() -> None:  # noqa: N802
     for rel in ICON_CODE:
