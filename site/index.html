@@ -24,7 +24,7 @@ li { margin:.2rem 0; }
 <main>
 <header>
 <h1>Certificate Flow Film</h1>
-<p class="muted">One continuous camera move, with a single flashback, through a stylised 3D world: how a certificate is requested, issued and trusted in an Active Directory Certificate Services PKI. 109 seconds, 1920&times;1080, 30 FPS, no narration.</p>
+<p class="muted">One continuous camera move, with a single flashback, through a 3D datacenter: how a certificate is requested, issued and trusted in an Active Directory Certificate Services PKI. 109 seconds, 1920&times;1080, 30 FPS, no narration.</p>
 </header>
 
 <section aria-labelledby="watch">
@@ -32,17 +32,17 @@ li { margin:.2rem 0; }
 <video controls preload="metadata" poster="poster.png" aria-describedby="watch-note">
 <source src="preview.mp4" type="video/mp4">
 <track kind="captions" src="captions.vtt" srclang="en" label="English captions (same text as on screen)">
-Your browser cannot play this video. <a href="https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.2.0">Download the full MP4</a>.
+Your browser cannot play this video. <a href="https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.3.0">Download the full MP4</a>.
 </video>
-<p id="watch-note" class="muted">This is the 720p preview with captions. <a href="https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.2.0">Full 1080p MP4 (release asset)</a>.</p>
-<p class="muted"><strong>Status: v1.2.0 is the current release.</strong> Audited on the rendered film: the PKI content and the on-screen text are accurate, and the look pass adds haze, pools of light, materials and a brighter closing wide shot. Some objects are still small on screen and two brief lighting pops remain; see the changelog.</p>
+<p id="watch-note" class="muted">This is the 720p preview with captions. <a href="https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.3.0">Full 1080p MP4 (release asset)</a>.</p>
+<p class="muted"><strong>Status: v1.3.0 is the current release.</strong> Audited on the rendered film: every PKI beat and all on-screen text are accurate. The world is a realistic datacenter with a seated user, server racks and an offline Root CA in a locked gold cage, and each PKI concept has one symbol. A few small polish items remain; see the changelog.</p>
 </section>
 
 <section aria-labelledby="what">
 <h2 id="what">What the film shows</h2>
 <div class="card">
-<p><strong>RDP path.</strong> The RDP server is issued a certificate from the <span class="path">RDPAuth</span> template by <span class="path">1SN0S Issuing CA 1</span>, whose CA certificate was signed offline by the <span class="path">1SN0S Root CA</span>. The client validates the whole chain up to the root it already trusts.</p>
-<p><strong>TLS path.</strong> The web server is issued a certificate from the <span class="path">WebServer-TLS</span> template by <span class="path">1SN0S Issuing CA 2</span>, signed by the same root.</p>
+<p><strong>RDP path.</strong> The RDP server is issued a certificate from the <span class="path">RDPAuth</span> template by <span class="path">MALAWI Issuing CA 1</span>, whose CA certificate was signed offline by the <span class="path">MALAWI Root CA</span>. The client validates the whole chain up to the root it already trusts.</p>
+<p><strong>TLS path.</strong> The web server is issued a certificate from the <span class="path">WebServer-TLS</span> template by <span class="path">MALAWI Issuing CA 2</span>, signed by the same root.</p>
 <p><strong>One trusted root.</strong> Different templates can use different issuing CAs, but trust always anchors at the single Root CA. The private key never leaves the machine that generated it: the request is signed with it, and the request carries only the public key.</p>
 </div>
 </section>
@@ -96,7 +96,7 @@ Your browser cannot play this video. <a href="https://github.com/SimSI2027/Certi
 <li><a href="https://github.com/SimSI2027/Certificate-Flow-Film">Repository</a></li>
 <li><a href="https://github.com/SimSI2027/Certificate-Flow-Film/blob/main/docs/PKI-TECHNICAL-NOTES.md">PKI technical notes</a></li>
 <li><a href="https://github.com/SimSI2027/Certificate-Flow-Film/blob/main/docs/STORYBOARD.md">Storyboard</a></li>
-<li><a href="https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.2.0">v1.2.0 current release (Final MP4, preview, poster, contact sheet, captions)</a></li>
+<li><a href="https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.3.0">v1.3.0 current release (Final MP4, preview, poster, contact sheet, captions)</a></li>
 <li><a href="https://github.com/SimSI2027/Certificate-Flow-Film/blob/main/CHANGELOG.md">Changelog and known limitations</a></li>
 <li>Related: <a href="https://github.com/SimSI2027/Certificate-Flow-Lab">Certificate-Flow-Lab</a> (<a href="https://simsi2027.github.io/Certificate-Flow-Lab/">demo</a>)</li>
 </ul>

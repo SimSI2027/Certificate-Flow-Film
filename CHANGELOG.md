@@ -1,55 +1,27 @@
 # Changelog
 
-## v1.2.0 (2026-11-14, current release)
+## v1.3.0 (2026-11-14, current release)
 
-The look release. Session L1 applied `docs\LOOK-PLAN-v1.2.md` and rendered the film once at the final tier; session L2 re-audited the rendered film: 0 BLOCKER, 0 MAJOR, every v1.1.0 fix intact, 33 of 33 PKI beats accurate. V1-CIN-03 (grey-box look) is closed. v1.1.0 is superseded.
+A 109 s, 1920x1080, 30 FPS film (H.264 High + AAC, captions only) that follows an ADCS certificate from request to trust. Audited on the rendered film (`docs\AUDIT-V5.md`): no blocker or major finding, 33 of 33 PKI beats accurate. Scores: PKI accuracy 9, icons 8.5, realism 8, presentation 7.5, legibility 8.5.
 
-Final MP4 SHA-256: `84097e10311daafa6b9d6b72bb94a31380357a82aee3006cf56536ad25093f44`.
+Final MP4 SHA-256: `ce4cf1fb12fa71d35237463506069c5f80c06b2c6ff15722dc69be43646f15d9`.
 
-Changed:
-- **Look (V1-CIN-03).** A night-time machine hall: thin blue haze with depth, a horizon glow instead of a black upper frame, a static pool of light over each actor in a pale tint of its identity colour, softer key and rim shadows, a dark slightly reflective floor, metallic neutrals, stronger bloom on the role colours. No pool light uses a state colour, and none animates.
-- **Hero shot (V1-CIN-02).** Mean luma of the closing wide shot 51.3, was 38.4 (target 50). Film mean 57.7, was 50.3.
-- **The white flash at 90 s and the step at 81 s (V1-CIN-06).** The web template badge rests at a low glow before the camera flies over it: steps 3.7 and 0.3, were 7.7 and 6.4.
-- **Focal size (V1-CIN-01).** Longer lenses (within 24–50 mm) in six beats and a larger AIA tag: B-01.2 84 px (was 78), B-02.3 103 (96), B-04.2 81 (65), B-05.2 75 (55), B-06.3 80 (53), B-07.4 73 (64).
-- **F3 MINORs.** The flashback marker ends at the cut (F3-LEG-01). AAC true peak −1.2 dBFS, was −0.6, and `verify` now fails above −1.0 (F3-AUD-01). `render-metadata.json` carries a `dirty` flag and `verify` rejects a dirty encode (F3-PIPE-02).
-- **Film grain** at encode (fixed seed), to hide banding in the haze.
+The film:
+- **Story.** An RDP server shows a self-signed certificate that the client cannot verify. Group Policy names the `RDPAuth` template; the server makes its key pair locally, signs a request and finds the right CA through Active Directory. Issuing CA 1 runs four checks and signs. The client validates the whole chain to a root it already trusts, including revocation for each link, and the connection turns green. A web server then repeats the path with `WebServer-TLS` and Issuing CA 2. Both paths end at one Root CA.
+- **PKI accuracy.** Private keys never leave their owners. Requests are signed, not the key sent. AD answers a lookup and never receives a request. The Root CA is offline: it signs only the issuing CA certificates, in a flashback of the setup ceremony. AIA can fetch a missing intermediate but never creates trust.
+- **World.** A night-time datacenter with haze and pools of light: a seated user at a laptop, server racks with devices behind perforated doors, an HSM and CA racks inside each issuing CA enclosure, and the Root CA as an offline machine in a locked gold cage on a concrete plinth, with no network cable. Rows of racks, cable trays and a raised floor surround the stage. All hardware is modelled in code, with three CC0 textures and no vendor marks.
+- **Symbols.** One symbol per concept, the same everywhere: certificate cards with a ribbon seal in the issuer's colour (cyan for Issuing CA 1, violet for Issuing CA 2, gold for the root); a shield badge on CA certificates only; a seal that closes on itself on the two self-signed certificates; a key locked in a padlock for private keys and an open key for public keys; a signature mark on each request and on the handshake proof; a list with a struck entry for each CRL; chain links for trust; ticks for validation checks.
+- **Camera and sound.** One continuous camera move with two clean cuts, into and out of the flashback. 13 captions, 54 in-world labels, 88 synthesised sound cues, −15.9 LUFS, true peak −1.2 dBFS.
+- **Names.** Domain `MALAWI.LAB`; `MALAWI Root CA`, `MALAWI Issuing CA 1`, `MALAWI Issuing CA 2`; hosts `rdp01.malawi.lab` and `portal.malawi.lab`.
 
-Known limitations:
-- **Shapes stay simple.** No bevels, textures or set dressing; the server interior (14–24 s) still reads mostly grey. Cinema estimate 7 of 10, so the charter's film gate (8) is not met.
-- **Lighting pops (L2-CIN-01, MINOR, new).** The camera-following rim light passes through the AD tower at 24.83 s (f746, luma step 8.0) and out of the Root CA complex at 45.83 s (f1376, step 10.6); its haze glow comes out from behind the root at 51.1 s (f1534–1535, 4.4 and 6.7). The step at 81.8 s (f2454–2455) is the camera passing the CA 2 doorway, not a defect.
-- **Focal size (V1-CIN-01 residuals).** Ten beats are still under the 150 px target (39–103 px); B-02.2, B-05.3 and B-08.3 cannot take a longer lens without breaking a camera or sign check.
-- **Hero timing (V1-CIN-02 residual).** The whole topology is in frame from about 101 s, not for most of the beat.
-- **Handshake proof unlabelled (F3-PKI-01, MINOR).** The label could hold only 36 of the 45 frames needed to read it, so it was removed; the proof is still shown as its own object.
-- **Process.** Lean mode: no discriminator round judged this film. Gate: `python -m tools verify` (pytest 200, 15 in-Blender checks) plus the L2 re-audit. Nobody has reviewed the audio by ear.
+Quality gate:
+- `python -m tools verify`: pytest 232, 20 in-Blender checks (including "no cable at the root", key containment and the greyscale silhouette test for the 14 shapes), both render tiers 3270 of 3270 frames, MP4 on spec.
+- A Chief of Staff audit of the rendered film, beat by beat and symbol by symbol.
 
-## v1.1.0 (2026-11-14, superseded by v1.2.0)
-
-The audit-fix release. v1.0.0 was audited (`docs\AUDIT-v1.md`: 0 BLOCKER, 16 MAJOR, 10 MINOR); every finding except the look (V1-CIN-03) was fixed in sessions F1 and F2, the final tier was fully re-rendered, and session F3 re-checked each fix on the rendered film before this release. v1.1.0 is a pre-release because V1-CIN-03 is still open. v1.0.0 is superseded.
-
-Final MP4 SHA-256: `2b56cee7b030528d6bf21cf864c74ced521cbc9c18ba170e7229704fd9d7f78e`.
-
-Fixed:
-- **Text on screen.** Signs are no longer motion-blurred (V1-LEG-01). Signs no longer jump or flash: 0 jumps over 96 px, 0 runs under 24 frames (V1-LEG-02; v1.0.0 had 51 and 29). Each check line appears when its own check starts, at one fixed place per list, with its own tick; "Revocation OK" stays pending amber until both CRL fetches have docked (V1-LEG-03). Name plates show only in the beats where they are read; signs cross the focal subject on 1.55% of sign frames, and no frame has more than 9 signs (V1-LEG-04; v1.0.0: 34.8% of frames, 15 signs). The two AIA tags hold longer (V1-LEG-05).
-- **PKI clarity.** The client's trust store is gold from the first frame, so trust is not "created" when the chain docks (V1-PKI-01). The marker "Earlier: offline signing ceremony" is on screen for the whole flashback (V1-PKI-02). "Private key" and "Public key" tags name both keys (V1-PKI-03). The handshake proof of possession is 85 px (RDP) and 55 px (web), was 28 and 15 (V1-PKI-04). The two CRL fetches dock beside their own cards at 73–78 px, was 22 (V1-PKI-05). The root's self-signed seal is 120 px, was 50 (V1-PKI-06).
-- **Camera.** Tighter framing in the beats with small subjects (V1-CIN-01, residuals below). The hero shot now shows the user, the laptop, both servers, both issuing CAs and the root (V1-CIN-02, residuals below). The two cuts are clean frames, not double exposures (V1-CIN-04). The trusted-session payoff glides in to the laptop: session window 188 px, was 126, with no sign over it (V1-CIN-05). The white flash at 90 s is reduced (V1-CIN-06). The sealed request has a visible seal ring (V1-CIN-07).
-- **Colour and sound.** Role colours hold at distance: pending amber and validated green measure 21 and 12 dE2000 from their tokens, was about 35–40 (V1-COL-01). Issuing-CA interiors are no longer twice as bright as the beats around them (V1-CIN-03 step 1). Audio is stereo, with cues panned by their source (V1-AUD-01); the signing cue lands with the press; −15.9 LUFS (V1-AUD-02).
-- **Pipeline and file.** `python -m tools verify` checks every rendered tier, the Final MP4 against the delivery spec, and the two cut frames (V1-PIPE-01). The MP4 is H.264 High level 4.1 with BT.709 tags (V1-ENC-01).
-- **Pages and docs.** The captions track is opt-in, so captions no longer show twice (V1-DOC-01); wording matches the film (V1-DOC-02, V1-DOC-03).
-
-Known limitations:
-- **V1-CIN-03 (MAJOR, open): the look is still a stylised grey-box.** Flat grey props, no material or light design, an empty dark upper frame. The charter's film gate (cinema score of 8 or more, no open MAJOR) is not met. Plan: `docs\LOOK-PLAN-v1.2.md`.
-- **Hero shot (V1-CIN-02 residuals).** The whole topology is in frame for the last 2 s of the 6 s beat (from about 102 s) and through the closing title, not for 90% of the beat. Mean luma of the beat is 38.4 (target 50).
-- **Focal size (V1-CIN-01 residuals).** Ten beats are below their size target: B-01.2 78 px, B-02.2 99, B-02.3 96, B-04.2 65, B-05.2 55, B-05.3 39, B-06.1 63, B-06.3 53, B-07.4 64, B-08.3 69 (targets 80–150 px). The session window is 188 px (target 220).
-- **Luma steps (V1-CIN-06 residual).** 7.7 at 90.27 s (f2709; v1.0.0: 12.2); also 5.6 at 24.83 s, 4.6 at 45.83 s and 6.4 at 81.00 s (target: none above 4.0).
-- **Check lists.** The CA 2 list and the RDP list overlap a protected object on 42 and 21 frames.
-- **New in the F3 re-audit (all MINOR).** The flashback marker fades out over the first three frames after the cut back to the present (f1396–1398, alpha 0.58 to 0.13). The AAC track's true peak is −0.6 dBFS (WAV mix −1.2 dBFS). `render-metadata.json` records commit `5cdae70`, one commit before the close-out commit `407243a` that holds the hero glow change it was encoded with. The handshake proof is visible but unlabelled.
-- **Process.** Lean mode: no discriminator round judged this film. Gate: `python -m tools verify` (pytest 189, 14 in-Blender checks) plus the F3 re-audit of 56 frames. Nobody has reviewed the audio by ear.
-
-## v1.0.0 (2026-11-13)
-
-- First release: 109 s, 1920x1080, 30 FPS film of the ADCS certificate flow (RDP and TLS paths, one trusted root).
-- Pipeline: story model -> scripted Blender scene (EEVEE) -> PNG sequences (beauty, signs, captions) -> FFmpeg composite and encode.
-- Audio: 88 sound cues derived from the story events, synthesised deterministically in Python, loudness-normalised to -16.0 LUFS.
-- Final signs fixes: signs are held parallel to the image plane, plates and text render in separate view layers (no stipple, no sorting errors), signs keep clear of capsules, cards and private keys, trust links grow from nothing.
-- Process: finished in "lean finish mode". The Stage 1 adversarial rounds stopped after R1 was triaged and fixed; round R2 was never judged (usage limits). No discriminator subagents ran for the final film. Gate: `python -m tools verify` (pytest, ruff, mypy, audits, 14 in-Blender checks, blank-frame check) plus two contact-sheet reviews.
-- Known limits: the look is stylised grey-box-plus (flat shaded actors, bloom, soft shadows); some check-list signs still overlap the focal subject in crowded frames (about 9% of tag frames, below the 10% test limit).
+Known limitations (all minor):
+- "Self-signed" and "Unverified" sit about 600 px from the self-signed card at 10.4–12.1 s. The "not published here" tag takes a second to settle beside Issuing CA 1 at 76.8 s.
+- The picture darkens over five frames at 81.7 s as the camera passes through Issuing CA 2's doorway (mean luma 64 to 45).
+- While the chain docks (53–64 s) the client's trust store is seen from behind and hides the root card.
+- The closing wide shot (99–104 s) is small in frame, and the title is a plain caption plate.
+- On end-entity cards the issuer seal has the card's own colour. The emblem on the root cage has a centre disc that the card seal does not have. The session window is a blank panel. The offline machine is hard to see inside the cage, and the root's key module stands on the dais outside it.
+- No adversarial discriminator round judged this film, and nobody has reviewed the sound by ear.
