@@ -188,3 +188,15 @@ Lean mode (no subagents, no discriminator round, no tag, no release). Details: `
 - **Final MP4:** SHA-256 `ce4cf1fb12fa71d35237463506069c5f80c06b2c6ff15722dc69be43646f15d9`, 110.6 MB, render commit 2666bad, `dirty: false`.
 - **Review:** preview contact sheet, 4 transition strips, 1 final contact sheet (accepted), plus icon legends and crops: 8 of 10 images.
 - **Decision: V5b DELIVERED, not approved for release.** First attempt at this gate, so nothing is auto-approved; Pages stays on v1.2.0. Next: the full V5 audit (Fable 5.2, High).
+
+## Full V5 audit, v1.3.0 release and GitHub cleanup, session V5 audit (Fable 5.2, 2026-11-14)
+
+Lean mode (no subagents, no discriminator round). Details: `docs\AUDIT-V5.md` and `docs\history\GAN-LEDGER.md` "Session V5 audit".
+
+- **Pre-flight:** previous phase V5b was "delivered, not approved for release". `python -m tools verify` was GREEN (pytest 232, 20 in-Blender checks), the Final MP4 SHA-256 was `ce4cf1fb…15d9` as recorded, ffprobe on spec, and local HEAD == origin/main (283b1b7) before any change.
+- **Scope:** full audit of the rendered film (PKI accuracy, icons, realism, presentation, legibility); rulings on V5B-CIN-03 and V5B-OBS-01; release v1.3.0; Pages; deletion of the older releases and tags; README, CHANGELOG and Pages to v1.3.0 only; process history moved to `docs\history\`; enhancement plan.
+- **Review performed:** 13 images: the icon legend, 36 beat frames (every beat), 18 native-resolution icon crops, the CA 2 doorway strip, the hero and title, both cuts and the root reveal, hardware crops, label crops. Measured: full-film luma scan, label-to-anchor distances for all 54 signs, projected sizes of the icons.
+- **Problems found:** 0 BLOCKER, 0 MAJOR, 10 MINOR (V5A-LEG-01/02, V5A-ICO-01/02, V5A-PKI-01, V5A-REAL-01, V5A-CIN-01..04). Rulings V5A-R1 and V5A-R2 accept the two open items as MINOR.
+- **Tests run (real results):** `python -m tools verify` VERIFY GREEN before the audit and again after the cleanup: ruff clean; mypy --strict 76 files; pytest 232 passed; traceability current; palette 87/0; planned-film audits 0 hard (1 advisory); in-Blender 20 of 20; both tiers 3270/3270, 0 blank; final MP4 on spec, true peak −1.2 dBFS; cut steps 0.5/0.1; MP4 luma gate PASS.
+- **Release and sync:** tag `v1.3.0` on `c125bae`; https://github.com/SimSI2027/Certificate-Flow-Film/releases/tag/v1.3.0, Latest, not a pre-release, 7 assets, all 7 downloaded back with equal SHA-256. Pages run 43661965682 succeeded; the live page, poster, preview and captions are byte-identical to `site\` and to the release assets. Releases and tags v1.0.0, v1.1.0 and v1.2.0 deleted; only v1.3.0 remains. No history rewrite, no force-push.
+- **Decision: APPROVED, v1.3.0 RELEASED.** This is the second look at the V5 film, by a fresh session on a different model from the one that built it. Scores: PKI 9, icons 8.5, realism 8, presentation 7.5, legibility 8.5; presentation is 0.5 under the charter's score gate, recorded as a known limitation.
