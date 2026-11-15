@@ -522,3 +522,56 @@ The owner set V5a before the V4 audit ran. No final render was made (by instruct
 - No final-tier render. The final-tier luma gates (B-09.2 mean, L2-CIN-01 and V3-CIN-01 frames, cuts, flashback) are unmeasured for the new world. The verify MP4 gate still passes only because it measures the V4 MP4.
 - The camera plan changed where the AD is focal (its centre moved from 1.7 m to 1.1 m), and the AD labels moved with the rack top. The final render needs every beauty and sign frame.
 - Captions and audio are unchanged.
+
+## Session V5b (2026-11-14, `claude-opus-5-5`; lean mode, no subagents, 8 of 10 images): PKI iconography, polish, final render, no release
+
+Owner scope (replaced the V5a draft): certificate iconography, a polish pass, a preview-tier check, one full final render. No release; Pages stays on v1.2.0. The REFERENCE-SPEC is unchanged (hash `90d698fc…6fe8`); no amendment was needed (the spec names the 14 C-11 shapes, not their drawings).
+
+### Iconography (one symbol per concept, the same everywhere; `cff\stage\icons.py`)
+
+All symbols are drawn originally in code from primitives (no imported icon set, so no third-party licence; no vendor marks), in palette tokens only (new token `ICON_INK_HEX` = the label-plate navy).
+
+| Concept | Symbol | Where |
+|---|---|---|
+| certificate | document with a folded corner, ink header and lines, the open-key emblem of the bound public key | every card |
+| issued certificate | ribbon seal (rosette and tails) in the ISSUER's colour, read from the model's `issuer_cert` | CERT-RDP (cyan), CERT-WEB (violet), CERT-CA1/CA2 and their copies (gold root seal) |
+| CA certificate | shield badge standing above the top-left corner | CERT-CA1, CERT-CA2, both copies, CERT-ROOT; never on end-entity cards |
+| self-signed | seal ring that runs past its start and closes on itself (V1-PKI-06 size kept: 0.162 m) | CERT-ROOT (gold), CERT-RDP-SELF (pale) |
+| private key | key locked in a padlock | every private key (server, CA, root) |
+| public key | open key (ring bow, no lock) | every public key and the card emblem |
+| signature | one autograph stroke | the request's seal ring tag, the CA request's tag, the handshake proof (now a swallowtail banner) |
+| CRL | hanging list document, one entry struck through | every CRL fetch |
+| trust chain | interlocking chain links of light along the bowed path | TL-CA1/2, TP-RDP/WEB |
+| validation | check marks | the check lines (unchanged) |
+
+Card marks are printed on both faces (the trust store is seen from behind). Sizes changed to keep C-11: card box 0.7 x 0.5 (was 0.45), proof 1.2 x 0.2 banner (was 0.85 x 0.5), CRL 0.56 x 0.8 tall, template badge 0.7 x 0.3; the intermediate slot moved 4 cm down.
+
+### C-11 is now measured (new in-Blender check `silhouettes`, 20 checks)
+
+The 14 shapes (assemblies where the film shows them as one: CA vault + crown, key container + lid/lock/clamps, root vault + plinth as the spec says), front or top view, normalised to unit bounding-box area, IoU on a 400-cell grid. Before the fixes six pairs were over 0.75 (worst key container vs CA vault 0.88). After: worst pair CA vault vs AIA indicator 0.696; strict pairs private vs public key 0.256, proof vs private key 0.267, proof vs public key 0.322 (limit 0.6).
+
+### Rulings
+
+- **V5B-R1 (LEG-S1R1-02):** the owner asked for an open key as the public-key symbol. That supersedes the finding's remedy (a non-key token). Its concern (a public key read as the private key) stays guarded by the padlock distinction and the measured strict IoU (0.256 <= 0.6). The test was rewritten to assert exactly that (`test_LEG_S1R1_02_the_public_key_never_reads_as_the_private_key`).
+- **V5B-R2 (V1-PKI-06):** the source-literal test now checks the real self-seal size (radius >= 0.162 m, ink ring >= 12 mm) from `icons.py`.
+
+### Found and fixed
+
+| ID | Severity | Finding | Fix and test |
+|---|---|---|---|
+| V5B-PIPE-01 | MAJOR (fixed before render) | `primitives.slot` assigned materials by face position; BMesh iteration order is not creation order, so issuer seals rendered unlit (and a later block could take older faces). | Each primitive claims exactly the faces it creates; raw `bmesh.ops.create_*` calls in the actors replaced by `p.cube`. `test_V5B_PIPE_01_material_slots_are_claimed_per_primitive`. |
+| V5B-PRV-01 | MINOR | Preview sheet: cards seen from behind (client trust store) showed a blank back. | Marks mirrored onto the back face. |
+| V5B-CIN-01 | MAJOR | Final MP4: luma step 12.6 at f1922 (6.2 at f1924). The rim light entered the west datacenter row's racks (x -19.0, 2.2 m). | `rig.keep_out` lifts key and rim over every row band (continuous ramp; 46 frames f1907-1952 changed). `test_V5B_CIN_01_rig_lights_never_enter_a_datacenter_row`. |
+| V5B-CIN-02 | MAJOR | Final MP4: step 5.5 at f1395. The rig lights were Bezier across the cut; final-tier motion blur saw them move during the last flashback frame. | Lights step with the camera at both cuts. `test_V5B_CIN_02_rig_lights_cut_with_the_camera`. |
+
+### Open (for the audit)
+
+- **V5B-CIN-03 (MINOR, open):** steps 6.4 / 5.5 at f2454-2455 (B-07.4). Measured in three bands: the whole frame darkens (centre 56.8 -> 45.3) as the camera enters CA 2's enclosure, where the camera-following key light is above the roof. Same frames as V3-R3. Tried `arrive=0.8` on the shot: it moved the crossing to a faster part of the move (reverted). A fix needs either a slower B-07.4 push (it costs the B-07.3 label holds) or an interior key, both wider changes than this pass.
+- **V5B-OBS-01:** at B-06.2 the camera sees the root's gold cradle from behind, which hides the root card (unchanged since v1.2).
+
+### Render and review
+
+- Preview gate (`qa\v5b\`): 1 contact sheet; strips of the 4 busiest transitions by keyed objects (f1141, f1396, f2701, f2281; preview steps <= 2.7 outside the cut). Final: full beauty 3270 and signs 2831 frames (1021 s for signs); captions and audio kept (timing unchanged); 78 beauty frames re-rendered after V5B-CIN-01/02 (originals in `renders\final-v5b-replaced`, seams smooth).
+- Full-film MP4 luma scan: steps over 4.0 outside the cuts only f2454 6.4, f2455 5.5; cuts 1.6 / 15.3 (by design); B-09.2 mean 58.8; film mean 57.4.
+- **Final MP4 SHA-256 `ce4cf1fb12fa71d35237463506069c5f80c06b2c6ff15722dc69be43646f15d9`**, 110.6 MB, render commit 2666bad, `dirty: false`.
+- Images: icon legend x2, preview sheet, strips, step tiles, final sheet, 2 crops (8 of 10).

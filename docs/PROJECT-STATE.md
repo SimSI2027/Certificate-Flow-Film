@@ -2,10 +2,15 @@
 
 Updated: 2026-11-14 (Session V5b, `claude-opus-5-5`, High, no subagents)
 
-## SESSION V5b IN PROGRESS (2026-11-14, Opus 5.5, High, no subagents): iconography, polish, final render. NO release (Pages stays on v1.2.0)
-- Done and pushed: PKI iconography (`cff\stage\icons.py`, commit 1 of V5b), new in-Blender check `silhouettes` (C-11, 20 checks), `tests\test_v5b.py`, slot fix V5B-PIPE-01; preview gate (1 contact sheet, 4 transition strips; `qa\v5b\`) and its fix (card marks on both faces, c62cd3c). Verify was GREEN before the render.
-- **Running: the full final render** (background): `python -m tools render --tier final --scene BEAUTY --rebuild`, then `--scene SIGNS`. Resumable; progress in `renders\final\progress.json`, log `renders\v5b-final-render.log`. V4 frames moved to `renders\final-v4-beauty` and `renders\final-v4-signs`. Captions and audio kept (timing unchanged).
-- **If interrupted:** rerun the two render commands (without `--rebuild` if `renders\film.blend` is the final-tier V5b build), then `python -m tools encode`, `python -m tools verify`, a full-film luma scan of the beauty frames (steps <= 4.0 outside 1246/1247/1396/1397), one final contact sheet, ledger/approvals, PROJECT-STATE, commit, push, sync-check.
+## SESSION V5b DONE (2026-11-14, Opus 5.5, High, no subagents, 8 of 10 images): PKI iconography, polish, full final render. NO release (Pages stays on v1.2.0)
+- **Final MP4 SHA-256 `ce4cf1fb12fa71d35237463506069c5f80c06b2c6ff15722dc69be43646f15d9`**, 110.6 MB, render commit 2666bad, `dirty: false`; H.264 High, 1920x1080, 30 fps, bt709, 3270 frames, 109.000 s. Gitignored (release asset); poster, contact sheet and metadata in `output\` are committed.
+- `python -m tools verify` VERIFY GREEN: pytest 232, **20** in-Blender checks (new `silhouettes`, C-11), both tiers 3270/3270, MP4 on spec, true peak -1.2 dBFS, cut steps 0.5/0.1, MP4 luma gate PASS, B-09.2 mean 58.8.
+- Iconography (`cff\stage\icons.py`, original code-drawn symbols, palette only): issuer-coloured ribbon seals, CA shield on CA certificates, self-closing seal on self-signed ones, key-in-padlock private key vs open public key, signature marks, struck-entry CRL, chain-link trust links. Legend: `qa\v5b\icon-legend.png`.
+- Fixed with tests: V5B-PIPE-01 (material slots), V5B-CIN-01 (rim light inside a datacenter row, step 12.6 at f1922), V5B-CIN-02 (rig lights blended across the cut, step 5.5 at f1395), V5B-PRV-01 (blank card backs). Rulings V5B-R1 (open public key supersedes the LEG-S1R1-02 remedy), V5B-R2.
+- **Open for the audit:** V5B-CIN-03 (MINOR: steps 6.4/5.5 at f2454/2455 as the camera enters CA 2's enclosure), V5B-OBS-01 (root cradle hides the root card at B-06.2). Every other step is <= 4.0 outside the cuts.
+- Commits: de68ba7 (iconography, check), c62cd3c (both-face marks), eac376c (preview images), 2666bad (lighting fixes), plus this close-out. Ledger: "Session V5b"; approvals: "session V5b".
+- Local only (gitignored): V4 frames in `renders\final-v4-beauty` and `-signs`; the 78 replaced V5b beauty frames in `renders\final-v5b-replaced`; V5a preview frames in `renders\preview-v5a`.
+- **Next session: V5 audit on Fable 5.2, High.** Prompt "Session V5 audit" in `docs\SESSION-PROMPTS.md`: full audit of this Final MP4; release v1.3.0 only if it passes.
 
 ## SESSION V5a DONE (2026-11-14, Opus 5.5, High, no subagents, 4 of 10 images): realistic hardware and world, NO render, NO release (Pages stays on v1.2.0)
 - Amendment **V5-A1** (owner request): hardware and environment are now realistic. Charter Section 8 was rewritten. REFERENCE-SPEC root wording now reads "an offline, air-gapped machine in a locked gold cage on its own plinth". New spec hash `90d698fc70be64c596500d903dfec64f7bf90b50f4730926404436ccf6c66fe8`; Stage 4 clean-round counter reset to 0.

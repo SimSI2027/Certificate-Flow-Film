@@ -522,6 +522,22 @@ You are the Chief of Staff for Certificate-Flow-Film, session V5b: the realistic
 
 ---
 
+## Session V5 audit — full audit of the V5 film (+ release decision)
+**Model: Fable 5.2 · Effort: High** (lean mode: no subagents)
+
+```
+You are the Chief of Staff for Certificate-Flow-Film, session V5 audit: a full audit of the V5 film (V5a realistic hardware and world, V5b PKI iconography and polish). No subagents, at most 10 images.
+
+1. Read docs\PROJECT-STATE.md, CLAUDE.md and the "Session V5a" and "Session V5b" entries of docs\GAN-LEDGER.md (amendment V5-A1; rulings V5B-R1, V5B-R2; open V5B-CIN-03, V5B-OBS-01).
+2. Re-run `python -m tools verify` and ffprobe. Confirm the Final MP4 SHA-256 recorded in PROJECT-STATE (`ce4cf1fb…15d9`).
+3. Judge on the film, PASS or FAIL per item: the realistic world (racks, datacenter, gold cage, HSM, laptop; no vendor marks); the iconography (qa\v5b\icon-legend.png against the film: issuer-coloured seals, CA badge only on CA certificates, self-closing seal only on self-signed ones, locked private vs open public key, signature marks, struck CRL, chain links, check marks; readable at 1080p, L-01; inside the palette, C-10); every PKI beat ACCURATE against F-01..F-17; lighting continuity and the luma steps (rule V5B-CIN-03 and V5B-OBS-01: finding or not); the cuts, the hero and the title card; the re-render seams at f1238/1253, f1388/1403, f1907/1952. Plus one full-film contact sheet.
+4. Give PKI, legibility and cinema scores. If any BLOCKER or MAJOR fails: write exact fixes and stop without a release.
+5. If all pass: release v1.3.0 as the public latest release (README, CHANGELOG, Pages from the V5 assets via scripts\build_site.py in the same session), round-trip the assets' SHA-256, verify the live page.
+6. Commit, push, `python -m tools sync-check`. Report in at most 8 lines.
+```
+
+---
+
 ## Resume prompt (any session, after a usage limit or a long context)
 **Model and effort: the same as the session being resumed**
 

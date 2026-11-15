@@ -1,5 +1,5 @@
 {
-  "commit": "616fc28428ec5c19777b3b5ff6cf6faac9802aff",
+  "commit": "2666bad0fb11257449957b636b93ec64856a137e",
   "dirty": false,
   "tier": "final",
   "blender": "5.2.3 LTS",
@@ -8,13 +8,13 @@
   "fps": 30,
   "duration_s": 109.0,
   "beats": 33,
-  "spec_sha256": "6a60d216f350bff163e5708c227e1af6143d25c248f5c5b3c30e64e0a4fc1a55",
+  "spec_sha256": "90d698fc70be64c596500d903dfec64f7bf90b50f4730926404436ccf6c66fe8",
   "last_render_progress": {
-    "layer": "captions",
+    "layer": "signs",
     "status": "complete",
-    "present": 1933,
-    "of": 1933,
-    "elapsed_s": 365.9
+    "present": 2831,
+    "of": 2831,
+    "elapsed_s": 1020.9
   },
   "loudness": {
     "first_pass": {
@@ -110,7 +110,7 @@
         "start_time": "0.000000",
         "duration_ts": 1674240,
         "duration": "109.000000",
-        "bit_rate": "4936927",
+        "bit_rate": "7911995",
         "bits_per_raw_sample": "8",
         "nb_frames": "3270",
         "extradata_size": 51,
@@ -203,8 +203,8 @@
       "format_long_name": "QuickTime / MOV",
       "start_time": "0.000000",
       "duration": "109.000000",
-      "size": "70021231",
-      "bit_rate": "5139172",
+      "size": "110557005",
+      "bit_rate": "8114275",
       "probe_score": 100,
       "tags": {
         "major_brand": "isom",
@@ -250,7 +250,7 @@
         "start_time": "0.000000",
         "duration_ts": 1674240,
         "duration": "109.000000",
-        "bit_rate": "615845",
+        "bit_rate": "954351",
         "bits_per_raw_sample": "8",
         "nb_frames": "3270",
         "extradata_size": 49,
@@ -343,8 +343,8 @@
       "format_long_name": "QuickTime / MOV",
       "start_time": "0.000000",
       "duration": "109.000000",
-      "size": "9838508",
-      "bit_rate": "722092",
+      "size": "14450974",
+      "bit_rate": "1060621",
       "probe_score": 100,
       "tags": {
         "major_brand": "isom",
